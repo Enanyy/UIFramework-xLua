@@ -1,0 +1,42 @@
+local M = {
+    mName = "UINormal",
+    mHidePrevious = true,
+	mWidgets = {'UIFixed'},
+}
+
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+--BINDING_CODE_BEGIN
+	self.mButtonClose = self.gameObject.transform:Find('SafeArea/@Button.mButtonClose'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mButtonMain = self.gameObject.transform:Find('SafeArea/@Button.mButtonMain'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mButtonPop = self.gameObject.transform:Find('SafeArea/@Button.mButtonPop'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mButtonWidget = self.gameObject.transform:Find('SafeArea/@Button.mButtonWidget'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+--BINDING_CODE_END
+    self.mButtonClose.onClick:AddListener(function() self:Close() end )
+    self.mButtonMain.onClick:AddListener(function() UIManager:CloseExcept("UIMain") end)
+    self.mButtonPop.onClick:AddListener(function() UIManager:Open("UIPop") end)
+    self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
+end
+
+--整个生命周期只调用一次
+function M:OnUnload()
+--UNBINDING_CODE_BEGIN
+	self.mButtonClose = nil
+	self.mButtonMain = nil
+	self.mButtonPop = nil
+	self.mButtonWidget = nil
+--UNBINDING_CODE_END
+end
+--整个生命周期可能调用多次
+function M:OnShow() 
+   
+end
+
+--整个生命周期可能调用多次
+function M:OnHide()
+    
+end
+
+return M

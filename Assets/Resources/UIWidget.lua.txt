@@ -1,0 +1,21 @@
+local M = {
+    mName = "UIWidget",
+    mType = UIType.Widget,
+    mFixedOrder = 1000
+}
+
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+    local close = self.gameObject.transform:Find("UIWidget/Close"):GetComponent(typeof(Button))
+    close.onClick:AddListener(function() self:Close() end )
+
+    local pop = self.gameObject.transform:Find("UIWidget/Pop"):GetComponent(typeof(Button))
+    pop.onClick:AddListener(function() UIManager:Open("UIPop") end)
+
+    local normal = self.gameObject.transform:Find("UIWidget/Normal"):GetComponent(typeof(Button))
+    normal.onClick:AddListener(function() UIManager:Open("UINormal") end)
+end
+
+return M

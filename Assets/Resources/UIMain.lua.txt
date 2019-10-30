@@ -1,0 +1,125 @@
+local M = {
+	mName = 'UIMain',
+	mWidgets = {'UIFixed'},
+}
+UIMain = M
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+--BINDING_CODE_BEGIN
+	self.mButtonNormal = self.gameObject.transform:Find('Widget/@Button.mButtonNormal'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mTextNormal = self.gameObject.transform:Find('Widget/@Button.mButtonNormal/@Text.mTextNormal'):GetComponent(typeof(CS.UnityEngine.UI.Text))
+	self.mButtonPop = self.gameObject.transform:Find('Widget/@Button.mButtonPop'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mButtonWidget = self.gameObject.transform:Find('Widget/@Button.mButtonWidget'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mText = self.gameObject.transform:Find('Widget/@Text.mText'):GetComponent(typeof(CS.UnityEngine.UI.Text))
+	self.mVerticalGridScrollView = self.gameObject.transform:Find('Widget/@VerticalScrollView.mVerticalGridScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
+	self.mButtonAdd = self.gameObject.transform:Find('Widget/@Button.mButtonAdd'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mButtonRemove = self.gameObject.transform:Find('Widget/@Button.mButtonRemove'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+	self.mVerticalScrollView = self.gameObject.transform:Find('Widget/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
+	self.mHorizontalScrollView = self.gameObject.transform:Find('Widget/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.HorizontalScrollView))
+--BINDING_CODE_END
+    self.mButtonNormal.onClick:AddListener(function() UIManager:Open("UINormal") end)
+    self.mButtonPop.onClick:AddListener(function() UIManager:Open("UIPop") end)
+	self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
+	
+	self.mVerticalGridScrollView.onScrollItem:AddListener(self:OnGridScrollItem())
+	self.mButtonAdd.onClick:AddListener(self:OnAdd())
+	self.mButtonRemove.onClick:AddListener(self:OnRemove())
+
+	self.mItemDic = {}
+
+	self.mData = {21,34,5,672,23,5,21,6,124,52,6,72,13,64,234,657,42,62,21,34,5,672,23,5,21,6,124,52,6,72,13,64,234,657,42,62,21,34,5,672,23,5,21,6,124,52,6,72,13,64,234,657,42,62}
+	self.mVerticalGridScrollView.totalCount = #self.mData
+	self.mVerticalGridScrollView:Refill()
+
+
+end
+
+--整个生命周期只调用一次
+function M:OnUnload()
+--UNBINDING_CODE_BEGIN
+	self.mButtonNormal = nil
+	self.mTextNormal = nil
+	self.mButtonPop = nil
+	self.mButtonWidget = nil
+	self.mText = nil
+	self.mVerticalGridScrollView = nil
+	self.mButtonAdd = nil
+	self.mButtonRemove = nil
+	self.mVerticalScrollView = nil
+	self.mHorizontalScrollView = nil
+--UNBINDING_CODE_END
+
+	self.mItemDic = nil
+end
+
+
+--整个生命周期可能调用多次
+function M:OnShow()
+	
+end
+
+--整个生命周期可能调用多次
+function M:OnHide()
+	
+end
+
+function M:OnAdd()
+	return function ()
+		for i=1,10 do
+			table.insert( self.mData, i )
+		end
+		local preCount = self.mVerticalGridScrollView.totalCount
+		self.mVerticalGridScrollView.totalCount = #self.mData
+		print(preCount.." "..self.mVerticalGridScrollView.totalCount)
+		self.mVerticalGridScrollView:Refresh()
+		
+	end
+end
+
+function M:OnRemove()
+	return function()
+		for i=1,10 do
+			table.remove( self.mData, #self.mData )
+		end
+		self.mVerticalGridScrollView.totalCount = #self.mData
+		self.mVerticalGridScrollView:Refresh()
+	end
+end
+
+function M:OnGridScrollItem()
+
+	return function(item, index) 
+		if self.mItemDic[item] == nil then
+			local itemWrap = {
+				mIndex = index,
+				mTransform = item,
+				mText = item:Find("Text"):GetComponent(typeof(Text)),
+
+			}
+			function itemWrap:Init()
+				self.mTransform:GetComponent(typeof(Button)).onClick:AddListener(self:OnClick())		
+			end
+			function itemWrap:OnClick()
+				return function () 
+					print("Click Item:"..self.mIndex)
+				end
+			end
+
+			function itemWrap:Refresh(data) 
+				self.mText.text = "Item "..self.mIndex .." data:"..data
+			end
+
+			itemWrap:Init()
+
+			self.mItemDic[item] = itemWrap	
+		else
+			self.mItemDic[item].mIndex = index
+		end
+		self.mItemDic[item]:Refresh(self.mData[index + 1])
+
+	end
+end
+
+return M

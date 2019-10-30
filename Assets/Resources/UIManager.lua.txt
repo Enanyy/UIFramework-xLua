@@ -1,0 +1,477 @@
+Application             = CS.UnityEngine.Application
+GameObject              = CS.UnityEngine.GameObject
+Transform               = CS.UnityEngine.Transform
+Vector2                 = CS.UnityEngine.Vector2
+Vector3                 = CS.UnityEngine.Vector3
+Quaternion              = CS.UnityEngine.Quaternion
+Camera                  = CS.UnityEngine.Camera
+RectTransform           = CS.UnityEngine.RectTransform
+Canvas                  = CS.UnityEngine.Canvas
+Screen                  = CS.UnityEngine.Screen
+Input                   = CS.UnityEngine.Input
+
+Image                   = CS.UnityEngine.UI.Image
+Button                  = CS.UnityEngine.UI.Button
+Text                    = CS.UnityEngine.UI.Text
+TextMeshProUGUI         = CS.TMPro.TextMeshProUGUI
+Toggle                  = CS.UnityEngine.UI.Toggle
+Slider                  = CS.UnityEngine.UI.Slider
+Scrollbar               = CS.UnityEngine.UI.Scrollbar
+Dropdown                = CS.UnityEngine.UI.Dropdown
+InputField              = CS.UnityEngine.UI.InputField
+ScrollRect              = CS.UnityEngine.UI.ScrollRect
+CanvasScaler            = CS.UnityEngine.UI.CanvasScaler
+
+local renderMode        = CS.UnityEngine.RenderMode.ScreenSpaceCamera
+local uiScaleMode       = CS.UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
+local screenMatchMode   = CS.UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
+
+
+UIType = 
+{
+    Normal  = 0,    --0、普通界面,会加入到导航栈
+    Widget  = 1,    --1、小组件，比如飘字
+}
+
+UIStatus = {
+    None            = 0, 
+    Loading         = 1,     --正在加载中
+    LoadDone        = 2,     --加载完成
+}
+
+
+UIBase = 
+{
+    mName           = "",
+    gameObject      = nil,
+    mCanvas         = nil,
+    mStatus         = UIStatus.None,
+    mActive         = false,
+
+    mType           = UIType.Normal,
+    mHidePrevious   = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
+    mFixedOrder     = 0,        --固定SortingOrder,只对Widget有用
+    mWidgets        = nil,       --子Widegets,如{'UIFixed'}
+}
+UIBase.__index = UIBase
+
+----------------------用户接口Begin------------------------
+
+--整个生命周期只调用一次
+function UIBase:OnLoad()
+    
+end
+--整个生命周期只调用一次
+function UIBase:OnUnload()
+
+end
+
+--整个生命周期可能调用多次
+function UIBase:OnShow()
+
+end
+--整个生命周期可能调用多次
+function UIBase:OnHide()
+
+end
+
+function UIBase:Close()
+    UIManager:Close(self)
+end
+----------------------用户接口End------------------------
+----------------------内部接口(禁止重写和本文件以外调用)Begin------------------------
+
+function UIBase:__OnLoad()
+    self:OnLoad()
+end
+function UIBase:__OnUnload(destroy)
+    self:__OnHide()
+
+    self:OnUnload()
+    if destroy and self.gameObject then
+        GameObject.Destroy(self.gameObject)
+    end
+    self.gameObject = nil
+    self.mCanvas = nil
+    self.mStatus = UIStatus.None
+    self.mActive = false
+end
+
+function UIBase:__OnShow()
+    self:OnShow()
+    self:__SetWidgetActive(true)
+end
+
+function UIBase:__OnHide()
+    self:OnHide()
+    self:__SetWidgetActive(false)
+end
+
+function UIBase:__SetWidgetActive(active)
+
+    if self.mWidgets == nil then return end
+
+    for i,v in ipairs(self.mWidgets) do
+        local widget = UIManager:Get(v)
+        if widget then
+            if active then
+                if widget.mStatus == UIStatus.None then
+                    UIManager:Open(widget, nil, self)
+                elseif widget.mStatus == UIStatus.LoadDone  then
+                    UIManager:SetActive(widget,active, self)
+                end
+            else
+                if widget.mStatus == UIStatus.LoadDone then
+                    --widget:Close()
+                    UIManager:SetActive(widget,active,self)
+                end
+            end
+        end
+    end
+end
+----------------------内部接口(禁止重写和本文件以外调用)End------------------------
+
+UIManager =
+{
+    mUIDic          = {},
+    mUIStack        = {}, 
+
+    mInited         = false,
+    mUIRoot         = nil,
+    mCamera         = nil,
+    mEventSystem    = nil,
+
+    mOrderAddition  = 10,
+    mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
+    mLayerHide      = 6, --隐藏层
+    mLayerModel     = 7, --UI模型层
+}
+
+function UIManager:Init()
+
+    if self.mInited  then
+        return
+    end
+
+    self.mInited = true
+
+    self.mUIRoot = GameObject("UIRoot")
+    GameObject.DontDestroyOnLoad(self.mUIRoot)
+
+    local camera = GameObject("Camera")
+    camera.transform:SetParent(self.mUIRoot.transform)
+    camera.layer = self.mLayer
+    self.mCamera = camera:AddComponent(typeof(Camera))
+    self.mCamera.clearFlags = CS.UnityEngine.CameraClearFlags.Depth
+    self.mCamera.depth = 10
+    self.mCamera.orthographic = false  --使用透视投影，这样UI模型的3D立体感更强
+    -- self.mCamera.orthographicSize = 10
+    self.mCamera.fieldOfView = 60
+    self.mCamera.cullingMask = 2^self.mLayer + 2^self.mLayerModel  
+
+    local eventsystem = GameObject("EventSystem")
+    eventsystem.transform:SetParent(self.mUIRoot.transform)
+    eventsystem.layer = self.mLayer
+    self.mEventSystem = eventsystem:AddComponent(typeof(CS.UnityEngine.EventSystems.EventSystem))
+    self.mEventSystem.sendNavigationEvents = true
+    self.mEventSystem.pixelDragThreshold = 5
+
+    eventsystem:AddComponent(typeof(CS.UnityEngine.EventSystems.StandaloneInputModule))
+    
+
+end
+
+function UIManager:SetTouch(touchable)
+    if self.mEventSystem then
+        self.mEventSystem.enabled = touchable
+    end
+end
+
+function UIManager:Open(ui, callback, parent)
+
+    self:Init()
+
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+    end
+
+    if ui == nil then
+        return 
+    end
+
+    self:SetTouch(false)
+
+    if self.mUIDic[ui.mName] == nil then
+        self.mUIDic[ui.mName] = ui
+    end
+
+
+    if ui.gameObject == nil then
+
+        if ui.mStatus == UIStatus.Loading  then
+            return
+        end
+        ui.mStatus = UIStatus.Loading
+
+        CS.Main.LoadUI(ui.mName,function(obj) 
+        
+            if ui.mStatus == UIStatus.None then
+                return
+            end
+
+            local go = GameObject.Instantiate(obj)
+            go.transform:SetParent(self.mUIRoot.transform)
+
+            local canvas = go:GetComponent(typeof(Canvas))
+            canvas.renderMode = renderMode
+            canvas.worldCamera = self.mCamera
+            canvas.sortingLayerName = "UI"
+
+            local scaler = go:GetComponent(typeof(CanvasScaler))
+            scaler.scaleFactor = 1
+            scaler.uiScaleMode = uiScaleMode
+            scaler.screenMatchMode = screenMatchMode
+            scaler.referenceResolution = Vector2(1920, 1080)
+            scaler.referencePixelsPerUnit = 100
+       
+            self:SetLayer(go,self.mLayer)
+
+            ui.gameObject = go
+            ui.mCanvas = canvas
+            ui.mStatus = UIStatus.LoadDone
+
+            ui:__OnLoad()
+        
+            if callback ~= nil then
+                callback()
+            end
+        
+            if  #self.mUIStack > 0 and ui.mHidePrevious == true then
+                local previous = self.mUIStack[1]
+                self:SetActive(previous,false)
+            end
+    
+            if ui.mType == UIType.Normal then
+                if #self.mUIStack <= 0  or self.mUIStack[1] ~= ui then
+                    table.insert( self.mUIStack, 1, ui )
+                end
+            end
+            self:SetActive(ui,true, parent)
+            self:SetTouch(true)
+        end)
+
+    else 
+
+        if callback ~= nil then
+            callback()
+        end
+ 
+        if  #self.mUIStack > 0 and ui.mHidePrevious == true then
+            local previous = self.mUIStack[1]
+            self:SetActive(previous,false) 
+        end
+
+        if ui.mType == UIType.Normal then
+            if #self.mUIStack <= 0  or self.mUIStack[1] ~= ui then
+                table.insert( self.mUIStack, 1, ui )
+            end
+        end
+
+        self:SetActive(ui,true, parent)
+        self:SetTouch(true)
+    end
+end
+
+function UIManager:Get(name)
+    return require(name)
+end
+
+function UIManager:SetLayer(go,layer)
+    if go then
+        if go.layer ~= layer then
+            go.layer = layer
+            local transforms = go:GetComponentsInChildren(typeof(Transform))
+            for i = 0, transforms.Length - 1 do
+                transforms[i].gameObject.layer = layer
+            end
+        end
+    end
+end
+
+
+function UIManager:SetActive(ui,active, parent)
+    if ui == nil then return end
+    if active then 
+        self:SetSortOrder(ui, parent)
+        if ui.mActive == false then
+            self:SetLayer(ui.gameObject, self.mLayer)
+            ui.mActive = true
+            ui:__OnShow()
+        end
+    else
+        if ui.mActive then
+            self:SetLayer(ui.gameObject, self.mLayerHide)
+            ui.mActive = false
+            ui:__OnHide()
+        end
+    end
+    ui:__SetWidgetActive(active)    
+end
+
+function UIManager:Hide(ui)
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+    end
+
+    if ui then
+        self:SetActive(ui,false)
+    end
+end
+
+--
+-- 关闭所有
+--
+function UIManager:CloseAll()
+    for k,v in pairs(self.mUIDic) do
+        v:__OnUnload(true)
+    end
+    self.mUIDic = {}
+    self.mUIStack = {}
+end
+--
+--关闭所有，除了ui
+--
+function UIManager:CloseExcept(ui)
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+    end
+    local exsit = false
+    for k,v in pairs(self.mUIDic) do
+        if v ~= ui then
+            v:__OnUnload(true)         
+        else
+            exsit = true
+        end
+    end
+    self.mUIDic = {}
+    self.mUIStack = {}
+    if ui ~= nil and exsit == true then
+       self:Open(ui)
+    end
+
+end
+
+---调用每个UI自己的Close
+function UIManager:Close(ui)
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+    end
+
+    if ui == nil then
+        return
+    end
+
+    self:SetTouch(false)
+   
+    if ui.mType == UIType.Normal  then
+
+        if #self.mUIStack > 0 and self.mUIStack[1] == ui then
+            table.remove( self.mUIStack, 1 )
+        end
+        local contains = false
+        for i,v in ipairs(self.mUIStack) do
+            if v == ui then
+                contains = true
+                break
+            end
+        end
+
+        if contains then
+            self:SetActive(ui,false)
+        else
+            self.mUIDic[ui.mName] = nil
+            ui:__OnUnload(true)                
+        end
+
+        if  #self.mUIStack > 0  then
+            
+            for i=#self.mUIStack, 1, -1 do
+                local v = self.mUIStack[i]
+                if i == 1 then
+                    self:SetActive(v,true)
+                else
+                    if v.mActive == true then
+                        v:__SetWidgetActive(true)
+                    end
+                end
+            end
+        end
+
+    else
+        self.mUIDic[ui.mName] = nil
+        ui:__OnUnload(true)
+    end
+
+    self:SetTouch(true)
+end
+
+function UIManager:PrintStack()
+    for i,v in ipairs(self.mUIStack) do
+        print(i,v.mName.." :"..tostring(v.mActive))
+    end
+end
+
+function UIManager:IsTouchUI()
+    if self.mEventSystem then
+
+        if Application.isMobilePlatform then
+            if self.mEventSystem:IsPointerOverGameObject(Input.GetTouch(0).fingerId) then
+                return true
+            end
+        else
+
+            if self.mEventSystem:IsPointerOverGameObject() then
+                return true
+            end
+        end
+    end
+
+    return false
+
+end
+
+function UIManager:SetSortOrder(ui, parent)
+
+    if ui == nil then return end
+
+    local maxOrder = -9999
+   
+    if ui.mType == UIType.Widget and ui.mFixedOrder ~= 0 then
+        
+        maxOrder = ui.mFixedOrder
+        ui.mCanvas.sortingOrder = maxOrder
+    else
+        if parent~= nil then
+            ui.mCanvas.sortingOrder = parent.mCanvas.sortingOrder + 1
+        else
+
+            for i,v in ipairs(self.mUIStack) do
+                if v ~= nil and v.mCanvas ~= nil then   
+                    if maxOrder == -9999 or  v.mCanvas.sortingOrder > maxOrder then 
+                        maxOrder = v.mCanvas.sortingOrder
+                    end
+                end
+            end
+
+            if maxOrder == -1 then
+                maxOrder = 0
+            else
+                maxOrder = maxOrder + self.mOrderAddition
+            end
+            ui.mCanvas.sortingOrder = maxOrder
+        end
+    end
+end
+
+return UIManager
+

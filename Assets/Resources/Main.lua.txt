@@ -1,0 +1,14 @@
+--用到时require
+setmetatable(_G, {
+    __index = function(t,i)
+        local ret = require(i)
+        t[i] = ret
+        return ret
+    end
+})
+function main( )
+    UIManager:Open("UIMain")
+    print(UIMain.mName)
+end
+
+main()
