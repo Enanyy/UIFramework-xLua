@@ -47,11 +47,12 @@ UIBase =
     mCanvas         = nil,
     mStatus         = UIStatus.None,
     mActive         = false,
+    mParent         = nil,       --当前的父UI
 
     mType           = UIType.Normal,
     mHidePrevious   = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
     mFixedOrder     = 0,        --固定SortingOrder,只对Widget有用
-    mWidgets        = nil,       --子Widegets,如{'UIFixed'}
+    mWidgets        = nil,      --子Widegets,如{'UIFixed'}
 }
 UIBase.__index = UIBase
 
@@ -95,6 +96,7 @@ function UIBase:__OnUnload(destroy)
     self.mCanvas = nil
     self.mStatus = UIStatus.None
     self.mActive = false
+    self.mParent = nil
 end
 
 function UIBase:__OnShow()
@@ -114,16 +116,17 @@ function UIBase:__SetWidgetActive(active)
     for i,v in ipairs(self.mWidgets) do
         local widget = UIManager:Get(v)
         if widget then
+            widget.mParent = self
             if active then
                 if widget.mStatus == UIStatus.None then
-                    UIManager:Open(widget, nil, self)
+                    UIManager:Open(widget)
                 elseif widget.mStatus == UIStatus.LoadDone  then
-                    UIManager:SetActive(widget,active, self)
+                    UIManager:SetActive(widget,active)
                 end
             else
                 if widget.mStatus == UIStatus.LoadDone then
                     --widget:Close()
-                    UIManager:SetActive(widget,active,self)
+                    UIManager:SetActive(widget,active)
                 end
             end
         end
@@ -141,7 +144,8 @@ UIManager =
     mCamera         = nil,
     mEventSystem    = nil,
 
-    mOrderAddition  = 10,
+    mOrderAddition  = 50,
+    mOrderWidgetAddition = 10,
     mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
     mLayerHide      = 6, --隐藏层
     mLayerModel     = 7, --UI模型层
@@ -187,7 +191,7 @@ function UIManager:SetTouch(touchable)
     end
 end
 
-function UIManager:Open(ui, callback, parent)
+function UIManager:Open(ui, callback)
 
     self:Init()
 
@@ -198,7 +202,7 @@ function UIManager:Open(ui, callback, parent)
     if ui == nil then
         return 
     end
-
+    
     self:SetTouch(false)
 
     if self.mUIDic[ui.mName] == nil then
@@ -256,7 +260,7 @@ function UIManager:Open(ui, callback, parent)
                     table.insert( self.mUIStack, 1, ui )
                 end
             end
-            self:SetActive(ui,true, parent)
+            self:SetActive(ui,true)
             self:SetTouch(true)
         end)
 
@@ -277,7 +281,7 @@ function UIManager:Open(ui, callback, parent)
             end
         end
 
-        self:SetActive(ui,true, parent)
+        self:SetActive(ui,true)
         self:SetTouch(true)
     end
 end
@@ -299,23 +303,59 @@ function UIManager:SetLayer(go,layer)
 end
 
 
-function UIManager:SetActive(ui,active, parent)
+function UIManager:SetActive(ui,active)
     if ui == nil then return end
     if active then 
-        self:SetSortOrder(ui, parent)
+        self:SetSortOrder(ui)
         if ui.mActive == false then
             self:SetLayer(ui.gameObject, self.mLayer)
             ui.mActive = true
             ui:__OnShow()
+        else
+            ui:__SetWidgetActive(active)    
         end
     else
         if ui.mActive then
             self:SetLayer(ui.gameObject, self.mLayerHide)
             ui.mActive = false
             ui:__OnHide()
+        else
+            ui:__SetWidgetActive(active)    
         end
     end
-    ui:__SetWidgetActive(active)    
+end
+
+function UIManager:SetSortOrder(ui)
+
+    if ui == nil then return end
+
+    local maxOrder = -9999
+   
+    if ui.mType == UIType.Widget and ui.mFixedOrder ~= 0 then
+        
+        maxOrder = ui.mFixedOrder
+        ui.mCanvas.sortingOrder = maxOrder
+    else
+        if  ui.mParent ~= nil then
+            ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + self.mOrderWidgetAddition
+        else
+
+            for i,v in ipairs(self.mUIStack) do
+                if v ~= nil and v.mCanvas ~= nil then   
+                    if maxOrder == -9999 or  v.mCanvas.sortingOrder > maxOrder then 
+                        maxOrder = v.mCanvas.sortingOrder
+                    end
+                end
+            end
+
+            if maxOrder == -1 then
+                maxOrder = 0
+            else
+                maxOrder = maxOrder + self.mOrderAddition
+            end
+            ui.mCanvas.sortingOrder = maxOrder
+        end
+    end
 end
 
 function UIManager:Hide(ui)
@@ -440,38 +480,7 @@ function UIManager:IsTouchUI()
 
 end
 
-function UIManager:SetSortOrder(ui, parent)
 
-    if ui == nil then return end
-
-    local maxOrder = -9999
-   
-    if ui.mType == UIType.Widget and ui.mFixedOrder ~= 0 then
-        
-        maxOrder = ui.mFixedOrder
-        ui.mCanvas.sortingOrder = maxOrder
-    else
-        if parent~= nil then
-            ui.mCanvas.sortingOrder = parent.mCanvas.sortingOrder + 1
-        else
-
-            for i,v in ipairs(self.mUIStack) do
-                if v ~= nil and v.mCanvas ~= nil then   
-                    if maxOrder == -9999 or  v.mCanvas.sortingOrder > maxOrder then 
-                        maxOrder = v.mCanvas.sortingOrder
-                    end
-                end
-            end
-
-            if maxOrder == -1 then
-                maxOrder = 0
-            else
-                maxOrder = maxOrder + self.mOrderAddition
-            end
-            ui.mCanvas.sortingOrder = maxOrder
-        end
-    end
-end
 
 return UIManager
 

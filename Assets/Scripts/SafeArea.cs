@@ -3,7 +3,7 @@ using System.Collections;
 
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
-public class Panel : MonoBehaviour
+public class SafeArea : MonoBehaviour
 {
 
     private RectTransform mTarget;

@@ -1,0 +1,32 @@
+local M = {
+    mName = 'UIRight'
+}
+UIRight = M
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+--BINDING_CODE_BEGIN
+--BINDING_CODE_END
+end
+
+--整个生命周期只调用一次
+function M:OnUnload()
+--UNBINDING_CODE_BEGIN
+--UNBINDING_CODE_END
+end
+
+
+--整个生命周期可能调用多次
+function M:OnShow()
+
+
+end
+
+--整个生命周期可能调用多次
+function M:OnHide()
+
+
+end
+
+return M

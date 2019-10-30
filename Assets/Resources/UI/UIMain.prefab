@@ -208,7 +208,7 @@ GameObject:
   - component: {fileID: 9168851709437638804}
   - component: {fileID: 8796709143073178485}
   m_Layer: 5
-  m_Name: Widget
+  m_Name: SafeArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
