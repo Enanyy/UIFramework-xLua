@@ -116,7 +116,7 @@ function UIBase:__SetWidgetActive(active)
 
     for i,v in ipairs(self.mWidgets) do
         local widget = UIManager:Get(v)
-        if widget then
+        if widget and widget.mType == UIType.Widget then
             widget.mParent = self
             if active then
                 if widget.mStatus == UIStatus.None then
@@ -342,8 +342,8 @@ function UIManager:SetSortOrder(ui)
             ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + self.mOrderWidgetAddition
         else
 
-            for i,v in ipairs(self.mUIStack) do
-                if v ~= nil and v.mCanvas ~= nil then   
+            for k,v in pairs(self.mUIDic) do
+                if v ~= nil and v.mCanvas ~= nil and v.mFixedOrder == 0 and v.mParent == nil then   
                     if maxOrder == -9999 or  v.mCanvas.sortingOrder > maxOrder then 
                         maxOrder = v.mCanvas.sortingOrder
                     end
