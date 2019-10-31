@@ -15,7 +15,7 @@ function M:OnLoad()
 --BINDING_CODE_END
     
     self.mButtonClose.onClick:AddListener(function() self:Close() end )
-    self.mbuttonMain.onClick:AddListener(function() UIManager:CloseExcept("UIMain") end)
+    self.mbuttonMain.onClick:AddListener(function() UIManager:CloseAllAndOpen("UIMain") end)
     self.mButtonNormal.onClick:AddListener(function() UIManager:Open("UINormal") end)
     self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
 end

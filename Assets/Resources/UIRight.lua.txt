@@ -1,5 +1,6 @@
 local M = {
-    mName = 'UIRight'
+    mName = 'UIRight',
+    mType = UIType.Widget,
 }
 UIRight = M
 setmetatable(M, UIBase)

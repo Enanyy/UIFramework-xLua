@@ -90,6 +90,7 @@ function UIBase:__OnUnload(destroy)
 
     self:OnUnload()
     if destroy and self.gameObject then
+        print("Destroy:"..self.mName)
         GameObject.Destroy(self.gameObject)
     end
     self.gameObject = nil
@@ -305,6 +306,7 @@ end
 
 function UIManager:SetActive(ui,active)
     if ui == nil then return end
+
     if active then 
         self:SetSortOrder(ui)
         if ui.mActive == false then
@@ -381,22 +383,36 @@ end
 --
 --关闭所有，除了ui
 --
-function UIManager:CloseExcept(ui)
+function UIManager:CloseAllAndOpen(ui)
     if type(ui) == "string" then
         ui = self:Get(ui)
     end
-    local exsit = false
+  
     for k,v in pairs(self.mUIDic) do
-        if v ~= ui then
-            v:__OnUnload(true)         
-        else
-            exsit = true
+        local close = true
+        if ui ~= nil and v ~= nil then
+            if v == ui then
+                close = false
+            else
+                if v.mType == UIType.Widget then
+                    for i,w in ipairs(ui.mWidgets) do
+                        if w == v.mName then
+                            close = false
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        if close and v ~= nil then
+            self.mUIDic[v.mName] = nil
+            v:__OnUnload(true)  
         end
     end
-    self.mUIDic = {}
+
     self.mUIStack = {}
-    if ui ~= nil and exsit == true then
-       self:Open(ui)
+    if ui ~= nil  then
+        self:Open(ui)
     end
 
 end
@@ -415,17 +431,23 @@ function UIManager:Close(ui)
    
     if ui.mType == UIType.Normal  then
 
-        if #self.mUIStack > 0 and self.mUIStack[1] == ui then
-            table.remove( self.mUIStack, 1 )
-        end
+        local index = 0
         local contains = false
-        for i,v in ipairs(self.mUIStack) do
-            if v == ui then
-                contains = true
-                break
+        for i = 1,#self.mUIStack do
+            if index == 0 then
+                if self.mUIStack[i]== ui then
+                    index = i
+                    table.remove(self.mUIStack, i)
+                    i = i -1
+                end
+            else
+                if self.mUIStack[i] == ui then
+                    contains = true 
+                    break
+                end
             end
         end
-
+        
         if contains then
             self:SetActive(ui,false)
         else
@@ -434,10 +456,15 @@ function UIManager:Close(ui)
         end
 
         if  #self.mUIStack > 0  then
-            
-            for i=#self.mUIStack, 1, -1 do
+            for i=#self.mUIStack, index, -1 do
                 local v = self.mUIStack[i]
-                if i == 1 then
+                if i == index then
+                    if v.mHidePrevious == false then
+                        local previous = self.mUIStack[index + 1]
+                        if previous and previous.mActive == false then
+                            self:SetActive(previous,true)
+                        end
+                    end
                     self:SetActive(v,true)
                 else
                     if v.mActive == true then
@@ -446,7 +473,6 @@ function UIManager:Close(ui)
                 end
             end
         end
-
     else
         self.mUIDic[ui.mName] = nil
         ui:__OnUnload(true)
@@ -457,7 +483,7 @@ end
 
 function UIManager:PrintStack()
     for i,v in ipairs(self.mUIStack) do
-        print(i,v.mName.." :"..tostring(v.mActive))
+        print(i,v.mName,v.mActive)
     end
 end
 

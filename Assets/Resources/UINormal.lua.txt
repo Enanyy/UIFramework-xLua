@@ -15,7 +15,7 @@ function M:OnLoad()
 	self.mButtonWidget = self.gameObject.transform:Find('SafeArea/@Button.mButtonWidget'):GetComponent(typeof(CS.UnityEngine.UI.Button))
 --BINDING_CODE_END
     self.mButtonClose.onClick:AddListener(function() self:Close() end )
-    self.mButtonMain.onClick:AddListener(function() UIManager:CloseExcept("UIMain") end)
+    self.mButtonMain.onClick:AddListener(function() UIManager:CloseAllAndOpen("UIMain") end)
     self.mButtonPop.onClick:AddListener(function() UIManager:Open("UIPop") end)
     self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
 end
