@@ -75,11 +75,11 @@ end
 function UIBase:OnHide()
 
 end
-
+--打开自己,如直接：UIMain:Open()
 function UIBase:Open()
     UIManager:Open(self)
 end
-
+--关闭自己,如:self:Close()
 function UIBase:Close()
     UIManager:Close(self)
 end
@@ -152,8 +152,8 @@ UIManager =
     mOrderAddition  = 50,
     mOrderWidgetAddition = 10,
     mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
-    mLayerHide      = 6, --隐藏层
-    mLayerModel     = 7, --UI模型层
+    mLayerModel     = 6, --UI模型层
+    mLayerHide      = 7, --隐藏层
 }
 
 function UIManager:Init()
@@ -288,14 +288,12 @@ function UIManager:Get(name)
 end
 
 function UIManager:SetLayer(go,layer)
-    if go then
-        if go.layer ~= layer then
-            go.layer = layer
-            local transforms = go:GetComponentsInChildren(typeof(Transform))
-            for i = 0, transforms.Length - 1 do
-                transforms[i].gameObject.layer = layer
-            end
-        end
+    if go and go.layer ~= layer then
+        go.layer = layer
+        local transforms = go:GetComponentsInChildren(typeof(Transform))
+        for i = 0, transforms.Length - 1 do
+            transforms[i].gameObject.layer = layer
+        end     
     end
 end
 
@@ -451,24 +449,24 @@ function UIManager:Close(ui)
             ui:__OnUnload(true)                
         end
 
-        if  #self.mUIStack > 0  then
-            for i=#self.mUIStack, index, -1 do
-                local v = self.mUIStack[i]
-                if i == index then
-                    if v.mHidePrevious == false then
-                        local previous = self.mUIStack[index + 1]
-                        if previous and previous.mActive == false then
-                            self:SetActive(previous,true)
-                        end
+      
+        for i=#self.mUIStack, index, -1 do
+            local v = self.mUIStack[i]
+            if i == index then
+                if v.mHidePrevious == false then
+                    local previous = self.mUIStack[index + 1]
+                    if previous and previous.mActive == false then
+                        self:SetActive(previous,true)
                     end
-                    self:SetActive(v,true)
-                else
-                    if v.mActive == true then
-                        v:__SetWidgetActive(true)
-                    end
+                end
+                self:SetActive(v,true)
+            else
+                if v.mActive == true then
+                    v:__SetWidgetActive(true)
                 end
             end
         end
+        
     else
         self.mUIDic[ui.mName] = nil
         ui:__OnUnload(true)
