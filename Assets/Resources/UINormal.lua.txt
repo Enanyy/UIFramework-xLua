@@ -16,8 +16,8 @@ function M:OnLoad()
 --BINDING_CODE_END
     self.mButtonClose.onClick:AddListener(function() self:Close() end )
     self.mButtonMain.onClick:AddListener(function() UIManager:CloseAllAndOpen("UIMain") end)
-    self.mButtonPop.onClick:AddListener(function() UIManager:Open("UIPop") end)
-    self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
+    self.mButtonPop.onClick:AddListener(function()  UIPop:Open() end)
+    self.mButtonWidget.onClick:AddListener(function() UIWidget:Open() end)
 end
 
 --整个生命周期只调用一次

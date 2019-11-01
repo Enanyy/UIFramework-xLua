@@ -30,7 +30,7 @@ local screenMatchMode   = CS.UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWi
 UIType = 
 {
     Normal  = 0,    --0、普通界面,会加入到导航栈
-    Widget  = 1,    --1、小组件，比如飘字
+    Widget  = 1,    --1、小组件，比如飘字或者子界面
 }
 
 UIStatus = {
@@ -52,7 +52,7 @@ UIBase =
     mType           = UIType.Normal,
     mHidePrevious   = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
     mFixedOrder     = 0,        --固定SortingOrder,只对Widget有用
-    mWidgets        = nil,      --子Widegets,如{'UIFixed'}
+    mWidgets        = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
 }
 UIBase.__index = UIBase
 
@@ -74,6 +74,10 @@ end
 --整个生命周期可能调用多次
 function UIBase:OnHide()
 
+end
+
+function UIBase:Open()
+    UIManager:Open(self)
 end
 
 function UIBase:Close()
@@ -192,7 +196,7 @@ function UIManager:SetTouch(touchable)
     end
 end
 
-function UIManager:Open(ui, callback)
+function UIManager:Open(ui)
 
     self:Init()
 
@@ -247,10 +251,6 @@ function UIManager:Open(ui, callback)
 
             ui:__OnLoad()
         
-            if callback ~= nil then
-                callback()
-            end
-        
             if  #self.mUIStack > 0 and ui.mHidePrevious == true then
                 local previous = self.mUIStack[1]
                 self:SetActive(previous,false)
@@ -266,10 +266,6 @@ function UIManager:Open(ui, callback)
         end)
 
     else 
-
-        if callback ~= nil then
-            callback()
-        end
  
         if  #self.mUIStack > 0 and ui.mHidePrevious == true then
             local previous = self.mUIStack[1]

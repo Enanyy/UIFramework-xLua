@@ -12,10 +12,10 @@ function M:OnLoad()
     close.onClick:AddListener(function() self:Close() end )
 
     local pop = self.gameObject.transform:Find("UIWidget/Pop"):GetComponent(typeof(Button))
-    pop.onClick:AddListener(function() UIManager:Open("UIPop") end)
+    pop.onClick:AddListener(function() UIPop:Open() end)
 
     local normal = self.gameObject.transform:Find("UIWidget/Normal"):GetComponent(typeof(Button))
-    normal.onClick:AddListener(function() UIManager:Open("UINormal") end)
+    normal.onClick:AddListener(function() UINormal:Open() end)
 end
 
 return M

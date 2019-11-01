@@ -7,7 +7,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal'):GetComponent(typeof(CS.UnityEngine.UI.Button))
+--BINDING_CODE_BEGIN
+	self.mButtonNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal'):GetComponent(typeof(CS.UnityEngine.UI.Button))
 	self.mTextNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal/@Text.mTextNormal'):GetComponent(typeof(CS.UnityEngine.UI.Text))
 	self.mButtonPop = self.gameObject.transform:Find('SafeArea/@Button.mButtonPop'):GetComponent(typeof(CS.UnityEngine.UI.Button))
 	self.mButtonWidget = self.gameObject.transform:Find('SafeArea/@Button.mButtonWidget'):GetComponent(typeof(CS.UnityEngine.UI.Button))
@@ -18,9 +19,9 @@ function M:OnLoad()
 	self.mVerticalScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
 	self.mHorizontalScrollView = self.gameObject.transform:Find('SafeArea/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.HorizontalScrollView))
 --BINDING_CODE_END
-    self.mButtonNormal.onClick:AddListener(function() UIManager:Open("UINormal") end)
-    self.mButtonPop.onClick:AddListener(function() UIManager:Open("UIPop") end)
-	self.mButtonWidget.onClick:AddListener(function() UIManager:Open("UIWidget") end)
+    self.mButtonNormal.onClick:AddListener(function() UINormal:Open() end)
+    self.mButtonPop.onClick:AddListener(function() UIPop:Open() end)
+	self.mButtonWidget.onClick:AddListener(function() UIWidget:Open() end)
 	
 	self.mVerticalGridScrollView.onScrollItem:AddListener(self:OnGridScrollItem())
 	self.mButtonAdd.onClick:AddListener(self:OnAdd())
@@ -37,7 +38,8 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mButtonNormal = nil
+--UNBINDING_CODE_BEGIN
+	self.mButtonNormal = nil
 	self.mTextNormal = nil
 	self.mButtonPop = nil
 	self.mButtonWidget = nil
