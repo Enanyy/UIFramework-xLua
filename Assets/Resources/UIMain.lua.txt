@@ -1,6 +1,6 @@
 local M = {
 	mName = 'UIMain',
-	mWidgets = {'UIFixed'},
+	mWidgets = {'UIRight'},
 }
 UIMain = M
 setmetatable(M, UIBase)

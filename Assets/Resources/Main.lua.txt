@@ -10,7 +10,7 @@ function main( )
     --UIManager:Open("UIMain")
     UIManager:Init()
     UIManager:Open(UIMain)
-    UIManager:Open('UIRight',"UIMain")
+    UIManager:Open('UIFixed',"UIMain")
 end
 
 main()

@@ -94,11 +94,19 @@ function UIBase:__OnUnload(destroy)
         print("Destroy:"..self.mName)
         GameObject.Destroy(self.gameObject)
     end
+    if self.mWidgets ~= nil then
+        for i=#self.mWidgets, 1, -1 do
+            local widget = self.mWidgets[i]
+            if type(widget) == "table" then
+                table.remove( self.mWidgets, i)
+            end
+        end
+    end
+    self:__SetParent(nil)
     self.gameObject = nil
     self.mCanvas = nil
     self.mStatus = UIStatus.None
     self.mActive = false
-    self.mParent = nil
 end
 
 function UIBase:__OnShow()
@@ -111,14 +119,43 @@ function UIBase:__OnHide()
     self:__SetWidgetActive(false)
 end
 
+function UIBase:__SetParent(parent)
+    
+    self.mParent = parent
+
+    if self.mParent ~= nil and self.mParent.mWidgets ~= nil then
+        local exsit = false
+        for i,v in ipairs(self.mParent.mWidgets) do
+            if type(v) == "string" then
+                if v == self.mName then
+                    exsit = true
+                    break
+                end
+            else
+                if v.mName == self.mName then
+                    exsit = true
+                    break
+                end
+            end
+        end
+        if exsit == false then
+            table.insert( self.mParent.mWidgets, self)
+        end
+    end
+end
+
 function UIBase:__SetWidgetActive(active)
 
     if self.mWidgets == nil then return end
 
     for i,v in ipairs(self.mWidgets) do
-        local widget = UIManager:Get(v)
+        local widget = v
+        if type(v) == "string" then
+            widget = UIManager:Get(v)
+        end
+
         if widget and widget.mType == UIType.Widget then
-            widget.mParent = self
+            widget:__SetParent(self)
             if active then
                 if widget.mStatus == UIStatus.None then
                     UIManager:Open(widget, self)
@@ -211,7 +248,7 @@ function UIManager:Open(ui, parent)
 
     if ui.mType == UIType.Widget  and parent ~= nil then
         if  parent.mType == UIType.Normal and parent.mStatus ~= UIStatus.None then
-            ui.mParent = parent
+            ui:__SetParent(parent)
         else
             error("Parent is not Normal or parent is not opening")
             return 
