@@ -1,0 +1,28 @@
+---
+---Data Example
+---设计目的：使用常规的key-value存储会造成每条数据都有相同的key，造成文本冗余大，文件大，从而加载后占用内存大。
+---
+local Key = {id = 1,name = 2,height = 3, list = 4}
+
+local mt = {__index = function(t,i) 
+    local index = Key[i]
+    return t[index]
+end}
+
+local function f(t) return setmetatable(t,mt) end 
+
+local M =
+{
+    Value={
+        [1] = f({1,"myname1",1020.12,{1,2,3}}),
+        [2] = f({2,"myname2",1020.12,{1,2,3}}),
+        [3] = f({3,"myname3",1020.12,{1,2,3}}),
+        [4] = f({4,"myname4",1020.12,{1,2,3}}),
+    }
+}
+
+function M.Get(id)
+    return M.Value[id]    
+end
+
+return M

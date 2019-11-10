@@ -6,8 +6,16 @@ setmetatable(_G, {
         return ret
     end
 })
+
 function main( )
     --UIManager:Open("UIMain")
+
+    local data = DTHero.Get(1)
+    print(data.id)
+    print(data.name)
+    print(data.height)
+    print(data.list)
+
     UIManager:Init()
     UIManager:Open(UIMain)
     UIManager:Open('UIFixed',"UIMain")
