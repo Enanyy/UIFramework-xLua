@@ -16,6 +16,10 @@ namespace UnityEngine.UI
 
         public ScrollItemEvent onScrollItem { get; private set; } = new ScrollItemEvent();
 
+        public class RemoveItemEvent : UnityEvent<Transform> { }
+
+        public RemoveItemEvent onRemoveItem { get; private set; } = new RemoveItemEvent();
+
         [Tooltip("Total count, negative means INFINITE mode")]
         public int totalCount;
  
@@ -706,6 +710,7 @@ namespace UnityEngine.UI
             item.SetParent(m_CacheItemsRoot.transform,false);
             m_CacheItems.Add(item.gameObject);
 
+            onRemoveItem.Invoke(item);
         }
 
         protected override void OnDestroy()

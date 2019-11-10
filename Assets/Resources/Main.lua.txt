@@ -9,7 +9,8 @@ setmetatable(_G, {
 function main( )
     --UIManager:Open("UIMain")
     UIManager:Init()
-    UIMain:Open()
+    UIManager:Open(UIMain)
+    UIManager:Open('UIRight',"UIMain")
 end
 
 main()

@@ -75,10 +75,7 @@ end
 function UIBase:OnHide()
 
 end
---打开自己,如直接：UIMain:Open()
-function UIBase:Open()
-    UIManager:Open(self)
-end
+
 --关闭自己,如:self:Close()
 function UIBase:Close()
     UIManager:Close(self)
@@ -124,7 +121,7 @@ function UIBase:__SetWidgetActive(active)
             widget.mParent = self
             if active then
                 if widget.mStatus == UIStatus.None then
-                    UIManager:Open(widget)
+                    UIManager:Open(widget, self)
                 elseif widget.mStatus == UIStatus.LoadDone  then
                     UIManager:SetActive(widget,active)
                 end
@@ -196,7 +193,7 @@ function UIManager:SetTouch(touchable)
     end
 end
 
-function UIManager:Open(ui)
+function UIManager:Open(ui, parent)
 
     self:Init()
 
@@ -206,6 +203,19 @@ function UIManager:Open(ui)
 
     if ui == nil then
         return 
+    end
+
+    if type(parent) == "string" then
+        parent = self:Get(parent)
+    end
+
+    if ui.mType == UIType.Widget  and parent ~= nil then
+        if  parent.mType == UIType.Normal and parent.mStatus ~= UIStatus.None then
+            ui.mParent = parent
+        else
+            error("Parent is not Normal or parent is not opening")
+            return 
+        end
     end
     
     self:SetTouch(false)

@@ -1,6 +1,6 @@
 local M = {
 	mName = 'UIMain',
-	mWidgets = {'UIFixed','UIRight'},
+	mWidgets = {'UIFixed'},
 }
 UIMain = M
 setmetatable(M, UIBase)
@@ -19,9 +19,9 @@ function M:OnLoad()
 	self.mVerticalScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
 	self.mHorizontalScrollView = self.gameObject.transform:Find('SafeArea/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.HorizontalScrollView))
 --BINDING_CODE_END
-    self.mButtonNormal.onClick:AddListener(function() UINormal:Open() end)
-    self.mButtonPop.onClick:AddListener(function() UIPop:Open() end)
-	self.mButtonWidget.onClick:AddListener(function() UIWidget:Open() end)
+    self.mButtonNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
+    self.mButtonPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
+	self.mButtonWidget.onClick:AddListener(function() UIManager:Open(UIWidget) end)
 	
 	self.mVerticalGridScrollView.onScrollItem:AddListener(self:OnGridScrollItem())
 	self.mButtonAdd.onClick:AddListener(self:OnAdd())
