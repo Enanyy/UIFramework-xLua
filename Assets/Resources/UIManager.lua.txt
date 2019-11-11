@@ -42,17 +42,18 @@ UIStatus = {
 
 UIBase = 
 {
-    mName           = "",
-    gameObject      = nil,
-    mCanvas         = nil,
-    mStatus         = UIStatus.None,
-    mActive         = false,
-    mParent         = nil,       --当前的父UI
+    mName                   = "",
+    gameObject              = nil,
+    mCanvas                 = nil,
+    mStatus                 = UIStatus.None,
+    mActive                 = false,
+    mParent                 = nil,       --当前的父UI
 
-    mType           = UIType.Normal,
-    mHidePrevious   = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
-    mFixedOrder     = 0,        --固定SortingOrder,只对Widget有用
-    mWidgets        = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
+    mType                   = UIType.Normal,
+    mHidePrevious           = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
+    mFixedOrder             = 0,        --固定SortingOrder,只对Widget有用
+    mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
+    mWidgetOrderAddition    = 5,        --在父界面的基础上加上的数值
 }
 UIBase.__index = UIBase
 
@@ -184,7 +185,6 @@ UIManager =
     mEventSystem    = nil,
 
     mOrderAddition  = 50,
-    mOrderWidgetAddition = 10,
     mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
     mLayerModel     = 6, --UI模型层
     mLayerHide      = 7, --隐藏层
@@ -380,7 +380,7 @@ function UIManager:SetSortOrder(ui)
         ui.mCanvas.sortingOrder = maxOrder
     else
         if  ui.mParent ~= nil then
-            ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + self.mOrderWidgetAddition
+            ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + ui.mWidgetOrderAddition
         else
 
             for k,v in pairs(self.mUIDic) do
