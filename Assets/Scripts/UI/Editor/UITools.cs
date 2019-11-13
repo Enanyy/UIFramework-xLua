@@ -272,6 +272,7 @@ return M";
             case "VerticalScrollView": return typeof(VerticalScrollView);
             case "HorizontalScrollView": return typeof(HorizontalScrollView);
             case "Tab":return typeof(Tab);
+            case "ProgressBar": return typeof(ProgressBar);
             default:
                 {         
                     return null;

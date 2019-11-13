@@ -19,6 +19,7 @@ function M:OnLoad()
 	self.mVerticalScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
 	self.mHorizontalScrollView = self.gameObject.transform:Find('SafeArea/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.HorizontalScrollView))
 	self.mTab = self.gameObject.transform:Find('SafeArea/@Tab.mTab'):GetComponent(typeof(CS.UnityEngine.UI.Tab))
+	self.mProgressBar = self.gameObject.transform:Find('SafeArea/@ProgressBar.mProgressBar'):GetComponent(typeof(CS.UnityEngine.UI.ProgressBar))
 --BINDING_CODE_END
     self.mButtonNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
     self.mButtonPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
@@ -36,6 +37,16 @@ function M:OnLoad()
 
 	self.mTab.onTabSelectChanged:AddListener(self:OnTabSelectChanged())
 
+	self.mProgressBar:SetMinMax(0,100)
+	self.mProgressBar:SetValue(100,2)
+	self.mProgressBar:AddListener(0, function(value) print("current:" ..tostring(value)) end)
+	self.mProgressBar:AddListener(100,function(value) 
+		print("current:" ..tostring(value)) 
+		self.mProgressBar:SetValue(0, 4) 
+	end)
+	self.mProgressBar:AddListener(60,function(value) print("current:" ..tostring(value)) end)
+	self.mProgressBar.onValueChanged:AddListener(function (from ,to) print("Value Change from:"..from .." to:"..to) end)
+
 end
 
 --整个生命周期只调用一次
@@ -52,6 +63,7 @@ function M:OnUnload()
 	self.mVerticalScrollView = nil
 	self.mHorizontalScrollView = nil
 	self.mTab = nil
+	self.mProgressBar = nil
 --UNBINDING_CODE_END
 
 	self.mItemDic = nil
@@ -96,7 +108,8 @@ function M:OnGridScrollItem()
 	return function(item, index) 
 		if self.mItemDic[item] == nil then
 			local itemWrap = {
-				mIndex = index,
+				mIndex = index, --从0开始
+				mData = nil,
 				mTransform = item,
 				mText = item:Find("Text"):GetComponent(typeof(Text)),
 
@@ -110,17 +123,17 @@ function M:OnGridScrollItem()
 				end
 			end
 
-			function itemWrap:Refresh(data) 
+			function itemWrap:Refresh(index, data) 
+				self.mIndex = index
+				self.mData = data
 				self.mText.text = "Item "..self.mIndex .." data:"..data
 			end
 
 			itemWrap:Init()
 
 			self.mItemDic[item] = itemWrap	
-		else
-			self.mItemDic[item].mIndex = index
 		end
-		self.mItemDic[item]:Refresh(self.mData[index + 1])
+		self.mItemDic[item]:Refresh(index, self.mData[index + 1])
 
 	end
 end
