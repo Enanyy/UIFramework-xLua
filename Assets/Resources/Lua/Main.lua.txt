@@ -2,7 +2,9 @@
 setmetatable(_G, {
     __index = function(t,i)
         local ret = require(i)
-        t[i] = ret
+        if ret then
+            t[i] = ret
+        end
         return ret
     end
 })
