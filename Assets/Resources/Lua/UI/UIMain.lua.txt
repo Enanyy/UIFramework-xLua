@@ -38,14 +38,18 @@ function M:OnLoad()
 	self.mTab.onTabSelectChanged:AddListener(self:OnTabSelectChanged())
 
 	self.mProgressBar:SetMinMax(0,100)
-	self.mProgressBar:SetValue(100,2)
-	self.mProgressBar:AddListener(0, function(value) print("current:" ..tostring(value)) end)
+	self.mProgressBar:AddListener(0, function(value) 
+		print("current:" ..tostring(value)) 
+		self.mProgressBar:SetValue(100,4)
+	end)
 	self.mProgressBar:AddListener(100,function(value) 
 		print("current:" ..tostring(value)) 
 		self.mProgressBar:SetValue(0, 4) 
 	end)
 	self.mProgressBar:AddListener(60,function(value) print("current:" ..tostring(value)) end)
 	self.mProgressBar.onValueChanged:AddListener(function (from ,to) print("Value Change from:"..from .." to:"..to) end)
+
+	self.mProgressBar:SetValue(100,4)
 
 end
 

@@ -14,19 +14,15 @@ namespace UnityEngine.UI
         private float mFrom;
         private Dictionary<float, List<UnityAction<float>>> mListeners = new Dictionary<float, List<UnityAction<float>>>();
 
-        public ProgressEvent onValueChanged = new ProgressEvent();
+        public ProgressValueChanged onValueChanged = new ProgressValueChanged();
         public float value
         {
             get { return mSlider.value; }
             set
             {
-                
-                if (mSlider.value != value)
-                {
-                    float from = mSlider.value;
-                    mSlider.value = value;
-                    onValueChanged.Invoke(from, mSlider.value);
-                }
+                float from = mSlider.value;
+                mSlider.value = value;
+                onValueChanged.Invoke(from, mSlider.value);
             }
         }
         private void Awake()
@@ -49,14 +45,15 @@ namespace UnityEngine.UI
             mValue = Mathf.Clamp(to, mSlider.minValue, mSlider.maxValue);
             if (to == value)
             {
-                CheckListener(value);
+                TriggerListener(value - 0.0001f);
+                TriggerListener(value + 0.0001f);
             }
             else
             {
                 if (duration <= 0)
                 {
                     value = mValue;
-                    CheckListener(value);
+                    TriggerListener(value);
                 }
                 else
                 {
@@ -88,11 +85,11 @@ namespace UnityEngine.UI
                     mTime = 0;
                 }
 
-                CheckListener(previous);
+                TriggerListener(previous);
             }
         }
 
-        private void CheckListener(float previous)
+        private void TriggerListener(float previous)
         {
             var it = mListeners.GetEnumerator();
             while (it.MoveNext())
@@ -136,9 +133,9 @@ namespace UnityEngine.UI
             mListeners.Clear(); 
         }
 
-        public class ProgressEvent:UnityEvent<float,float>
+        public class ProgressValueChanged:UnityEvent<float,float>
         {
-            public ProgressEvent() { }
+            public ProgressValueChanged() { }
         }
     }
 }
