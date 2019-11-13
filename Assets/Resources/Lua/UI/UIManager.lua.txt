@@ -10,6 +10,7 @@ Canvas                  = CS.UnityEngine.Canvas
 Screen                  = CS.UnityEngine.Screen
 Input                   = CS.UnityEngine.Input
 
+Color                   = CS.UnityEngine.Color
 Image                   = CS.UnityEngine.UI.Image
 Button                  = CS.UnityEngine.UI.Button
 Text                    = CS.UnityEngine.UI.Text

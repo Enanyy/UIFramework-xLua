@@ -18,14 +18,15 @@ function M:OnLoad()
 	self.mButtonRemove = self.gameObject.transform:Find('SafeArea/@Button.mButtonRemove'):GetComponent(typeof(CS.UnityEngine.UI.Button))
 	self.mVerticalScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.VerticalScrollView))
 	self.mHorizontalScrollView = self.gameObject.transform:Find('SafeArea/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(CS.UnityEngine.UI.HorizontalScrollView))
+	self.mTab = self.gameObject.transform:Find('SafeArea/@Tab.mTab'):GetComponent(typeof(CS.UnityEngine.UI.Tab))
 --BINDING_CODE_END
     self.mButtonNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
     self.mButtonPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
 	self.mButtonWidget.onClick:AddListener(function() UIManager:Open(UIWidget) end)
 	
 	self.mVerticalGridScrollView.onScrollItem:AddListener(self:OnGridScrollItem())
-	self.mButtonAdd.onClick:AddListener(self:OnAdd())
-	self.mButtonRemove.onClick:AddListener(self:OnRemove())
+	self.mButtonAdd.onClick:AddListener(self:OnAddClick())
+	self.mButtonRemove.onClick:AddListener(self:OnRemoveClick())
 
 	self.mItemDic = {}
 
@@ -33,6 +34,7 @@ function M:OnLoad()
 	self.mVerticalGridScrollView.totalCount = #self.mData
 	self.mVerticalGridScrollView:Refill()
 
+	self.mTab.onTabSelectChanged:AddListener(self:OnTabSelectChanged())
 
 end
 
@@ -49,6 +51,7 @@ function M:OnUnload()
 	self.mButtonRemove = nil
 	self.mVerticalScrollView = nil
 	self.mHorizontalScrollView = nil
+	self.mTab = nil
 --UNBINDING_CODE_END
 
 	self.mItemDic = nil
@@ -65,7 +68,7 @@ function M:OnHide()
 	
 end
 
-function M:OnAdd()
+function M:OnAddClick()
 	return function ()
 		for i=1,10 do
 			table.insert( self.mData, i )
@@ -78,7 +81,7 @@ function M:OnAdd()
 	end
 end
 
-function M:OnRemove()
+function M:OnRemoveClick()
 	return function()
 		for i=1,10 do
 			table.remove( self.mData, #self.mData )
@@ -87,7 +90,7 @@ function M:OnRemove()
 		self.mVerticalGridScrollView:Refresh()
 	end
 end
-
+--列表实例
 function M:OnGridScrollItem()
 
 	return function(item, index) 
@@ -119,6 +122,17 @@ function M:OnGridScrollItem()
 		end
 		self.mItemDic[item]:Refresh(self.mData[index + 1])
 
+	end
+end
+--标签页实例
+function M:OnTabSelectChanged()
+	return function(toggle)
+		local image = toggle:GetComponent(typeof(Image))
+		if toggle.isOn then
+			image.color = Color.yellow
+		else
+			image.color = Color.white
+		end
 	end
 end
 

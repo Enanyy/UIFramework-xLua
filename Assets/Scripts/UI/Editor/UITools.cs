@@ -18,20 +18,16 @@ using UnityEngine.EventSystems;
 
 public class Variable
 {
-    string name = string.Empty;
-    string type = string.Empty;
-    string path = string.Empty;
+    public readonly string Name;
+    public readonly string Type;
+    public readonly string Path;
 
     public Variable(string varName, string varType, string varPath)
     {
-        name = varName;
-        type = varType;
-        path = varPath;
+        Name = varName;
+        Type = varType;
+        Path = varPath;
     }
-    public string Name { get { return name; } }
-    public string Type { get { return type; } }
-    public string Path { get { return path; } }
-
 }
 
 public static class UITools
@@ -266,6 +262,7 @@ return M";
             case "Image": return typeof(Image);
             case "Button": return typeof(Button);
             case "Toggle": return typeof(Toggle);
+            case "ToggleGroup": return typeof(ToggleGroup);
             case "RawImage": return typeof(RawImage);
             case "Slider": return typeof(Slider);
             case "Scrollbar": return typeof(Scrollbar);
@@ -274,6 +271,7 @@ return M";
             case "ScrollRect": return typeof(ScrollRect);
             case "VerticalScrollView": return typeof(VerticalScrollView);
             case "HorizontalScrollView": return typeof(HorizontalScrollView);
+            case "Tab":return typeof(Tab);
             default:
                 {         
                     return null;
@@ -283,7 +281,7 @@ return M";
 
     static string GetFileName(GameObject ui)
     {
-        string dir = Application.dataPath + "/Resources/";
+        string dir = Application.dataPath + "/Resources/Lua/UI/";
 
         if (!Directory.Exists(dir))
         {
