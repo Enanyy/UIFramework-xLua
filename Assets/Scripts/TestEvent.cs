@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+
 public class TestEvent : MonoBehaviour
 {
 
@@ -11,40 +12,42 @@ public class TestEvent : MonoBehaviour
         AddListener(2);
         Invoke(1);
         Invoke(3);
-        RemoveListener();
+        RemoveListener(1);
         Invoke(1);
+        Invoke(2);
+        RemoveListener(1);
     }
     void AddListener(int id)
     {
-        EventCenter.AddListener(id, OnListen);
-        EventCenter.AddListener<int>(id, OnListen);
-        EventCenter.AddListener<float>(id, OnListen);
-        EventCenter.AddListener<Param>(id, OnListen);
-        EventCenter.AddListener<int, int>(id, OnListen);
-        EventCenter.AddListener<int, float>(id, OnListen);
-        EventCenter.AddListener<float, int>(id, OnListen);
+        EventSystem.AddListener(id, OnListen);
+        EventSystem.AddListener<int>(id, OnListen);
+        EventSystem.AddListener<float>(id, OnListen);
+        EventSystem.AddListener<Param>(id, OnListen);
+        EventSystem.AddListener<int, int>(id, OnListen);
+        EventSystem.AddListener<int, float>(id, OnListen);
+        EventSystem.AddListener<float, int>(id, OnListen);
     }
 
-    void RemoveListener()
+    void RemoveListener(int id)
     {
-        EventCenter.RemoveListener(1, OnListen);
-        EventCenter.RemoveListener<int>(1, OnListen);
-        EventCenter.RemoveListener<float>(1, OnListen);
-        EventCenter.RemoveListener<Param>(1, OnListen);
-        EventCenter.RemoveListener<int, int>(1, OnListen);
-        EventCenter.RemoveListener<int, float>(1, OnListen);
-        EventCenter.RemoveListener<float, int>(1, OnListen);
+        EventSystem.RemoveListener(id, OnListen);
+        EventSystem.RemoveListener<int>(id, OnListen);
+        EventSystem.RemoveListener<float>(id, OnListen);
+        EventSystem.RemoveListener<Param>(id, OnListen);
+        EventSystem.RemoveListener<int, int>(id, OnListen);
+        EventSystem.RemoveListener<int, float>(id, OnListen);
+        EventSystem.RemoveListener<float, int>(id, OnListen);
     }
 
     void Invoke(int id)
     {
-        EventCenter.Invoke(id);
-        EventCenter.Invoke(id, 1);
-        EventCenter.Invoke(id, 1.2f);
-        EventCenter.Invoke(id, new Param { i = 1, j = 2 });
-        EventCenter.Invoke(id, 1, 2);
-        EventCenter.Invoke(id, 2, 3.0f);
-        EventCenter.Invoke(id, 9f, 1);   
+        EventSystem.Invoke(id);
+        EventSystem.Invoke(id, 1);
+        EventSystem.Invoke(id, 1.2f);
+        EventSystem.Invoke(id, new Param { i = 1, j = 2 });
+        EventSystem.Invoke(id, 1, 2);
+        EventSystem.Invoke(id, 2, 3.0f);
+        EventSystem.Invoke(id, 9f, 1);   
     }
 
     // Update is called once per frame
