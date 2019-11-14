@@ -7,44 +7,44 @@ public class TestEvent : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Register(1);
-        Register(2);
-        Dispatch(1);
-        Dispatch(3);
-        UnRegister();
-        Dispatch(1);
+        AddListener(1);
+        AddListener(2);
+        Invoke(1);
+        Invoke(3);
+        RemoveListener();
+        Invoke(1);
     }
-    void Register(int id)
+    void AddListener(int id)
     {
-        EventCenter.Register(id, OnListen);
-        EventCenter.Register<int>(id, OnListen);
-        EventCenter.Register<float>(id, OnListen);
-        EventCenter.Register<Param>(id, OnListen);
-        EventCenter.Register<int, int>(id, OnListen);
-        EventCenter.Register<int, float>(id, OnListen);
-        EventCenter.Register<float, int>(id, OnListen);
-    }
-
-    void UnRegister()
-    {
-        EventCenter.UnRegister(1, OnListen);
-        EventCenter.UnRegister<int>(1, OnListen);
-        EventCenter.UnRegister<float>(1, OnListen);
-        EventCenter.UnRegister<Param>(1, OnListen);
-        EventCenter.UnRegister<int, int>(1, OnListen);
-        EventCenter.UnRegister<int, float>(1, OnListen);
-        EventCenter.UnRegister<float, int>(1, OnListen);
+        EventCenter.AddListener(id, OnListen);
+        EventCenter.AddListener<int>(id, OnListen);
+        EventCenter.AddListener<float>(id, OnListen);
+        EventCenter.AddListener<Param>(id, OnListen);
+        EventCenter.AddListener<int, int>(id, OnListen);
+        EventCenter.AddListener<int, float>(id, OnListen);
+        EventCenter.AddListener<float, int>(id, OnListen);
     }
 
-    void Dispatch(int id)
+    void RemoveListener()
     {
-        EventCenter.Dispatch(id);
-        EventCenter.Dispatch(id, 1);
-        EventCenter.Dispatch(id, 1.2f);
-        EventCenter.Dispatch(id, new Param { i = 1, j = 2 });
-        EventCenter.Dispatch(id, 1, 2);
-        EventCenter.Dispatch(id, 2, 3.0f);
-        EventCenter.Dispatch(id, 9f, 1);   
+        EventCenter.RemoveListener(1, OnListen);
+        EventCenter.RemoveListener<int>(1, OnListen);
+        EventCenter.RemoveListener<float>(1, OnListen);
+        EventCenter.RemoveListener<Param>(1, OnListen);
+        EventCenter.RemoveListener<int, int>(1, OnListen);
+        EventCenter.RemoveListener<int, float>(1, OnListen);
+        EventCenter.RemoveListener<float, int>(1, OnListen);
+    }
+
+    void Invoke(int id)
+    {
+        EventCenter.Invoke(id);
+        EventCenter.Invoke(id, 1);
+        EventCenter.Invoke(id, 1.2f);
+        EventCenter.Invoke(id, new Param { i = 1, j = 2 });
+        EventCenter.Invoke(id, 1, 2);
+        EventCenter.Invoke(id, 2, 3.0f);
+        EventCenter.Invoke(id, 9f, 1);   
     }
 
     // Update is called once per frame

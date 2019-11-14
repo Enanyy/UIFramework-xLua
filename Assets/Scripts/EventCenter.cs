@@ -56,7 +56,7 @@ public class EventCenter
 
     private static Dictionary<int, Dictionary<Type, IEventListener>> listeners { get { return Instance.mListeners; } }
 
-    public static void Register(int id, UnityAction call)
+    public static void AddListener(int id, UnityAction call)
     {
         if(call == null)
         { 
@@ -77,7 +77,7 @@ public class EventCenter
         listener.RemoveListener(call);
         listener.AddListener(call);
     }
-    public static void Register<T0>(int id, UnityAction<T0> call)
+    public static void AddListener<T0>(int id, UnityAction<T0> call)
     {
         if (call == null)
         {
@@ -98,7 +98,7 @@ public class EventCenter
         listener.RemoveListener(call);
         listener.AddListener(call);
     }
-    public static void Register<T0, T1>(int id, UnityAction<T0, T1> call)
+    public static void AddListener<T0, T1>(int id, UnityAction<T0, T1> call)
     {
         if (call == null)
         {
@@ -119,7 +119,7 @@ public class EventCenter
         listener.RemoveListener(call);
         listener.AddListener(call);
     }
-    public static void Register<T0, T1, T2>(int id, UnityAction<T0, T1, T2> call)
+    public static void AddListener<T0, T1, T2>(int id, UnityAction<T0, T1, T2> call)
     {
         if (call == null)
         {
@@ -140,7 +140,7 @@ public class EventCenter
         listener.RemoveListener(call);
         listener.AddListener(call);
     }
-    public static void Register<T0, T1, T2, T3>(int id, UnityAction<T0, T1, T2, T3> call)
+    public static void AddListener<T0, T1, T2, T3>(int id, UnityAction<T0, T1, T2, T3> call)
     {
         if (call == null)
         {
@@ -161,7 +161,7 @@ public class EventCenter
         listener.RemoveListener(call);
         listener.AddListener(call);
     }
-    public static void UnRegister(int id, UnityAction call)
+    public static void RemoveListener(int id, UnityAction call)
     {
         if (call == null)
         {
@@ -177,7 +177,7 @@ public class EventCenter
             }
         }
     }
-    public static void UnRegister<T0>(int id, UnityAction<T0> call)
+    public static void RemoveListener<T0>(int id, UnityAction<T0> call)
     {
         if (call == null)
         {
@@ -193,7 +193,7 @@ public class EventCenter
             }
         }
     }
-    public static void UnRegister<T0, T1>(int id, UnityAction<T0, T1> call)
+    public static void RemoveListener<T0, T1>(int id, UnityAction<T0, T1> call)
     {
         if (call == null)
         {
@@ -209,7 +209,7 @@ public class EventCenter
             }
         }
     }
-    public static void UnRegister<T0, T1, T2>(int id, UnityAction<T0, T1, T2> call)
+    public static void RemoveListener<T0, T1, T2>(int id, UnityAction<T0, T1, T2> call)
     {
         if (call == null)
         {
@@ -225,7 +225,7 @@ public class EventCenter
             }
         }
     }
-    public static void UnRegister<T0, T1, T2, T3>(int id, UnityAction<T0, T1, T2, T3> call)
+    public static void RemoveListener<T0, T1, T2, T3>(int id, UnityAction<T0, T1, T2, T3> call)
     {
         if (call == null)
         {
@@ -242,7 +242,7 @@ public class EventCenter
         }
     }
 
-    public static void Dispatch(int id)
+    public static void Invoke(int id)
     {
         if (listeners.TryGetValue(id, out Dictionary<Type, IEventListener> dic))
         {
@@ -254,7 +254,7 @@ public class EventCenter
             }
         }
     }
-    public static void Dispatch<T0>(int id, T0 arg0)
+    public static void Invoke<T0>(int id, T0 arg0)
     {
         if (listeners.TryGetValue(id, out Dictionary<Type, IEventListener> dic))
         {
@@ -266,7 +266,7 @@ public class EventCenter
             }
         }
     }
-    public static void Dispatch<T0, T1>(int id, T0 arg0, T1 arg1)
+    public static void Invoke<T0, T1>(int id, T0 arg0, T1 arg1)
     {
         if (listeners.TryGetValue(id, out Dictionary<Type, IEventListener> dic))
         {
@@ -278,7 +278,7 @@ public class EventCenter
             }
         }
     }
-    public static void Dispatch<T0, T1, T2>(int id, T0 arg0, T1 arg1, T2 arg2)
+    public static void Invoke<T0, T1, T2>(int id, T0 arg0, T1 arg1, T2 arg2)
     {
         if (listeners.TryGetValue(id, out Dictionary<Type, IEventListener> dic))
         {
@@ -290,7 +290,7 @@ public class EventCenter
             }
         }
     }
-    public static void Dispatch<T0, T1, T2, T3>(int id, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
+    public static void Invoke<T0, T1, T2, T3>(int id, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
     {
         if (listeners.TryGetValue(id, out Dictionary<Type, IEventListener> dic))
         {
