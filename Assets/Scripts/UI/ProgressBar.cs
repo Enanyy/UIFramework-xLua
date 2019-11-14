@@ -3,7 +3,6 @@ using UnityEngine.Events;
 
 namespace UnityEngine.UI
 {
-
     [RequireComponent(typeof(Slider))]
     public class ProgressBar : MonoBehaviour
     {
@@ -45,15 +44,15 @@ namespace UnityEngine.UI
             mTo = Mathf.Clamp(to, mSlider.minValue, mSlider.maxValue);
             if (to == value)
             {
-                TriggerListener(value - 0.0001f);
-                TriggerListener(value + 0.0001f);
+                Trigger(value - 0.0001f);
+                Trigger(value + 0.0001f);
             }
             else
             {
                 if (duration <= 0)
                 {
                     value = mTo;
-                    TriggerListener(value);
+                    Trigger(value);
                 }
                 else
                 {
@@ -85,11 +84,11 @@ namespace UnityEngine.UI
                     mTime = 0;
                 }
 
-                TriggerListener(previous);
+                Trigger(previous);
             }
         }
 
-        private void TriggerListener(float previous)
+        private void Trigger(float previous)
         {
             var it = mListeners.GetEnumerator();
             while (it.MoveNext())
@@ -107,9 +106,17 @@ namespace UnityEngine.UI
                 }
             }
         }
-
+        /// <summary>
+        /// 添加触发器
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="call"></param>
         public void AddListener(float value, UnityAction<float> call)
         {
+            if(call == null)
+            {
+                return;
+            }
             if(mListeners.TryGetValue(value, out List<UnityAction<float>> list) ==false)
             {
                 list = new List<UnityAction<float>>();
@@ -121,8 +128,17 @@ namespace UnityEngine.UI
             }
            
         }
+        /// <summary>
+        /// 移除触发器
+        /// </summary>
+        /// <param name="vaue"></param>
+        /// <param name="call"></param>
         public void RemoveListener(float vaue, UnityAction<float> call)
         {
+            if (call == null)
+            {
+                return;
+            }
             if (mListeners.TryGetValue(value, out List<UnityAction<float>> list))
             {
                 list.Remove(call);
