@@ -8,10 +8,10 @@ namespace UnityEngine.UI
     public class ProgressBar : MonoBehaviour
     {
         private Slider mSlider;
-        private float mValue;
+        private float mFrom;
+        private float mTo;
         private float mDuration;
         private float mTime;
-        private float mFrom;
         private Dictionary<float, List<UnityAction<float>>> mListeners = new Dictionary<float, List<UnityAction<float>>>();
 
         public ProgressValueChanged onValueChanged = new ProgressValueChanged();
@@ -42,7 +42,7 @@ namespace UnityEngine.UI
         public void SetValue(float to, float duration = 0)
         {
             mFrom = mSlider.value;
-            mValue = Mathf.Clamp(to, mSlider.minValue, mSlider.maxValue);
+            mTo = Mathf.Clamp(to, mSlider.minValue, mSlider.maxValue);
             if (to == value)
             {
                 TriggerListener(value - 0.0001f);
@@ -52,7 +52,7 @@ namespace UnityEngine.UI
             {
                 if (duration <= 0)
                 {
-                    value = mValue;
+                    value = mTo;
                     TriggerListener(value);
                 }
                 else
@@ -78,8 +78,8 @@ namespace UnityEngine.UI
 
                 float factor = mTime / mDuration;
 
-                value = Mathf.Lerp(mFrom, mValue, factor);
-                if(value == mValue)
+                value = Mathf.Lerp(mFrom, mTo, factor);
+                if(value == mTo)
                 {
                     mDuration = 0; 
                     mTime = 0;
