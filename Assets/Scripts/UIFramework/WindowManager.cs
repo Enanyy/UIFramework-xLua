@@ -16,8 +16,10 @@ public enum WindowStatus{
     LoadDone        = 2,     //加载完成
 }
 
-public abstract class Window : MonoBehaviour
+public abstract class Window 
 {
+    public GameObject gameObject;
+
     public Canvas canvas;
     public WindowStatus status;
     public bool active;
@@ -92,7 +94,21 @@ public class WindowManager : MonoBehaviour
 
     public void Open<T>(Window parent,Action<T> callback) where T:Window
     {
+        T t = Get<T>();
+        if(t == null)
+        {
 
+        }
+        else
+        {
+
+        }
+    }
+
+    public T Get<T>() where T:Window
+    {
+        mWindowDic.TryGetValue(typeof(T), out Window t);
+        return t as T;
     }
 
     // Use this for initialization
