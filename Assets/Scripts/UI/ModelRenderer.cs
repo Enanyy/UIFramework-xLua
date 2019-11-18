@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(CanvasRenderer))]
-public class UIModelRenderer : MonoBehaviour
+public class ModelRenderer : MonoBehaviour
 {
     private CanvasRenderer mCanvasRenderer;
     // Use this for initialization
