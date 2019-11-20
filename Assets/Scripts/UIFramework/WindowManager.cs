@@ -459,7 +459,11 @@ public class WindowManager : MonoBehaviour
                     mWindowStackTemp.Push(v);
                 }
             }
-            while(mWindowStackTemp.Count > 0)
+            if (contains)
+            {
+                SetActive(window, false);
+            }
+            while (mWindowStackTemp.Count > 0)
             {
                 var v = mWindowStackTemp.Pop();
                 mWindowStack.Push(v);
@@ -476,11 +480,7 @@ public class WindowManager : MonoBehaviour
                 }
             }
 
-            if(contains)
-            {
-                SetActive(window, false);
-            }
-            else
+            if(contains == false)
             {
                 Destroy(window.gameObject);
                 mWindowDic.Remove(window.GetType());
