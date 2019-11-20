@@ -198,7 +198,7 @@ public class WindowManager : MonoBehaviour
                 go.transform.SetParent(transform);
                 go.SetActive(true);
 
-                Window t = go.GetComponent(type) as Window;
+                t = go.GetComponent(type) as Window;
                 if (t == null) t = go.AddComponent(type) as Window;
 
                 t.canvas = go.GetComponent<Canvas>();
