@@ -125,7 +125,10 @@ function UIBase:__SetParent(parent)
     
     self.mParent = parent
 
-    if self.mParent ~= nil and self.mParent.mWidgets ~= nil then
+    if self.mParent ~= nil then
+        if  self.mParent.mWidgets == nil then
+            self.mParent.mWidgets = {} 
+        end
         local exsit = false
         for i,v in ipairs(self.mParent.mWidgets) do
             if type(v) == "string" then
@@ -317,7 +320,9 @@ function UIManager:Open(ui, parent)
  
         if  #self.mUIStack > 0 and ui.mHidePrevious == true then
             local previous = self.mUIStack[1]
-            self:SetActive(previous,false) 
+            if previous ~= ui then
+                self:SetActive(previous,false) 
+            end
         end
 
         if ui.mType == UIType.Normal then

@@ -59,16 +59,25 @@ public class Main : MonoBehaviour
 
     public static void LoadUI(string name,LuaFunction callback)
     {
+        Instance.StartCoroutine(LoadUIAsync(name, (asset)=> 
+        {
+            if(callback!=null)
+            {
+                callback.Action(asset);
+            }
+        }));
+    }
+    public static void LoadUI(string name, System.Action<Object> callback)
+    {
         Instance.StartCoroutine(LoadUIAsync(name, callback));
     }
-
-    private static IEnumerator LoadUIAsync(string name, LuaFunction callback)
+    private static IEnumerator LoadUIAsync(string name, System.Action<Object> callback)
     {
         ResourceRequest request = Resources.LoadAsync<Object>(string.Format("UI/{0}", name));
         yield return request;
         if(request.asset!= null)
         {
-            callback.Action(request.asset);
+            callback(request.asset);
         }
     }
 }
