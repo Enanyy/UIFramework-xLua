@@ -6,12 +6,11 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN
-	self.mButtonClose = self.gameObject.transform:Find('Widget/@Button.mButtonClose'):GetComponent(typeof(CS.UnityEngine.UI.Button))
-	self.mbuttonMain = self.gameObject.transform:Find('Widget/@Button.mbuttonMain'):GetComponent(typeof(CS.UnityEngine.UI.Button))
-	self.mButtonNormal = self.gameObject.transform:Find('Widget/@Button.mButtonNormal'):GetComponent(typeof(CS.UnityEngine.UI.Button))
-	self.mButtonWidget = self.gameObject.transform:Find('Widget/@Button.mButtonWidget'):GetComponent(typeof(CS.UnityEngine.UI.Button))
-	self.mText = self.gameObject.transform:Find('Widget/@Text.mText'):GetComponent(typeof(CS.UnityEngine.UI.Text))
+--BINDING_CODE_BEGIN	self.mButtonClose = self.gameObject.transform:Find('Widget/@Button.mButtonClose'):GetComponent(typeof(Button))
+	self.mbuttonMain = self.gameObject.transform:Find('Widget/@Button.mbuttonMain'):GetComponent(typeof(Button))
+	self.mButtonNormal = self.gameObject.transform:Find('Widget/@Button.mButtonNormal'):GetComponent(typeof(Button))
+	self.mButtonWidget = self.gameObject.transform:Find('Widget/@Button.mButtonWidget'):GetComponent(typeof(Button))
+	self.mText = self.gameObject.transform:Find('Widget/@Text.mText'):GetComponent(typeof(Text))
 --BINDING_CODE_END
     
     self.mButtonClose.onClick:AddListener(function() self:Close() end )
@@ -22,8 +21,7 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN
-	self.mButtonClose = nil
+--UNBINDING_CODE_BEGIN	self.mButtonClose = nil
 	self.mbuttonMain = nil
 	self.mButtonNormal = nil
 	self.mButtonWidget = nil

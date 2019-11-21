@@ -5,9 +5,9 @@ using UnityEngine.UI;
 using System.IO;
 using XLua;
 
-public class Main : MonoBehaviour
+public class MainLua : MonoBehaviour
 {
-    static Main Instance;
+    static MainLua Instance;
     LuaEnv luaenv;
     private void Awake()
     {

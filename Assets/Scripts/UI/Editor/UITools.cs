@@ -25,29 +25,37 @@ public class Variable
     public Variable(string varName, string varType, string varPath)
     {
         Name = varName;
-        Type = varType;
+
         Path = varPath;
+        if (varType.Contains("."))
+        {
+            Type = varType.Substring(varType.LastIndexOf('.')+1);
+        }
+        else
+        {
+            Type = varType;
+        }
     }
 }
 
 public static class UITools
 {
-    static string template = @"local M = {{
-    mName = '{0}'
+    static string lua = @"local M = {{
+    mName = '{classname}'
 }}
-{1} = M
+{classname} = M
 setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
 --BINDING_CODE_BEGIN
-{2}--BINDING_CODE_END
+{binding}--BINDING_CODE_END
 end
 
 --整个生命周期只调用一次
 function M:OnUnload()
 --UNBINDING_CODE_BEGIN
-{3}--UNBINDING_CODE_END
+{unbinding}--UNBINDING_CODE_END
 end
 
 
@@ -65,15 +73,31 @@ end
 
 return M";
 
-    [MenuItem("Assets/Generate UI Code", true)]
+    static string cshape = @"using UnityEngine;
+using UnityEngine.UI;
+
+public class {classname} : Window
+{
+//BINDING_DEFINITION_BEGIN
+{definition}//BINDING_DEFINITION_END
+
+    private void Awake()
+    {
+//BINDING_CODE_BEGIN
+{binding}//BINDING_CODE_END
+    } 
+}";
+
+    [MenuItem("Assets/Generate UI Lua Code", true)]
+    [MenuItem("Assets/Generate UI CS Code", true)]
     public static bool IsPrefab()
     {
         return (Selection.activeObject != null && Selection.activeObject.GetType() == typeof(GameObject));
     }
 
 
-    [MenuItem("Assets/Generate UI Code")]
-    public static void GenerateUICode()
+    [MenuItem("Assets/Generate UI Lua Code")]
+    public static void GenerateLuaCode()
     {
         GameObject ui = Selection.activeGameObject;
         if (!ui)
@@ -96,7 +120,7 @@ return M";
         }
 
 
-        string fullpath = GetFileName(ui);
+        string fullpath = GetLuaFileName(ui);
 
         string code = "";
         if (File.Exists(fullpath))
@@ -120,12 +144,84 @@ return M";
         }
         else
         {
-            code = string.Format(template, ui.name, ui.name, bindCode.ToString(), unBindCode.ToString());
+            code = lua.Replace("{classname}", ui.name)
+                    .Replace("{binding}", bindCode.ToString())
+                    .Replace("{unbinding}", unBindCode.ToString());
         }
 
 
         try
         {  
+            FileStream fs = new FileStream(fullpath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.Write(code);
+            sw.Close();
+        }
+        catch (System.Exception e)
+        {
+            throw e;
+        }
+
+        Debug.Log("Done!!");
+        AssetDatabase.Refresh();
+    }
+
+
+    [MenuItem("Assets/Generate UI CS Code")]
+    public static void GenerateCSCode()
+    {
+        GameObject ui = Selection.activeGameObject;
+        if (!ui)
+        {
+            Debug.Log("请选择一个UI Prefab");
+            return;
+        }
+
+        Dictionary<string, Variable> variableDir = ParseUIPrefab(ui);
+
+        if (variableDir == null)
+            return;
+
+        StringBuilder definitionCode = new StringBuilder();
+        StringBuilder bindCode = new StringBuilder();
+        foreach (Variable variable in variableDir.Values)
+        {
+            definitionCode.AppendFormat("\tprivate {0} {1};\n", variable.Type, variable.Name );
+            bindCode.AppendFormat("\t\t{0} = transform.Find(\"{1}\").GetComponent<{2}>();\n", variable.Name, variable.Path, variable.Type);
+        }
+
+        string fullpath = GetCSFileName(ui);
+
+        string code = "";
+        if (File.Exists(fullpath))
+        {
+            string content = File.ReadAllText(fullpath);
+
+            int startIndex = content.IndexOf("//BINDING_DEFINITION_BEGIN");
+            int endIndex = content.IndexOf("//BINDING_DEFINITION_END");
+            string part1 = content.Substring(0, startIndex + "//BINDING_DEFINITION_BEGIN".Length + 1);
+            string part2 = content.Substring(endIndex);
+            content = part1 + definitionCode.ToString() + part2;
+
+            startIndex = content.IndexOf("//BINDING_CODE_BEGIN");
+            endIndex = content.IndexOf("//BINDING_CODE_END");
+            part1 = content.Substring(0, startIndex + "//BINDING_CODE_BEGIN".Length + 1);
+            part2 = content.Substring(endIndex);
+
+            code = part1 + bindCode.ToString() + part2;
+
+            File.Delete(fullpath);
+        }
+        else
+        {
+            code = cshape.Replace("{classname}", ui.name)
+                    .Replace("{definition}", definitionCode.ToString())
+                    .Replace("{binding}", bindCode.ToString());
+        }
+
+
+        try
+        {
             FileStream fs = new FileStream(fullpath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             StreamWriter sw = new StreamWriter(fs);
             sw.Write(code);
@@ -235,7 +331,7 @@ return M";
                 {
                     if (!string.IsNullOrEmpty(variableName) && !string.IsNullOrEmpty(variableType.ToString()) && !string.IsNullOrEmpty(path))
                     {
-                        variableDir.Add(variableName, new Variable(variableName, "CS."+variableType.ToString(), path));
+                        variableDir.Add(variableName, new Variable(variableName, variableType.ToString(), path));
                     }
                     else
                     {
@@ -280,7 +376,7 @@ return M";
         }
     }
 
-    static string GetFileName(GameObject ui)
+    static string GetLuaFileName(GameObject ui)
     {
         string dir = Application.dataPath + "/Resources/Lua/UI/";
 
@@ -290,5 +386,16 @@ return M";
         }
 
         return dir + ui.name + ".lua.txt";
+    }
+    static string GetCSFileName(GameObject ui)
+    {
+        string dir = Application.dataPath + "/Scripts/UIScripts/";
+
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        return dir + ui.name + ".cs";
     }
 }

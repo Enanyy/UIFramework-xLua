@@ -21,13 +21,15 @@ public abstract class Window:MonoBehaviour
 {
     public Canvas canvas;
 
+    public const int LAYER = 5;
+    public const int LAYER_MODEL = 6;
+    public const int LAYER_HIDE = 7;
     public WindowStatus status { get { return WindowManager.Instance.GetStatus(GetType()); } }
     public bool active
     {
-        get { return gameObject.activeInHierarchy; }
+        get { return gameObject.layer == LAYER; }
         set
         {
-            gameObject.SetActive(value);
             SetWidgetActive(value);
         }
     }
@@ -63,7 +65,7 @@ public abstract class Window:MonoBehaviour
 
     public void Close()
     {
-
+        WindowManager.Instance.Close(this);
     }
 
     public void SetWidgetActive(bool active)
@@ -132,25 +134,23 @@ public class WindowManager : MonoBehaviour
     private EventSystem mEventSystem;
 
     private int mOrderAddition = 50;
-    private int mLayer = 5;             // --显示层LayerMask.NameToLayer("UI")
-    private int mLayerModel = 6;        // --UI模型层
-    private int mLayerHide = 7;         // --隐藏层
+
     void Awake()
     {
         GameObject camera = new GameObject("Camera");
         camera.transform.SetParent(transform);
-        camera.layer = mLayer;
+        camera.layer = Window.LAYER;
         mCamera = camera.AddComponent<Camera>();
-        mCamera.clearFlags = UnityEngine.CameraClearFlags.Depth;
+        mCamera.clearFlags = CameraClearFlags.Depth;
         mCamera.depth = 10;
         mCamera.orthographic = false; //--使用透视投影，这样UI模型的3D立体感更强
         mCamera.orthographicSize = 10;
         mCamera.fieldOfView = 60;
-        mCamera.cullingMask = 2 ^ mLayer + 2 ^ mLayerModel;
+        mCamera.cullingMask = 1 << Window.LAYER | 1 << Window.LAYER_MODEL;
 
         GameObject eventsystem = new GameObject("EventSystem");
         eventsystem.transform.SetParent(transform);
-        eventsystem.layer = mLayer;
+        eventsystem.layer = Window.LAYER;
         mEventSystem = eventsystem.AddComponent<EventSystem>();
         mEventSystem.sendNavigationEvents = true;
         mEventSystem.pixelDragThreshold = 5;
@@ -185,7 +185,7 @@ public class WindowManager : MonoBehaviour
                 return;
             }
             SetStatus(type, WindowStatus.Loading);
-            Main.LoadUI(type.Name, (asset) =>
+            MainCS.LoadUI(type.Name, (asset) =>
             {
                 status = GetStatus(type);
                 if (status == WindowStatus.None)
@@ -201,6 +201,8 @@ public class WindowManager : MonoBehaviour
                 t = go.GetComponent(type) as Window;
                 if (t == null) t = go.AddComponent(type) as Window;
 
+                mWindowDic.Add(type, t);
+
                 t.canvas = go.GetComponent<Canvas>();
                 t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 t.canvas.worldCamera = mCamera;
@@ -215,7 +217,7 @@ public class WindowManager : MonoBehaviour
                 scaler.referenceResolution = new Vector2(1920, 1080);
                 scaler.referencePixelsPerUnit = 100;
 
-                SetLayer(go, mLayer);
+                SetLayer(go, Window.LAYER);
 
                 if (t.hidePrevious && mWindowStack.Count > 0)
                 {
@@ -307,7 +309,7 @@ public class WindowManager : MonoBehaviour
             SetOrder(window);
             if(window.active== false)
             {
-                SetLayer(window.gameObject, mLayer);
+                SetLayer(window.gameObject, Window.LAYER);
                 window.active = true;
             }
             else
@@ -319,7 +321,7 @@ public class WindowManager : MonoBehaviour
         {
             if(window.active)
             {
-                SetLayer(window.gameObject, mLayerHide);
+                SetLayer(window.gameObject, Window.LAYER_HIDE);
                 window.active = false;
             }
             else
@@ -466,21 +468,23 @@ public class WindowManager : MonoBehaviour
             while (mWindowStackTemp.Count > 0)
             {
                 var v = mWindowStackTemp.Pop();
-                mWindowStack.Push(v);
                 if (v == previous)
                 {
-                    if (window.hidePrevious == false && v.active == false)
+                    if (mWindowStack.Count > 0 && previous.hidePrevious == false)
                     {
-                        SetActive(v, true);
+                        mWindowStack.Peek();
+                        SetActive(mWindowStack.Peek(), true);
                     }
                 }
-                else
-                {
-                    SetActive(v, true);
-                }
+               
+                mWindowStack.Push(v);
+            }
+            if(previous!=  null)
+            {
+                SetActive(previous, true);
             }
 
-            if(contains == false)
+            if (contains == false)
             {
                 Destroy(window.gameObject);
                 mWindowDic.Remove(window.GetType());

@@ -23,6 +23,11 @@ InputField              = CS.UnityEngine.UI.InputField
 ScrollRect              = CS.UnityEngine.UI.ScrollRect
 CanvasScaler            = CS.UnityEngine.UI.CanvasScaler
 
+HorizontalScrollView    = CS.UnityEngine.UI.HorizontalScrollView
+VerticalScrollView      = CS.UnityEngine.UI.VerticalScrollView
+ProgressBar             = CS.UnityEngine.UI.ProgressBar
+Tab                     = CS.UnityEngine.UI.Tab
+
 local renderMode        = CS.UnityEngine.RenderMode.ScreenSpaceCamera
 local uiScaleMode       = CS.UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
 local screenMatchMode   = CS.UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
@@ -273,7 +278,7 @@ function UIManager:Open(ui, parent)
         end
         ui.mStatus = UIStatus.Loading
 
-        CS.Main.LoadUI(ui.mName,function(obj) 
+        CS.MainLua.LoadUI(ui.mName,function(obj) 
         
             if ui.mStatus == UIStatus.None then
                 return
