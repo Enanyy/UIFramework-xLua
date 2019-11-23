@@ -476,9 +476,9 @@ public class WindowManager : MonoBehaviour
         Open<T>(parentType, callback);
     }
 
-    public void Close<T>() where T:Window
+    public void Close<T>(bool destroy = true) where T:Window
     {
-        Close(Get<T>());
+        Close(Get<T>(),destroy);
     }
     public void Close(Window window,bool destroy = true)
     {
