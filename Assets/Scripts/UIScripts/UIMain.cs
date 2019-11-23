@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class UIMain : Window
 {
@@ -17,6 +18,10 @@ public class UIMain : Window
 	private ProgressBar mProgressBar;
 //BINDING_DEFINITION_END
 
+    public UIMain()
+    {
+        fixedWidgets = new List<System.Type> { typeof(UIFixed), typeof(UIRight) };
+    }
     private void Awake()
     {
         //BINDING_CODE_BEGIN		mButtonNormal = transform.Find("SafeArea/@Button.mButtonNormal").GetComponent<Button>();

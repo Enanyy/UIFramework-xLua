@@ -78,9 +78,12 @@ using UnityEngine.UI;
 
 public class {classname} : Window
 {
+    public {classname}()
+    {
+    }
 //BINDING_DEFINITION_BEGIN
 {definition}//BINDING_DEFINITION_END
-
+   
     private void Awake()
     {
 //BINDING_CODE_BEGIN

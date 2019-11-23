@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2446704235799572628}
   - component: {fileID: 4717699059898787458}
   m_Layer: 5
-  m_Name: Toggle
+  m_Name: '@Toggle.mToggle'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +175,7 @@ GameObject:
   - component: {fileID: 7098052418760981798}
   - component: {fileID: 2467364594479614738}
   m_Layer: 5
-  m_Name: Pop
+  m_Name: '@Button.mPop'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -293,7 +293,7 @@ GameObject:
   - component: {fileID: 3961710614686973548}
   - component: {fileID: 5360344721126453433}
   m_Layer: 5
-  m_Name: Normal
+  m_Name: '@Button.mNormal'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -485,7 +485,7 @@ GameObject:
   - component: {fileID: 4391994351069225219}
   - component: {fileID: 3227187532987376202}
   m_Layer: 5
-  m_Name: Main
+  m_Name: '@Button.mMain'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -757,7 +757,7 @@ GameObject:
   - component: {fileID: 2782730129115727612}
   - component: {fileID: 457117492567175520}
   m_Layer: 5
-  m_Name: Close
+  m_Name: '@Button.mClose'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

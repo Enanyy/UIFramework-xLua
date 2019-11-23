@@ -17,9 +17,20 @@ public enum WindowStatus{
     LoadDone        = 2,     //加载完成
 }
 
-public abstract class Window:MonoBehaviour
+public abstract class Window : MonoBehaviour
 {
-    public Canvas canvas;
+    private Canvas mCanvas;
+    public Canvas canvas
+    {
+        get
+        {
+            if (mCanvas == null)
+            {
+                mCanvas = GetComponent<Canvas>();
+            }
+            return mCanvas;
+        }
+    }
 
     public const int LAYER = 5;
     public const int LAYER_MODEL = 6;
@@ -30,7 +41,12 @@ public abstract class Window:MonoBehaviour
         get { return gameObject.layer == LAYER; }
         set
         {
+            SetLayer(value ? LAYER : LAYER_HIDE);
             SetWidgetActive(value);
+            if (value == false)
+            {
+                canvas.sortingOrder = 0;
+            }
         }
     }
     private Window mParent;
@@ -40,14 +56,14 @@ public abstract class Window:MonoBehaviour
         set
         {
             mParent = value;
-            if(mParent!= null)
+            if (mParent != null)
             {
-                if(mParent.widgets == null)
+                if (mParent.widgets == null)
                 {
                     mParent.widgets = new Dictionary<Type, Window>();
                 }
                 Type type = GetType();
-                if(mParent.widgets.ContainsKey(type) == false)
+                if (mParent.widgets.ContainsKey(type) == false)
                 {
                     mParent.widgets.Add(type, this);
                 }
@@ -58,25 +74,32 @@ public abstract class Window:MonoBehaviour
     public bool hidePrevious { get; protected set; }
     public int fixedOrder { get; protected set; } = 0;
 
-    public List<Type> fixedWidgets { get; private set; }
+    public List<Type> fixedWidgets { get; protected set; }
     public Dictionary<Type, Window> widgets { get; protected set; }
 
     public int widgetOrderAddition = 5;
 
+    /// <summary>
+    /// 关闭是是否Destroy
+    /// </summary>
+    public bool closeDestroy = true;
     public void Close()
     {
-        WindowManager.Instance.Close(this);
+        WindowManager.Instance.Close(this, closeDestroy);
     }
 
-    public void SetWidgetActive(bool active)
+    private void SetWidgetActive(bool active)
     {
-       
-        if(fixedWidgets!= null && active)
+        if (fixedWidgets != null && active)
         {
-            for(int i = 0; i < fixedWidgets.Count; ++i)
+            for (int i = 0; i < fixedWidgets.Count; ++i)
             {
                 Type type = fixedWidgets[i];
-                if(widgets.ContainsKey(type) == false)
+                if (widgets == null)
+                {
+                    widgets = new Dictionary<Type, Window>();
+                }
+                if (widgets.ContainsKey(type) == false)
                 {
                     WindowManager.Instance.Open(type, GetType(), null);
                 }
@@ -90,7 +113,9 @@ public abstract class Window:MonoBehaviour
         while (it.MoveNext())
         {
             var widget = it.Current.Value;
-           
+
+            widget.parent = this;
+
             if (widget.status == WindowStatus.LoadDone)
             {
                 WindowManager.Instance.SetActive(widget, active);
@@ -100,11 +125,25 @@ public abstract class Window:MonoBehaviour
 
     public void RemoveFromParent()
     {
-        if(mParent!= null && mParent.widgets!= null)
+        if (mParent != null && mParent.widgets != null)
         {
             Type type = GetType();
             mParent.widgets.Remove(type);
 
+        }
+    }
+    private void SetLayer(int layer)
+    {
+        if (gameObject.layer == layer)
+        {
+            return;
+        }
+        gameObject.layer = layer;
+
+        var transforms = gameObject.GetComponentsInChildren<Transform>();
+        for (int i = 0; i < transforms.Length; ++i)
+        {
+            transforms[i].gameObject.layer = layer;
         }
     }
 }
@@ -127,6 +166,7 @@ public class WindowManager : MonoBehaviour
     private Dictionary<Type, Window> mWindowDic = new Dictionary<Type, Window>();
     private Stack<Window> mWindowStack = new Stack<Window>();
     private Stack<Window> mWindowStackTemp = new Stack<Window>();
+    private List<Type> mCloseList = new List<Type>();
 
     private Dictionary<Type, WindowStatus> mWindowStatus = new Dictionary<Type, WindowStatus>();
 
@@ -134,6 +174,8 @@ public class WindowManager : MonoBehaviour
     private EventSystem mEventSystem;
 
     private int mOrderAddition = 50;
+
+    public Action<string, Action<UnityEngine.Object>> LoadUI;
 
     void Awake()
     {
@@ -171,6 +213,12 @@ public class WindowManager : MonoBehaviour
 
     public void Open(Type type, Type parentType = null, Action<Window> callback = null)
     {
+        if(LoadUI== null)
+        {
+            Debug.LogError("LoadUI is null.");
+            return;
+        }
+
         if(type == null)
         {
             callback?.Invoke(null);
@@ -185,7 +233,7 @@ public class WindowManager : MonoBehaviour
                 return;
             }
             SetStatus(type, WindowStatus.Loading);
-            MainCS.LoadUI(type.Name, (asset) =>
+            LoadUI(type.Name, (asset) =>
             {
                 status = GetStatus(type);
                 if (status == WindowStatus.None)
@@ -203,7 +251,6 @@ public class WindowManager : MonoBehaviour
 
                 mWindowDic.Add(type, t);
 
-                t.canvas = go.GetComponent<Canvas>();
                 t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 t.canvas.worldCamera = mCamera;
                 t.canvas.sortingLayerName = "UI";
@@ -217,8 +264,16 @@ public class WindowManager : MonoBehaviour
                 scaler.referenceResolution = new Vector2(1920, 1080);
                 scaler.referencePixelsPerUnit = 100;
 
-                SetLayer(go, Window.LAYER);
+                if (parentType != null)
+                {
+                    Window parent = Get(parentType);
+                    if (parent != null)
+                    {
+                        t.parent = parent;
+                    }
+                }
 
+                
                 if (t.hidePrevious && mWindowStack.Count > 0)
                 {
                     var v = mWindowStack.Peek();
@@ -234,22 +289,22 @@ public class WindowManager : MonoBehaviour
                 
                 SetActive(t, true);
                 SetTouch(true);
-
-                if(parentType!= null)
-                {
-                    Window parent = Get(parentType);
-                    if(parent!= null)
-                    {
-                        t.parent = parent;
-                    }
-                }
-
+              
                 callback?.Invoke(t);
 
             });
         }
         else
         {
+            if (parentType != null)
+            {
+                Window parent = Get(parentType);
+                if (parent != null)
+                {
+                    t.parent = parent;
+                }
+            }
+
             if (t.hidePrevious && mWindowStack.Count > 0)
             {
                 var v = mWindowStack.Peek();
@@ -267,35 +322,13 @@ public class WindowManager : MonoBehaviour
             }
             SetActive(t, true);
             SetTouch(true);
-
-            if (parentType != null)
-            {
-                Window parent = Get(parentType);
-                if (parent != null)
-                {
-                    t.parent = parent;
-                }
-            }
-
+        
             callback?.Invoke(t);
         }
     }
 
    
-    void SetLayer(GameObject go, int layer)
-    {
-        if(go == null || go.layer == layer)
-        {
-            return;
-        }
-        go.layer = layer;
-
-        var transforms = go.GetComponentsInChildren<Transform>();
-        for(int i = 0; i < transforms.Length; ++i)
-        {
-            transforms[i].gameObject.layer = layer;
-        }
-    }
+   
 
     public void SetActive(Window window,bool active)
     {
@@ -307,33 +340,13 @@ public class WindowManager : MonoBehaviour
         if(active)
         {
             SetOrder(window);
-            if(window.active== false)
-            {
-                SetLayer(window.gameObject, Window.LAYER);
-                window.active = true;
-            }
-            else
-            {
-                window.SetWidgetActive(true);
-            }
         }
-        else
-        {
-            if(window.active)
-            {
-                SetLayer(window.gameObject, Window.LAYER_HIDE);
-                window.active = false;
-            }
-            else
-            {
-                window.SetWidgetActive(false);
-            }
-        }
+        
+        window.active = active;
     }
     private void SetOrder(Window window)
     {
         if (window == null || window.canvas == null) return;
-
 
         if(window.type == WindowType.Widget && window.fixedOrder != 0)
         {
@@ -420,12 +433,54 @@ public class WindowManager : MonoBehaviour
         mWindowDic.Clear();
         mWindowStack.Clear();
     }
+    public void CloseAllAndOpen<T>(Type parentType = null, Action<T> callback = null,bool destroy = true) where T:Window
+    {
+        Type type = typeof(T);
+        Window window = Get(type);
+        mCloseList.Clear();
+        var it = mWindowDic.GetEnumerator();
+        while(it.MoveNext())
+        {
+            if(it.Current.Key!= type)
+            {
+                if(window!= null 
+                    && window.widgets!= null
+                    && window.widgets.ContainsKey(it.Current.Key))
+                {
+                  
+                }
+                else
+                {
+                    mCloseList.Add(it.Current.Key);
+                }
+            }
+        }
+        for(int i = 0; i< mCloseList.Count; ++i)
+        {
+            Type key = mCloseList[i];
+            if (mWindowDic.TryGetValue(key, out Window w))
+            {
+                if (destroy)
+                {
+                    Destroy(w.gameObject);
+                    mWindowDic.Remove(key);
+                }
+                else
+                {
+                    SetActive(w, false);
+                }
+            }
+        }
+        mWindowStack.Clear();
+
+        Open<T>(parentType, callback);
+    }
 
     public void Close<T>() where T:Window
     {
         Close(Get<T>());
     }
-    public void Close(Window window)
+    public void Close(Window window,bool destroy = true)
     {
         if(window == null)
         {
@@ -461,9 +516,14 @@ public class WindowManager : MonoBehaviour
                     mWindowStackTemp.Push(v);
                 }
             }
-            if (contains)
+            if (contains || destroy ==false)
             {
                 SetActive(window, false);
+            }
+            else
+            {
+                Destroy(window.gameObject);
+                mWindowDic.Remove(window.GetType());
             }
             while (mWindowStackTemp.Count > 0)
             {
@@ -471,8 +531,7 @@ public class WindowManager : MonoBehaviour
                 if (v == previous)
                 {
                     if (mWindowStack.Count > 0 && previous.hidePrevious == false)
-                    {
-                        mWindowStack.Peek();
+                    {                 
                         SetActive(mWindowStack.Peek(), true);
                     }
                 }
@@ -483,20 +542,19 @@ public class WindowManager : MonoBehaviour
             {
                 SetActive(previous, true);
             }
-
-            if (contains == false)
-            {
-                Destroy(window.gameObject);
-                mWindowDic.Remove(window.GetType());
-            }
-
         }
         else
         {
-            mWindowDic.Remove(window.GetType());
-            Destroy(window.gameObject);
+            if (destroy)
+            {
+                mWindowDic.Remove(window.GetType());
+                Destroy(window.gameObject);
+            }
+            else
+            {
+                SetActive(window, false);
+            }
         }
-
     }
    
 }

@@ -12,6 +12,7 @@ public class MainCS : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        WindowManager.Instance.LoadUI = LoadUI;
         WindowManager.Instance.Open<UIMain>();
     }
 
