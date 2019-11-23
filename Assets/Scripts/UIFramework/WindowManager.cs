@@ -443,16 +443,13 @@ public class WindowManager : MonoBehaviour
         {
             if(it.Current.Key!= type)
             {
-                if(window!= null 
-                    && window.widgets!= null
-                    && window.widgets.ContainsKey(it.Current.Key))
-                {
-                  
-                }
-                else
+                if(window == null 
+                    || window.widgets == null
+                    || window.widgets.ContainsKey(it.Current.Key) ==false)
                 {
                     mCloseList.Add(it.Current.Key);
                 }
+               
             }
         }
         for(int i = 0; i< mCloseList.Count; ++i)
