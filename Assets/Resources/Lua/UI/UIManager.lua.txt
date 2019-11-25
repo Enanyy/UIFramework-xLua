@@ -60,6 +60,8 @@ UIBase =
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有用
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
     mWidgetOrderAddition    = 5,        --在父界面的基础上加上的数值
+
+    mCloseDestroy           = true,     --关闭时Destroy资源
 }
 UIBase.__index = UIBase
 
@@ -93,11 +95,11 @@ end
 function UIBase:__OnLoad()
     self:OnLoad()
 end
-function UIBase:__OnUnload(destroy)
+function UIBase:__OnUnload()
     self:__OnHide()
 
     self:OnUnload()
-    if destroy and self.gameObject then
+    if self.mCloseDestroy and self.gameObject then
         print("Destroy:"..self.mName)
         GameObject.Destroy(self.gameObject)
     end
@@ -197,6 +199,8 @@ UIManager =
     mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
     mLayerModel     = 6, --UI模型层
     mLayerHide      = 7, --隐藏层
+
+    mUILoader         = nil,--加载预设
 }
 
 function UIManager:Init()
@@ -239,9 +243,18 @@ function UIManager:SetTouch(touchable)
     end
 end
 
+function UIManager:SetUILoader(func)
+    self.mUILoader = func
+end
+
 function UIManager:Open(ui, parent)
 
     self:Init()
+
+    if self.mUILoader == nil then
+        error("mUILoader function is nil")
+        return 
+    end
 
     if type(ui) == "string" then
         ui = self:Get(ui)
@@ -278,7 +291,7 @@ function UIManager:Open(ui, parent)
         end
         ui.mStatus = UIStatus.Loading
 
-        CS.MainLua.LoadUI(ui.mName,function(obj) 
+        self.mUILoader(ui.mName,function(obj) 
         
             if ui.mStatus == UIStatus.None then
                 return
@@ -369,6 +382,8 @@ function UIManager:SetActive(ui,active)
             ui:__SetWidgetActive(active)    
         end
     else
+        ui.mCanvas.sortingOrder = 0
+
         if ui.mActive then
             self:SetLayer(ui.gameObject, self.mLayerHide)
             ui.mActive = false
@@ -427,7 +442,7 @@ end
 --
 function UIManager:CloseAll()
     for k,v in pairs(self.mUIDic) do
-        v:__OnUnload(true)
+        v:__OnUnload()
     end
     self.mUIDic = {}
     self.mUIStack = {}
@@ -458,7 +473,7 @@ function UIManager:CloseAllAndOpen(ui)
         end
         if close and v ~= nil then
             self.mUIDic[v.mName] = nil
-            v:__OnUnload(true)  
+            v:__OnUnload()  
         end
     end
 
@@ -504,7 +519,7 @@ function UIManager:Close(ui)
             self:SetActive(ui,false)
         else
             self.mUIDic[ui.mName] = nil
-            ui:__OnUnload(true)                
+            ui:__OnUnload()                
         end
 
       
@@ -527,7 +542,7 @@ function UIManager:Close(ui)
         
     else
         self.mUIDic[ui.mName] = nil
-        ui:__OnUnload(true)
+        ui:__OnUnload()
     end
 
     self:SetTouch(true)
