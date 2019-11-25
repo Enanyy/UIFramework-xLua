@@ -432,6 +432,7 @@ public class WindowManager : MonoBehaviour
         }
         mWindowDic.Clear();
         mWindowStack.Clear();
+        mWindowStatus.Clear();
     }
     public void CloseAllAndOpen<T>(Type parentType = null, Action<T> callback = null,bool destroy = true) where T:Window
     {
@@ -459,8 +460,7 @@ public class WindowManager : MonoBehaviour
             {
                 if (destroy)
                 {
-                    Destroy(w.gameObject);
-                    mWindowDic.Remove(key);
+                    RemoveWindow(w);
                 }
                 else
                 {
@@ -519,8 +519,7 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                Destroy(window.gameObject);
-                mWindowDic.Remove(window.GetType());
+                RemoveWindow(window);
             }
             while (mWindowStackTemp.Count > 0)
             {
@@ -544,14 +543,24 @@ public class WindowManager : MonoBehaviour
         {
             if (destroy)
             {
-                mWindowDic.Remove(window.GetType());
-                Destroy(window.gameObject);
+                RemoveWindow(window);
             }
             else
             {
                 SetActive(window, false);
             }
         }
+    }
+
+    private void RemoveWindow(Window window)
+    {
+        if(window== null)
+        {
+            return;
+        }
+        mWindowDic.Remove(window.GetType());
+        Destroy(window.gameObject);
+        SetStatus(window.GetType(), WindowStatus.None);
     }
    
 }
