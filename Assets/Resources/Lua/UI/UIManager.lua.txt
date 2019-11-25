@@ -87,7 +87,7 @@ end
 
 --关闭自己,如:self:Close()
 function UIBase:Close()
-    UIManager:Close(self)
+    UIManager:Close(self,self.mCloseDestroy)
 end
 ----------------------用户接口End------------------------
 ----------------------内部接口(禁止重写和本文件以外调用)Begin------------------------
