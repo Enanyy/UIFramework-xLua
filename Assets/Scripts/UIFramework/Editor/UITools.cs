@@ -392,7 +392,7 @@ public class {classname} : Window
     }
     static string GetCSFileName(GameObject ui)
     {
-        string dir = Application.dataPath + "/Scripts/UIScripts/";
+        string dir = Application.dataPath + "/Scripts/UI/";
 
         if (!Directory.Exists(dir))
         {

@@ -402,11 +402,10 @@ public class WindowManager : MonoBehaviour
     }
     public WindowStatus GetStatus(Type type)
     {
-        WindowStatus status = WindowStatus.None;
-        mWindowStatus.TryGetValue(type, out status);
+        mWindowStatus.TryGetValue(type, out WindowStatus status);
         return status;
     }
-    private void SetStatus<T>( WindowStatus status)
+    public void SetStatus<T>( WindowStatus status)
     {
         SetStatus(typeof(T), status);
     }
@@ -423,16 +422,24 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    public void CloseAll()
+    public void CloseAll(bool destroy = true)
     {
-        var it = mWindowDic.GetEnumerator();
-        while(it.MoveNext())
+        mCloseList.Clear();
+        mCloseList.AddRange(mWindowDic.Keys);
+        for(int i = 0; i < mCloseList.Count; ++i)
         {
-            Destroy(it.Current.Value.gameObject);
+            Window window = Get(mCloseList[i]);
+            if(destroy)
+            {
+                DestroyWindow(window);
+            }
+            else
+            {
+                SetActive(window, false);
+            }
         }
-        mWindowDic.Clear();
+        mCloseList.Clear();
         mWindowStack.Clear();
-        mWindowStatus.Clear();
     }
     public void CloseAllAndOpen<T>(Type parentType = null, Action<T> callback = null,bool destroy = true) where T:Window
     {
@@ -460,7 +467,7 @@ public class WindowManager : MonoBehaviour
             {
                 if (destroy)
                 {
-                    RemoveWindow(w);
+                    DestroyWindow(w);
                 }
                 else
                 {
@@ -519,7 +526,7 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                RemoveWindow(window);
+                DestroyWindow(window);
             }
             while (mWindowStackTemp.Count > 0)
             {
@@ -543,7 +550,7 @@ public class WindowManager : MonoBehaviour
         {
             if (destroy)
             {
-                RemoveWindow(window);
+                DestroyWindow(window);
             }
             else
             {
@@ -552,7 +559,7 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    private void RemoveWindow(Window window)
+    private void DestroyWindow(Window window)
     {
         if(window== null)
         {

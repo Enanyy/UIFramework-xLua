@@ -7,7 +7,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal'):GetComponent(typeof(Button))
+--BINDING_CODE_BEGIN
+	self.mButtonNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal'):GetComponent(typeof(Button))
 	self.mTextNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal/@Text.mTextNormal'):GetComponent(typeof(Text))
 	self.mButtonPop = self.gameObject.transform:Find('SafeArea/@Button.mButtonPop'):GetComponent(typeof(Button))
 	self.mButtonWidget = self.gameObject.transform:Find('SafeArea/@Button.mButtonWidget'):GetComponent(typeof(Button))
@@ -34,7 +35,7 @@ function M:OnLoad()
 	self.mVerticalGridScrollView.totalCount = #self.mData
 	self.mVerticalGridScrollView:Refill()
 
-	self.mTab.onTabSelectChanged:AddListener(self:OnTabSelectChanged())
+	self.mTab.onTabValueChanged:AddListener(self:OnTabValueChanged())
 
 	local onValueChanged = function(from, to) 
 		print("Value Change from:"..from .." to:"..to)
@@ -59,7 +60,8 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mButtonNormal = nil
+--UNBINDING_CODE_BEGIN
+	self.mButtonNormal = nil
 	self.mTextNormal = nil
 	self.mButtonPop = nil
 	self.mButtonWidget = nil
@@ -145,7 +147,7 @@ function M:OnGridScrollItem()
 	end
 end
 --标签页实例
-function M:OnTabSelectChanged()
+function M:OnTabValueChanged()
 	return function(toggle)
 		local image = toggle:GetComponent(typeof(Image))
 		if toggle.isOn then

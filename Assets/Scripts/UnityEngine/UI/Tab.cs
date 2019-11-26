@@ -14,20 +14,20 @@ namespace UnityEngine.UI
 
         ToggleGroup mGroup;
 
-        public TabEvent onTabSelectChanged = new TabEvent();
+        public TabEvent onTabValueChanged = new TabEvent();
+        public TabEvent onTabAdd = new TabEvent();
         private bool mChildrenChanged = true;
         void Start()
         {
             mGroup = GetComponent<ToggleGroup>();
             if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
 
-            AddListener();
+            InitTab();
 
         }
 
-        private void AddListener()
+        private void InitTab()
         {
-            mToggles.Clear();
             for (int i = 0; i < transform.childCount; ++i)
             {
                 var toggle = transform.GetChild(i).GetComponent<Toggle>();
@@ -40,7 +40,15 @@ namespace UnityEngine.UI
 
                     toggle.onValueChanged.RemoveListener(OnValueChanged);
                     toggle.onValueChanged.AddListener(OnValueChanged);
-                    mToggles.Add(toggle, toggle.isOn);
+                    if (mToggles.ContainsKey(toggle) == false)
+                    {
+                        mToggles.Add(toggle, toggle.isOn);
+                        onTabAdd.Invoke(toggle);
+                    }
+                    else
+                    {
+
+                    }
                 }
             }
 
@@ -68,7 +76,7 @@ namespace UnityEngine.UI
             {
                 var toggle = mTogglesChanged[i];
                 mToggles[toggle] = toggle.isOn;
-                onTabSelectChanged.Invoke(toggle);
+                onTabValueChanged.Invoke(toggle);
             }
         }
 
@@ -76,7 +84,7 @@ namespace UnityEngine.UI
         {
             mChildrenChanged = true;
             Debug.Log("OnTransformChildrenChanged");
-            AddListener();
+            InitTab();
 
         }
 
