@@ -118,7 +118,7 @@ public class {classname} : Window
         StringBuilder unBindCode = new StringBuilder();
         foreach (Variable variable in variableDir.Values)
         {
-            bindCode.Append(string.Format("\tself.{0} = self.gameObject.transform:Find('{1}'):GetComponent(typeof({2}))\n", variable.Name, variable.Path, variable.Type));
+            bindCode.Append(string.Format("\tself.{0} = self:GetComponent({1}, '{2}')\n", variable.Name, variable.Type, variable.Path));
             unBindCode.Append(string.Format("\tself.{0} = nil\n", variable.Name));
         }
 
@@ -190,7 +190,7 @@ public class {classname} : Window
         foreach (Variable variable in variableDir.Values)
         {
             definitionCode.AppendFormat("\tprivate {0} {1};\n", variable.Type, variable.Name );
-            bindCode.AppendFormat("\t\t{0} = transform.Find(\"{1}\").GetComponent<{2}>();\n", variable.Name, variable.Path, variable.Type);
+            bindCode.AppendFormat("\t\ttransform.Find(\"{0}\").TryGetComponent(out {1});\n",  variable.Path, variable.Name);
         }
 
         string fullpath = GetCSFileName(ui);

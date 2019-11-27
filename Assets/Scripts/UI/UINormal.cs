@@ -7,7 +7,7 @@ public class UINormal : Window
 	private Button mButtonMain;
 	private Button mButtonPop;
 	private Button mButtonWidget;
-    //BINDING_DEFINITION_END
+//BINDING_DEFINITION_END
     public UINormal()
     {
         hidePrevious = true;
@@ -15,11 +15,11 @@ public class UINormal : Window
     }
     private void Awake()
     {
-//BINDING_CODE_BEGIN		mButtonClose = transform.Find("SafeArea/@Button.mButtonClose").GetComponent<Button>();
-		mButtonMain = transform.Find("SafeArea/@Button.mButtonMain").GetComponent<Button>();
-		mButtonPop = transform.Find("SafeArea/@Button.mButtonPop").GetComponent<Button>();
-		mButtonWidget = transform.Find("SafeArea/@Button.mButtonWidget").GetComponent<Button>();
-        //BINDING_CODE_END
+//BINDING_CODE_BEGIN		transform.Find("SafeArea/@Button.mButtonClose").TryGetComponent(out mButtonClose);
+		transform.Find("SafeArea/@Button.mButtonMain").TryGetComponent(out mButtonMain);
+		transform.Find("SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
+		transform.Find("SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+//BINDING_CODE_END
 
         mButtonClose.onClick.AddListener(Close);
         mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open<UIPop>());

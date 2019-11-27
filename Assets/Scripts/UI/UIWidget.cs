@@ -17,12 +17,12 @@ public class UIWidget : Window
 
     private void Awake()
     {
-//BINDING_CODE_BEGIN		mClose = transform.Find("UIWidget/@Button.mClose").GetComponent<Button>();
-		mNormal = transform.Find("UIWidget/@Button.mNormal").GetComponent<Button>();
-		mPop = transform.Find("UIWidget/@Button.mPop").GetComponent<Button>();
-		mMain = transform.Find("UIWidget/@Button.mMain").GetComponent<Button>();
-		mToggle = transform.Find("UIWidget/@Toggle.mToggle").GetComponent<Toggle>();
-        //BINDING_CODE_END
+//BINDING_CODE_BEGIN		transform.Find("UIWidget/@Button.mClose").TryGetComponent(out mClose);
+		transform.Find("UIWidget/@Button.mNormal").TryGetComponent(out mNormal);
+		transform.Find("UIWidget/@Button.mPop").TryGetComponent(out mPop);
+		transform.Find("UIWidget/@Button.mMain").TryGetComponent(out mMain);
+		transform.Find("UIWidget/@Toggle.mToggle").TryGetComponent(out mToggle);
+//BINDING_CODE_END
 
         mClose.onClick.AddListener(Close);
         mNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

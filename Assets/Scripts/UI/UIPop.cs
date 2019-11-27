@@ -12,11 +12,11 @@ public class UIPop : Window
 
     private void Awake()
     {
-//BINDING_CODE_BEGIN		mButtonClose = transform.Find("Widget/@Button.mButtonClose").GetComponent<Button>();
-		mbuttonMain = transform.Find("Widget/@Button.mbuttonMain").GetComponent<Button>();
-		mButtonNormal = transform.Find("Widget/@Button.mButtonNormal").GetComponent<Button>();
-		mButtonWidget = transform.Find("Widget/@Button.mButtonWidget").GetComponent<Button>();
-		mText = transform.Find("Widget/@Text.mText").GetComponent<Text>();
+//BINDING_CODE_BEGIN		transform.Find("Widget/@Button.mButtonClose").TryGetComponent(out mButtonClose);
+		transform.Find("Widget/@Button.mbuttonMain").TryGetComponent(out mbuttonMain);
+		transform.Find("Widget/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
+		transform.Find("Widget/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+		transform.Find("Widget/@Text.mText").TryGetComponent(out mText);
 //BINDING_CODE_END
         mButtonClose.onClick.AddListener(Close);
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

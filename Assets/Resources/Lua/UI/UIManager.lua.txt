@@ -89,6 +89,11 @@ end
 function UIBase:Close()
     UIManager:Close(self)
 end
+--获取组件
+function UIBase:GetComponent(type,path)
+    local result, component = self.gameObject.transform:Find(path):TryGetComponent(typeof(type))
+    return component
+end
 ----------------------用户接口End------------------------
 ----------------------内部接口(禁止重写和本文件以外调用)Begin------------------------
 

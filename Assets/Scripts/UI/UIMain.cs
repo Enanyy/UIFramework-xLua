@@ -16,7 +16,7 @@ public class UIMain : Window
 	private HorizontalScrollView mHorizontalScrollView;
 	private Tab mTab;
 	private ProgressBar mProgressBar;
-    //BINDING_DEFINITION_END
+//BINDING_DEFINITION_END
 
 
     private Dictionary<Transform, int> mGridItemDic = new Dictionary<Transform, int>();
@@ -27,18 +27,18 @@ public class UIMain : Window
     }
     private void Awake()
     {
-        //BINDING_CODE_BEGIN		mButtonNormal = transform.Find("SafeArea/@Button.mButtonNormal").GetComponent<Button>();
-		mTextNormal = transform.Find("SafeArea/@Button.mButtonNormal/@Text.mTextNormal").GetComponent<Text>();
-		mButtonPop = transform.Find("SafeArea/@Button.mButtonPop").GetComponent<Button>();
-		mButtonWidget = transform.Find("SafeArea/@Button.mButtonWidget").GetComponent<Button>();
-		mText = transform.Find("SafeArea/@Text.mText").GetComponent<Text>();
-		mVerticalGridScrollView = transform.Find("SafeArea/@VerticalScrollView.mVerticalGridScrollView").GetComponent<VerticalScrollView>();
-		mButtonAdd = transform.Find("SafeArea/@Button.mButtonAdd").GetComponent<Button>();
-		mButtonRemove = transform.Find("SafeArea/@Button.mButtonRemove").GetComponent<Button>();
-		mVerticalScrollView = transform.Find("SafeArea/@VerticalScrollView.mVerticalScrollView").GetComponent<VerticalScrollView>();
-		mHorizontalScrollView = transform.Find("SafeArea/@HorizontalScrollView.mHorizontalScrollView").GetComponent<HorizontalScrollView>();
-		mTab = transform.Find("SafeArea/@Tab.mTab").GetComponent<Tab>();
-		mProgressBar = transform.Find("SafeArea/@ProgressBar.mProgressBar").GetComponent<ProgressBar>();
+        //BINDING_CODE_BEGIN		transform.Find("SafeArea/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
+		transform.Find("SafeArea/@Button.mButtonNormal/@Text.mTextNormal").TryGetComponent(out mTextNormal);
+		transform.Find("SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
+		transform.Find("SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+		transform.Find("SafeArea/@Text.mText").TryGetComponent(out mText);
+		transform.Find("SafeArea/@VerticalScrollView.mVerticalGridScrollView").TryGetComponent(out mVerticalGridScrollView);
+		transform.Find("SafeArea/@Button.mButtonAdd").TryGetComponent(out mButtonAdd);
+		transform.Find("SafeArea/@Button.mButtonRemove").TryGetComponent(out mButtonRemove);
+		transform.Find("SafeArea/@VerticalScrollView.mVerticalScrollView").TryGetComponent(out mVerticalScrollView);
+		transform.Find("SafeArea/@HorizontalScrollView.mHorizontalScrollView").TryGetComponent(out mHorizontalScrollView);
+		transform.Find("SafeArea/@Tab.mTab").TryGetComponent(out mTab);
+		transform.Find("SafeArea/@ProgressBar.mProgressBar").TryGetComponent(out mProgressBar);
 //BINDING_CODE_END
 
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

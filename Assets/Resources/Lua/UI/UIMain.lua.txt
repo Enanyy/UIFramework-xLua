@@ -7,19 +7,18 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN
-	self.mButtonNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal'):GetComponent(typeof(Button))
-	self.mTextNormal = self.gameObject.transform:Find('SafeArea/@Button.mButtonNormal/@Text.mTextNormal'):GetComponent(typeof(Text))
-	self.mButtonPop = self.gameObject.transform:Find('SafeArea/@Button.mButtonPop'):GetComponent(typeof(Button))
-	self.mButtonWidget = self.gameObject.transform:Find('SafeArea/@Button.mButtonWidget'):GetComponent(typeof(Button))
-	self.mText = self.gameObject.transform:Find('SafeArea/@Text.mText'):GetComponent(typeof(Text))
-	self.mVerticalGridScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalGridScrollView'):GetComponent(typeof(VerticalScrollView))
-	self.mButtonAdd = self.gameObject.transform:Find('SafeArea/@Button.mButtonAdd'):GetComponent(typeof(Button))
-	self.mButtonRemove = self.gameObject.transform:Find('SafeArea/@Button.mButtonRemove'):GetComponent(typeof(Button))
-	self.mVerticalScrollView = self.gameObject.transform:Find('SafeArea/@VerticalScrollView.mVerticalScrollView'):GetComponent(typeof(VerticalScrollView))
-	self.mHorizontalScrollView = self.gameObject.transform:Find('SafeArea/@HorizontalScrollView.mHorizontalScrollView'):GetComponent(typeof(HorizontalScrollView))
-	self.mTab = self.gameObject.transform:Find('SafeArea/@Tab.mTab'):GetComponent(typeof(Tab))
-	self.mProgressBar = self.gameObject.transform:Find('SafeArea/@ProgressBar.mProgressBar'):GetComponent(typeof(ProgressBar))
+--BINDING_CODE_BEGIN	self.mButtonNormal = self:GetComponent(Button, 'SafeArea/@Button.mButtonNormal')
+	self.mTextNormal = self:GetComponent(Text, 'SafeArea/@Button.mButtonNormal/@Text.mTextNormal')
+	self.mButtonPop = self:GetComponent(Button, 'SafeArea/@Button.mButtonPop')
+	self.mButtonWidget = self:GetComponent(Button, 'SafeArea/@Button.mButtonWidget')
+	self.mText = self:GetComponent(Text, 'SafeArea/@Text.mText')
+	self.mVerticalGridScrollView = self:GetComponent(VerticalScrollView, 'SafeArea/@VerticalScrollView.mVerticalGridScrollView')
+	self.mButtonAdd = self:GetComponent(Button, 'SafeArea/@Button.mButtonAdd')
+	self.mButtonRemove = self:GetComponent(Button, 'SafeArea/@Button.mButtonRemove')
+	self.mVerticalScrollView = self:GetComponent(VerticalScrollView, 'SafeArea/@VerticalScrollView.mVerticalScrollView')
+	self.mHorizontalScrollView = self:GetComponent(HorizontalScrollView, 'SafeArea/@HorizontalScrollView.mHorizontalScrollView')
+	self.mTab = self:GetComponent(Tab, 'SafeArea/@Tab.mTab')
+	self.mProgressBar = self:GetComponent(ProgressBar, 'SafeArea/@ProgressBar.mProgressBar')
 --BINDING_CODE_END
     self.mButtonNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
     self.mButtonPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
@@ -60,8 +59,7 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN
-	self.mButtonNormal = nil
+--UNBINDING_CODE_BEGIN	self.mButtonNormal = nil
 	self.mTextNormal = nil
 	self.mButtonPop = nil
 	self.mButtonWidget = nil

@@ -88,6 +88,12 @@ public abstract class Window : MonoBehaviour
         WindowManager.Instance.Close(this, closeDestroy);
     }
 
+    public T GetComponent<T>(string path) where T :Component
+    {
+        transform.Find(path).TryGetComponent(out T component);
+        return component;
+    }
+
     private void SetWidgetActive(bool active)
     {
         if (fixedWidgets != null && active)

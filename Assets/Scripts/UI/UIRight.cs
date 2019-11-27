@@ -3,8 +3,7 @@ using UnityEngine.UI;
 
 public class UIRight : Window
 {
-//BINDING_DEFINITION_BEGIN
-//BINDING_DEFINITION_END
+//BINDING_DEFINITION_BEGIN//BINDING_DEFINITION_END
 
     public UIRight()
     {
@@ -12,8 +11,6 @@ public class UIRight : Window
     }
     private void Awake()
     {
-//BINDING_CODE_BEGIN
-
-//BINDING_CODE_END
+//BINDING_CODE_BEGIN//BINDING_CODE_END
     } 
 }
