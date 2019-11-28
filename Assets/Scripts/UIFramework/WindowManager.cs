@@ -181,7 +181,7 @@ public class WindowManager : MonoBehaviour
 
     private int mOrderAddition = 50;
 
-    public Action<string, Action<UnityEngine.Object>> LoadUI;
+    private Action<string, Action<UnityEngine.Object>> mLoader;
 
     void Awake()
     {
@@ -210,6 +210,14 @@ public class WindowManager : MonoBehaviour
         if (mEventSystem)
             mEventSystem.enabled = touchable;
     } 
+    /// <summary>
+    /// 设置加载预设函数
+    /// </summary>
+    /// <param name="loader"></param>
+    public void SetLoader(Action<string, Action<UnityEngine.Object>> loader)
+    {
+        mLoader = loader;
+    }
 
     public void Open<T>(Type parentType = null,Action<T> callback = null) where T:Window
     {
@@ -219,9 +227,9 @@ public class WindowManager : MonoBehaviour
 
     public void Open(Type type, Type parentType = null, Action<Window> callback = null)
     {
-        if(LoadUI== null)
+        if(mLoader == null)
         {
-            Debug.LogError("LoadUI is null.");
+            Debug.LogError("Loader is null.");
             return;
         }
 
@@ -239,7 +247,7 @@ public class WindowManager : MonoBehaviour
                 return;
             }
             SetStatus(type, WindowStatus.Loading);
-            LoadUI(type.Name, (asset) =>
+            mLoader(type.Name, (asset) =>
             {
                 status = GetStatus(type);
                 if (status == WindowStatus.None)
