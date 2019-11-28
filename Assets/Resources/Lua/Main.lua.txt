@@ -18,7 +18,7 @@ function main( )
     print(data.list)
 
     UIManager:Init()
-    UIManager:SetUILoader(CS.MainLua.LoadUI)
+    UIManager:SetLoader(CS.MainLua.LoadUI)
     UIManager:Open(UIMain)
     UIManager:Open('UIFixed',"UIMain")
 end
