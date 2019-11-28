@@ -48,14 +48,13 @@ UIStatus = {
 
 UIBase = 
 {
-    mName                   = "",
-    gameObject              = nil,
-    mCanvas                 = nil,
-    mStatus                 = UIStatus.None,
-    mActive                 = false,
-    mParent                 = nil,       --当前的父UI
+    mName                   = "",               --UI名字
+    gameObject              = nil,              --gameObject
+    mCanvas                 = nil,              --画布
+    mStatus                 = UIStatus.None,    --加载状态
+    mParent                 = nil,              --当前的父UI
 
-    mType                   = UIType.Normal,
+    mType                   = UIType.Normal,    --UI类型
     mHidePrevious           = false,    --隐藏上一个Normal窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
@@ -66,7 +65,6 @@ UIBase =
 UIBase.__index = UIBase
 
 ----------------------用户接口Begin------------------------
-
 --整个生命周期只调用一次
 function UIBase:OnLoad()
     
@@ -108,20 +106,20 @@ end
 
 UIManager =
 {
-    mUIDic          = {},
-    mUIStack        = {}, 
+    mUIDic          = {},       --存储所有ui的字典
+    mUIStack        = {},       --Normal类型的UI导航栈，下标1为栈顶
 
-    mInited         = false,
-    mUIRoot         = nil,
-    mCamera         = nil,
-    mEventSystem    = nil,
+    mInited         = false,    --是否初始化完毕
+    mUIRoot         = nil,      --Root gameObject
+    mCamera         = nil,      --UI camera
+    mEventSystem    = nil,      -- Event System
 
-    mOrderAddition  = 50,
-    mLayer          = 5, --显示层LayerMask.NameToLayer("UI")
-    mLayerModel     = 6, --UI模型层
-    mLayerHide      = 7, --隐藏层
+    mOrderAddition  = 50,       --自动设置SortingOrder的间隔
+    mLayer          = 5,        --显示层LayerMask.NameToLayer("UI")
+    mLayerModel     = 6,        --UI模型层
+    mLayerHide      = 7,        --隐藏层
 
-    mLoader         = nil,--加载预设
+    mLoader         = nil,      --加载函数
 }
 
 function UIManager:Init()
@@ -318,29 +316,35 @@ function UIManager:SetParent(ui, parent)
     end
 end
 
+--设置ui隐藏或者显示
 function UIManager:SetActive(ui,active)
 
     if ui == nil then return end
 
     if active then 
         self:SetSortOrder(ui)
-        if ui.mActive == false then
+        if self:IsActive(ui) == false then
             self:SetLayer(ui.gameObject, self.mLayer)
-            ui.mActive = true
             ui:OnShow()
         end
     else
         ui.mCanvas.sortingOrder = 0
 
-        if ui.mActive then
+        if self:IsActive(ui) then
             self:SetLayer(ui.gameObject, self.mLayerHide)
-            ui.mActive = false
             ui:OnHide()   
         end
     end
     self:SetWidgetActive(ui,active) 
 end
 
+--判断ui是否显示中
+function UIManager:IsActive(ui)
+
+    if ui == nil or ui.gameObject == nil then return false end
+
+    return ui.gameObject.layer == self.mLayer
+end
 
 function UIManager:SetWidgetActive(ui, active)
 
@@ -482,7 +486,7 @@ function UIManager:Close(ui)
             if i == index then
                 if v.mHidePrevious == false then
                     local previous = self.mUIStack[index + 1]
-                    if previous and previous.mActive == false then
+                    if self:IsActive(previous) == false then
                         self:SetActive(previous,true)
                     end
                 end
@@ -524,13 +528,12 @@ function UIManager:Destroy(ui)
         ui.gameObject = nil
         ui.mCanvas = nil
         ui.mStatus = UIStatus.None
-        ui.mActive = false
     end
 end
 
 function UIManager:PrintStack()
     for i,v in ipairs(self.mUIStack) do
-        print(i,v.mName,v.mActive)
+        print(i,v.mName, self:IsActive(v))
     end
 end
 
