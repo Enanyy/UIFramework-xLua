@@ -225,11 +225,12 @@ public class WindowManager : MonoBehaviour
         Open(type, parentType, (window) => { callback?.Invoke(window as T);});
     }
 
-    public void Open(Type type, Type parentType = null, Action<Window> callback = null)
+    public void Open(Type type, Type parentType, Action<Window> callback = null)
     {
         if(mLoader == null)
         {
             Debug.LogError("Loader is null.");
+            callback?.Invoke(null);
             return;
         }
 
@@ -238,46 +239,91 @@ public class WindowManager : MonoBehaviour
             callback?.Invoke(null);
             return;
         }
-        Window t = Get(type);
-        if (t == null)
+
+        SetTouch(false);
+
+        if (parentType != null && GetStatus(parentType) == WindowStatus.None)
         {
-            WindowStatus status = GetStatus(type);
-            if (status == WindowStatus.Loading)
+            //先加载父界面
+            Open(parentType, null, (parent)=> {
+
+                Open(type, parentType, callback);
+            });
+        }
+        else
+        {
+            Window t = Get(type);
+            if (t == null)
             {
-                return;
-            }
-            SetStatus(type, WindowStatus.Loading);
-            mLoader(type.Name, (asset) =>
-            {
-                status = GetStatus(type);
-                if (status == WindowStatus.None)
+                WindowStatus status = GetStatus(type);
+                if (status == WindowStatus.Loading)
                 {
                     return;
                 }
-                SetStatus(type, WindowStatus.LoadDone);
+                SetStatus(type, WindowStatus.Loading);
+                mLoader(type.Name, (asset) =>
+                {
+                    status = GetStatus(type);
+                    if (status == WindowStatus.None)
+                    {
+                        return;
+                    }
+                    SetStatus(type, WindowStatus.LoadDone);
 
-                GameObject go = Instantiate(asset) as GameObject;
-                go.transform.SetParent(transform);
-                go.SetActive(true);
+                    GameObject go = Instantiate(asset) as GameObject;
+                    go.transform.SetParent(transform);
+                    go.SetActive(true);
 
-                t = go.GetComponent(type) as Window;
-                if (t == null) t = go.AddComponent(type) as Window;
+                    t = go.GetComponent(type) as Window;
+                    if (t == null) t = go.AddComponent(type) as Window;
 
-                mWindowDic.Add(type, t);
+                    mWindowDic.Add(type, t);
 
-                t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                t.canvas.worldCamera = mCamera;
-                t.canvas.sortingLayerName = "UI";
+                    t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    t.canvas.worldCamera = mCamera;
+                    t.canvas.sortingLayerName = "UI";
 
-                var scaler = go.GetComponent<CanvasScaler>();
-                if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
+                    var scaler = go.GetComponent<CanvasScaler>();
+                    if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
 
-                scaler.scaleFactor = 1;
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.referenceResolution = new Vector2(1920, 1080);
-                scaler.referencePixelsPerUnit = 100;
+                    scaler.scaleFactor = 1;
+                    scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                    scaler.referenceResolution = new Vector2(1920, 1080);
+                    scaler.referencePixelsPerUnit = 100;
 
+                    if (parentType != null)
+                    {
+                        Window parent = Get(parentType);
+                        if (parent != null)
+                        {
+                            t.parent = parent;
+                        }
+                    }
+
+
+                    if (t.hidePrevious && mWindowStack.Count > 0)
+                    {
+                        var v = mWindowStack.Peek();
+                        SetActive(v, false);
+                    }
+                    if (t.type == WindowType.Normal)
+                    {
+                        if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
+                        {
+                            mWindowStack.Push(t);
+                        }
+                    }
+
+                    SetActive(t, true);
+                    SetTouch(true);
+
+                    callback?.Invoke(t);
+
+                });
+            }
+            else
+            {
                 if (parentType != null)
                 {
                     Window parent = Get(parentType);
@@ -287,62 +333,29 @@ public class WindowManager : MonoBehaviour
                     }
                 }
 
-                
                 if (t.hidePrevious && mWindowStack.Count > 0)
                 {
                     var v = mWindowStack.Peek();
-                    SetActive(v, false);
+                    if (v != t)
+                    {
+                        SetActive(v, false);
+                    }
                 }
-                if(t.type == WindowType.Normal )
+                if (t.type == WindowType.Normal)
                 {
                     if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
                     {
                         mWindowStack.Push(t);
                     }
                 }
-                
                 SetActive(t, true);
                 SetTouch(true);
-              
+
                 callback?.Invoke(t);
-
-            });
-        }
-        else
-        {
-            if (parentType != null)
-            {
-                Window parent = Get(parentType);
-                if (parent != null)
-                {
-                    t.parent = parent;
-                }
             }
-
-            if (t.hidePrevious && mWindowStack.Count > 0)
-            {
-                var v = mWindowStack.Peek();
-                if (v != t)
-                {
-                    SetActive(v, false);
-                }
-            }
-            if (t.type == WindowType.Normal)
-            {
-                if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
-                {
-                    mWindowStack.Push(t);
-                }
-            }
-            SetActive(t, true);
-            SetTouch(true);
-        
-            callback?.Invoke(t);
         }
     }
 
-   
-   
 
     public void SetActive(Window window,bool active)
     {
@@ -407,6 +420,11 @@ public class WindowManager : MonoBehaviour
     }
     public Window Get(Type type)
     {
+        if(type == null)
+        {
+            return null;
+        }
+
         mWindowDic.TryGetValue(type, out Window t);
         return t;
     }
@@ -416,6 +434,11 @@ public class WindowManager : MonoBehaviour
     }
     public WindowStatus GetStatus(Type type)
     {
+        if(type == null)
+        {
+            return WindowStatus.None;
+        }
+
         mWindowStatus.TryGetValue(type, out WindowStatus status);
         return status;
     }
@@ -426,6 +449,10 @@ public class WindowManager : MonoBehaviour
 
     private void SetStatus(Type type, WindowStatus status)
     {
+        if(type == null)
+        {
+            return;
+        }
         if (mWindowStatus.ContainsKey(type) == false)
         {
             mWindowStatus.Add(type, status);
@@ -455,9 +482,13 @@ public class WindowManager : MonoBehaviour
         mCloseList.Clear();
         mWindowStack.Clear();
     }
-    public void CloseAllAndOpen<T>(Type parentType = null, Action<T> callback = null,bool destroy = true) where T:Window
+    public void CloseAllAndOpen<T>(Type parentType = null, Action<T> callback = null, bool destroy = true) where T: Window
     {
-        Type type = typeof(T);
+        CloseAllAndOpen(typeof(T), parentType, (t)=> { callback?.Invoke(t as T); }, destroy);
+    }
+   
+    public void CloseAllAndOpen(Type type, Type parentType = null, Action<Window> callback = null,bool destroy = true) 
+    {
         Window window = Get(type);
         mCloseList.Clear();
         var it = mWindowDic.GetEnumerator();
@@ -491,7 +522,7 @@ public class WindowManager : MonoBehaviour
         }
         mWindowStack.Clear();
 
-        Open<T>(parentType, callback);
+        Open(type, parentType, callback);
     }
 
     public void Close<T>(bool destroy = true) where T:Window
