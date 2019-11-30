@@ -228,12 +228,12 @@ function UIManager:Open(ui, parent, callback)
                 self:SetLayer(go,self.mLayer)
         
                 ui.gameObject = go
-                ui.mCanvas = ui:GetComponent(Canvas)
+                ui.mCanvas = ui:GetComponent(typeof(Canvas))
                 ui.mCanvas.renderMode = renderMode
                 ui.mCanvas.worldCamera = self.mCamera
                 ui.mCanvas.sortingLayerName = "UI"
             
-                local scaler = ui:GetComponent(CanvasScaler)
+                local scaler = ui:GetComponent(typeof(CanvasScaler))
                 scaler.scaleFactor = 1
                 scaler.uiScaleMode = uiScaleMode
                 scaler.screenMatchMode = screenMatchMode
