@@ -357,19 +357,25 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void SetActive(Window window,bool active)
+    public void SetActive(Window window,bool active,bool destory = false)
     {
         if(window == null)
         {
             return;
         }
-
-        if(active)
+        if (destory)
         {
-            SetOrder(window);
+            DestroyWindow(window);
         }
-        
-        window.active = active;
+        else
+        {
+            if (active)
+            {
+                SetOrder(window);
+            }
+
+            window.active = active;
+        }
     }
     private void SetOrder(Window window)
     {
@@ -469,15 +475,7 @@ public class WindowManager : MonoBehaviour
         mCloseList.AddRange(mWindowDic.Keys);
         for(int i = 0; i < mCloseList.Count; ++i)
         {
-            Window window = Get(mCloseList[i]);
-            if(destroy)
-            {
-                DestroyWindow(window);
-            }
-            else
-            {
-                SetActive(window, false);
-            }
+            SetActive(Get(mCloseList[i]), false, destroy);
         }
         mCloseList.Clear();
         mWindowStack.Clear();
@@ -510,14 +508,7 @@ public class WindowManager : MonoBehaviour
             Type key = mCloseList[i];
             if (mWindowDic.TryGetValue(key, out Window w))
             {
-                if (destroy)
-                {
-                    DestroyWindow(w);
-                }
-                else
-                {
-                    SetActive(w, false);
-                }
+                SetActive(w, false, destroy);
             }
         }
         mWindowStack.Clear();
@@ -535,16 +526,16 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
-        if(window.type == WindowType.Normal)
+        if (window.type == WindowType.Normal)
         {
             Window previous = null;
             bool contains = false;
             bool find = false;
             mWindowStackTemp.Clear();
-            while(mWindowStack.Count > 0)
+            while (mWindowStack.Count > 0)
             {
                 var v = mWindowStack.Pop();
-                if(v == window)
+                if (v == window)
                 {
                     if (find == false)
                     {
@@ -565,42 +556,30 @@ public class WindowManager : MonoBehaviour
                     mWindowStackTemp.Push(v);
                 }
             }
-            if (contains || destroy ==false)
-            {
-                SetActive(window, false);
-            }
-            else
-            {
-                DestroyWindow(window);
-            }
+
+            SetActive(window, false, contains == false || destroy);
+
             while (mWindowStackTemp.Count > 0)
             {
                 var v = mWindowStackTemp.Pop();
                 if (v == previous)
                 {
                     if (mWindowStack.Count > 0 && previous.hidePrevious == false)
-                    {                 
+                    {
                         SetActive(mWindowStack.Peek(), true);
                     }
                 }
-               
+
                 mWindowStack.Push(v);
             }
-            if(previous!=  null)
+            if (previous != null)
             {
                 SetActive(previous, true);
             }
         }
         else
         {
-            if (destroy)
-            {
-                DestroyWindow(window);
-            }
-            else
-            {
-                SetActive(window, false);
-            }
+            SetActive(window, false, destroy);
         }
     }
 

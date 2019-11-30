@@ -15,10 +15,10 @@ public class UINormal : Window
     }
     private void Awake()
     {
-//BINDING_CODE_BEGIN		transform.Find("SafeArea/@Button.mButtonClose").TryGetComponent(out mButtonClose);
-		transform.Find("SafeArea/@Button.mButtonMain").TryGetComponent(out mButtonMain);
-		transform.Find("SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
-		transform.Find("SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+//BINDING_CODE_BEGIN		transform.Find("Tween/SafeArea/@Button.mButtonClose").TryGetComponent(out mButtonClose);
+		transform.Find("Tween/SafeArea/@Button.mButtonMain").TryGetComponent(out mButtonMain);
+		transform.Find("Tween/SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
+		transform.Find("Tween/SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
 //BINDING_CODE_END
 
         mButtonClose.onClick.AddListener(Close);

@@ -118,7 +118,7 @@ public class {classname} : Window
         StringBuilder unBindCode = new StringBuilder();
         foreach (Variable variable in variableDir.Values)
         {
-            bindCode.Append(string.Format("\tself.{0} = self:GetComponent({1}, '{2}')\n", variable.Name, variable.Type, variable.Path));
+            bindCode.Append(string.Format("\tself.{0} = self:GetComponent(typeof({1}), '{2}')\n", variable.Name, variable.Type, variable.Path));
             unBindCode.Append(string.Format("\tself.{0} = nil\n", variable.Name));
         }
 

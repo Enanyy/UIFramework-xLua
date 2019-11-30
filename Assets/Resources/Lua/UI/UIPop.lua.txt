@@ -6,11 +6,11 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonClose = self:GetComponent(Button, 'Widget/@Button.mButtonClose')
-	self.mbuttonMain = self:GetComponent(Button, 'Widget/@Button.mbuttonMain')
-	self.mButtonNormal = self:GetComponent(Button, 'Widget/@Button.mButtonNormal')
-	self.mButtonWidget = self:GetComponent(Button, 'Widget/@Button.mButtonWidget')
-	self.mText = self:GetComponent(Text, 'Widget/@Text.mText')
+--BINDING_CODE_BEGIN	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonClose')
+	self.mbuttonMain = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mbuttonMain')
+	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonNormal')
+	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonWidget')
+	self.mText = self:GetComponent(typeof(Text), 'Tween/Widget/@Text.mText')
 --BINDING_CODE_END
     
     self.mButtonClose.onClick:AddListener(function() self:Close() end )

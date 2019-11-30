@@ -27,18 +27,18 @@ public class UIMain : Window
     }
     private void Awake()
     {
-        //BINDING_CODE_BEGIN		transform.Find("SafeArea/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
-		transform.Find("SafeArea/@Button.mButtonNormal/@Text.mTextNormal").TryGetComponent(out mTextNormal);
-		transform.Find("SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
-		transform.Find("SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
-		transform.Find("SafeArea/@Text.mText").TryGetComponent(out mText);
-		transform.Find("SafeArea/@VerticalScrollView.mVerticalGridScrollView").TryGetComponent(out mVerticalGridScrollView);
-		transform.Find("SafeArea/@Button.mButtonAdd").TryGetComponent(out mButtonAdd);
-		transform.Find("SafeArea/@Button.mButtonRemove").TryGetComponent(out mButtonRemove);
-		transform.Find("SafeArea/@VerticalScrollView.mVerticalScrollView").TryGetComponent(out mVerticalScrollView);
-		transform.Find("SafeArea/@HorizontalScrollView.mHorizontalScrollView").TryGetComponent(out mHorizontalScrollView);
-		transform.Find("SafeArea/@Tab.mTab").TryGetComponent(out mTab);
-		transform.Find("SafeArea/@ProgressBar.mProgressBar").TryGetComponent(out mProgressBar);
+        //BINDING_CODE_BEGIN		transform.Find("Tween/SafeArea/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
+		transform.Find("Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal").TryGetComponent(out mTextNormal);
+		transform.Find("Tween/SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
+		transform.Find("Tween/SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+		transform.Find("Tween/SafeArea/@Text.mText").TryGetComponent(out mText);
+		transform.Find("Tween/SafeArea/@VerticalScrollView.mVerticalGridScrollView").TryGetComponent(out mVerticalGridScrollView);
+		transform.Find("Tween/SafeArea/@Button.mButtonAdd").TryGetComponent(out mButtonAdd);
+		transform.Find("Tween/SafeArea/@Button.mButtonRemove").TryGetComponent(out mButtonRemove);
+		transform.Find("Tween/SafeArea/@VerticalScrollView.mVerticalScrollView").TryGetComponent(out mVerticalScrollView);
+		transform.Find("Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView").TryGetComponent(out mHorizontalScrollView);
+		transform.Find("Tween/SafeArea/@Tab.mTab").TryGetComponent(out mTab);
+		transform.Find("Tween/SafeArea/@ProgressBar.mProgressBar").TryGetComponent(out mProgressBar);
 //BINDING_CODE_END
 
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

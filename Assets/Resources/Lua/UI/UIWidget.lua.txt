@@ -8,11 +8,11 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mClose = self:GetComponent(Button, 'UIWidget/@Button.mClose')
-	self.mNormal = self:GetComponent(Button, 'UIWidget/@Button.mNormal')
-	self.mPop = self:GetComponent(Button, 'UIWidget/@Button.mPop')
-	self.mMain = self:GetComponent(Button, 'UIWidget/@Button.mMain')
-	self.mToggle = self:GetComponent(Toggle, 'UIWidget/@Toggle.mToggle')
+--BINDING_CODE_BEGIN	self.mClose = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mClose')
+	self.mNormal = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mNormal')
+	self.mPop = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mPop')
+	self.mMain = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mMain')
+	self.mToggle = self:GetComponent(typeof(Toggle), 'Tween/UIWidget/@Toggle.mToggle')
 --BINDING_CODE_END
 
     self.mClose.onClick:AddListener(function() self:Close() end )
