@@ -16,42 +16,13 @@ public class TweenColor : UITweener
 	public Color to = Color.white;
 
 	bool mCached = false;
-	Image mWidget;
-	Material mMat;
-	Light mLight;
-	SpriteRenderer mSr;
+    CanvasRenderer mRender;
 
 	void Cache ()
 	{
 		mCached = true;
-		mWidget = GetComponent<Image>();
-		if (mWidget != null) return;
-
-		mSr = GetComponent<SpriteRenderer>();
-		if (mSr != null) return;
-
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
-		Renderer ren = renderer;
-#else
-		Renderer ren = GetComponent<Renderer>();
-#endif
-		if (ren != null)
-		{
-			mMat = ren.material;
-			return;
-		}
-
-#if UNITY_4_3 || UNITY_4_5 || UNITY_4_6 || UNITY_4_7
-		mLight = light;
-#else
-		mLight = GetComponent<Light>();
-#endif
-		if (mLight == null) mWidget = GetComponentInChildren<Image>();
+        mRender = GetComponent<CanvasRenderer>();
 	}
-
-	[System.Obsolete("Use 'value' instead")]
-	public Color color { get { return this.value; } set { this.value = value; } }
-
 	/// <summary>
 	/// Tween's current value.
 	/// </summary>
@@ -61,23 +32,17 @@ public class TweenColor : UITweener
 		get
 		{
 			if (!mCached) Cache();
-			if (mWidget != null) return mWidget.color;
-			if (mMat != null) return mMat.color;
-			if (mSr != null) return mSr.color;
-			if (mLight != null) return mLight.color;
+			
+			if (mRender != null) return mRender.GetColor();
 			return Color.black;
 		}
 		set
 		{
 			if (!mCached) Cache();
-			if (mWidget != null) mWidget.color = value;
-			else if (mMat != null) mMat.color = value;
-			else if (mSr != null) mSr.color = value;
-			else if (mLight != null)
+			 if (mRender != null)
 			{
-				mLight.color = value;
-				mLight.enabled = (value.r + value.g + value.b) > 0.01f;
-			}
+                mRender.SetColor(value);
+            }
 		}
 	}
 
@@ -85,7 +50,11 @@ public class TweenColor : UITweener
 	/// Tween the value.
 	/// </summary>
 
-	protected override void OnUpdate (float factor, bool isFinished) { value = Color.Lerp(from, to, factor); }
+	protected override void OnUpdate (float factor, bool isFinished) 
+    { 
+        base.OnUpdate(factor,isFinished); 
+        value = Color.Lerp(from, to, factor); 
+    }
 
 	/// <summary>
 	/// Start the tweening operation.

@@ -28,7 +28,8 @@ public class TweenScale : UITweener
 
 	protected override void OnUpdate (float factor, bool isFinished)
 	{
-		value = from * (1f - factor) + to * factor;
+        base.OnUpdate(factor, isFinished);
+        value = from * (1f - factor) + to * factor;
 	}
 
 	/// <summary>

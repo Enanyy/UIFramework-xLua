@@ -109,9 +109,6 @@ public abstract class UITweener : MonoBehaviour
     }
     public TweenEvent onFinished = new TweenEvent();
 
-	// Deprecated functionality, kept for backwards compatibility
-	[HideInInspector] public GameObject eventReceiver;
-	[HideInInspector] public string callWhenFinished;
 
 	bool mStarted = false;
 	float mStartTime = 0f;
@@ -230,12 +227,7 @@ public abstract class UITweener : MonoBehaviour
 				{
                     onFinished.Invoke();
 
-                }
-
-				// Deprecated legacy functionality support
-				if (eventReceiver != null && !string.IsNullOrEmpty(callWhenFinished))
-					eventReceiver.SendMessage(callWhenFinished, this, SendMessageOptions.DontRequireReceiver);
-
+                }			
 				current = before;
 			}
 		}
@@ -384,7 +376,10 @@ public abstract class UITweener : MonoBehaviour
 	/// Actual tweening logic should go here.
 	/// </summary>
 
-	abstract protected void OnUpdate (float factor, bool isFinished);
+    protected virtual void OnUpdate (float factor, bool isFinished)
+    {
+
+    }
 
 	/// <summary>
 	/// Starts the tweening operation.
@@ -426,8 +421,6 @@ public abstract class UITweener : MonoBehaviour
 		comp.mAmountPerDelta = Mathf.Abs(comp.amountPerDelta);
 		comp.style = Style.Once;
 		comp.animationCurve = new AnimationCurve(new Keyframe(0f, 0f, 0f, 1f), new Keyframe(1f, 1f, 1f, 0f));
-		comp.eventReceiver = null;
-		comp.callWhenFinished = null;
 		comp.enabled = true;
 		return comp;
 	}

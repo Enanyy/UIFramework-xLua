@@ -27,7 +27,8 @@ public class TweenTransform : UITweener
 
 	protected override void OnUpdate (float factor, bool isFinished)
 	{
-		if (to != null)
+        base.OnUpdate(factor, isFinished);
+        if (to != null)
 		{
 			if (mTrans == null)
 			{

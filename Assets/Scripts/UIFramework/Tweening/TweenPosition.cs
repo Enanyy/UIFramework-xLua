@@ -41,13 +41,15 @@ public class TweenPosition : UITweener
         }
     }
 
-	void Awake () {  }
+    /// <summary>
+    /// Tween the value.
+    /// </summary>
 
-	/// <summary>
-	/// Tween the value.
-	/// </summary>
-
-	protected override void OnUpdate (float factor, bool isFinished) { value = from * (1f - factor) + to * factor; }
+    protected override void OnUpdate(float factor, bool isFinished) 
+    { 
+        base.OnUpdate(factor, isFinished); 
+        value = from * (1f - factor) + to * factor; 
+    }
 
 	/// <summary>
 	/// Start the tweening operation.

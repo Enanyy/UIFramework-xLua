@@ -48,7 +48,12 @@ public class TweenAlpha : UITweener
 	/// Tween the value.
 	/// </summary>
 
-	protected override void OnUpdate (float factor, bool isFinished) { value = Mathf.Lerp(from, to, factor); }
+	protected override void OnUpdate (float factor, bool isFinished) 
+    { 
+        base.OnUpdate(factor, isFinished); 
+
+        value = Mathf.Lerp(from, to, factor);
+    }
 
 	/// <summary>
 	/// Start the tweening operation.
