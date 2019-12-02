@@ -9,8 +9,10 @@ public class UIRight : Window
     {
         type = WindowType.Widget;
     }
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
+        base.OnLoad(go);
+    
 //BINDING_CODE_BEGIN//BINDING_CODE_END
     } 
 }

@@ -25,20 +25,21 @@ public class UIMain : Window
     {
         fixedWidgets = new List<System.Type> { typeof(UIFixed), typeof(UIRight) };
     }
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
-        //BINDING_CODE_BEGIN		transform.Find("Tween/SafeArea/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
-		transform.Find("Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal").TryGetComponent(out mTextNormal);
-		transform.Find("Tween/SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
-		transform.Find("Tween/SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
-		transform.Find("Tween/SafeArea/@Text.mText").TryGetComponent(out mText);
-		transform.Find("Tween/SafeArea/@VerticalScrollView.mVerticalGridScrollView").TryGetComponent(out mVerticalGridScrollView);
-		transform.Find("Tween/SafeArea/@Button.mButtonAdd").TryGetComponent(out mButtonAdd);
-		transform.Find("Tween/SafeArea/@Button.mButtonRemove").TryGetComponent(out mButtonRemove);
-		transform.Find("Tween/SafeArea/@VerticalScrollView.mVerticalScrollView").TryGetComponent(out mVerticalScrollView);
-		transform.Find("Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView").TryGetComponent(out mHorizontalScrollView);
-		transform.Find("Tween/SafeArea/@Tab.mTab").TryGetComponent(out mTab);
-		transform.Find("Tween/SafeArea/@ProgressBar.mProgressBar").TryGetComponent(out mProgressBar);
+        base.OnLoad(go);
+        //BINDING_CODE_BEGIN		mButtonNormal = GetComponent<Button>("Tween/SafeArea/@Button.mButtonNormal");
+		mTextNormal = GetComponent<Text>("Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal");
+		mButtonPop = GetComponent<Button>("Tween/SafeArea/@Button.mButtonPop");
+		mButtonWidget = GetComponent<Button>("Tween/SafeArea/@Button.mButtonWidget");
+		mText = GetComponent<Text>("Tween/SafeArea/@Text.mText");
+		mVerticalGridScrollView = GetComponent<VerticalScrollView>("Tween/SafeArea/@VerticalScrollView.mVerticalGridScrollView");
+		mButtonAdd = GetComponent<Button>("Tween/SafeArea/@Button.mButtonAdd");
+		mButtonRemove = GetComponent<Button>("Tween/SafeArea/@Button.mButtonRemove");
+		mVerticalScrollView = GetComponent<VerticalScrollView>("Tween/SafeArea/@VerticalScrollView.mVerticalScrollView");
+		mHorizontalScrollView = GetComponent<HorizontalScrollView>("Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView");
+		mTab = GetComponent<Tab>("Tween/SafeArea/@Tab.mTab");
+		mProgressBar = GetComponent<ProgressBar>("Tween/SafeArea/@ProgressBar.mProgressBar");
 //BINDING_CODE_END
 
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

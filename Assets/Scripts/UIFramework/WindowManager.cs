@@ -17,16 +17,17 @@ public enum WindowStatus{
     LoadDone        = 2,     //加载完成
 }
 
-public abstract class Window : MonoBehaviour
+public abstract class Window 
 {
+    public GameObject gameObject { get; private set; }
     private Canvas mCanvas;
     public Canvas canvas
     {
         get
         {
-            if (mCanvas == null)
+            if (mCanvas == null && gameObject!= null)
             {
-                mCanvas = GetComponent<Canvas>();
+                mCanvas =gameObject.GetComponent<Canvas>();
             }
             return mCanvas;
         }
@@ -35,18 +36,26 @@ public abstract class Window : MonoBehaviour
     public const int LAYER = 5;
     public const int LAYER_MODEL = 6;
     public const int LAYER_HIDE = 7;
-    public WindowStatus status { get { return WindowManager.Instance.GetStatus(GetType()); } }
+    public WindowStatus status = WindowStatus.None;
     public bool active
     {
-        get { return gameObject.layer == LAYER; }
+        get { return gameObject && gameObject.layer == LAYER; }
         set
         {
-            SetLayer(value ? LAYER : LAYER_HIDE);
-            SetWidgetActive(value);
-            if (value == false)
+            if (active != value)
             {
-                canvas.sortingOrder = 0;
+                SetLayer(value ? LAYER : LAYER_HIDE);
+                if(value)
+                {
+                    OnShow();
+                }
+                else
+                {
+                    canvas.sortingOrder = 0;
+                    OnHide();
+                }
             }
+            SetWidgetActive(value);
         }
     }
     private Window mParent;
@@ -88,10 +97,22 @@ public abstract class Window : MonoBehaviour
         WindowManager.Instance.Close(this, closeDestroy);
     }
 
-    public T GetComponent<T>(string path) where T :Component
+    public T GetComponent<T>(string path = null) where T : Component
     {
-        transform.Find(path).TryGetComponent(out T component);
-        return component;
+        if (gameObject == null)
+        {
+            return null;
+        }
+        if (string.IsNullOrEmpty(path))
+        {
+            gameObject.TryGetComponent(out T component);
+            return component;
+        }
+        else
+        {
+            gameObject.transform.Find(path).TryGetComponent(out T component);
+            return component;
+        }
     }
 
     private void SetWidgetActive(bool active)
@@ -140,7 +161,7 @@ public abstract class Window : MonoBehaviour
     }
     private void SetLayer(int layer)
     {
-        if (gameObject.layer == layer)
+        if (gameObject == null || gameObject.layer == layer)
         {
             return;
         }
@@ -151,6 +172,26 @@ public abstract class Window : MonoBehaviour
         {
             transforms[i].gameObject.layer = layer;
         }
+    }
+
+    public virtual void OnLoad(GameObject go)
+    {
+        gameObject = go;
+        status = WindowStatus.LoadDone;
+    }
+    public virtual void OnUnload()
+    {
+        gameObject = null;
+        status = WindowStatus.None;
+    }
+
+    protected virtual void OnShow()
+    {
+
+    }
+    protected virtual void OnHide()
+    {
+
     }
 }
 public class WindowManager : MonoBehaviour
@@ -174,8 +215,7 @@ public class WindowManager : MonoBehaviour
     private Stack<Window> mWindowStackTemp = new Stack<Window>();
     private List<Type> mCloseList = new List<Type>();
 
-    private Dictionary<Type, WindowStatus> mWindowStatus = new Dictionary<Type, WindowStatus>();
-
+    
     private Camera mCamera;
     private EventSystem mEventSystem;
 
@@ -234,50 +274,59 @@ public class WindowManager : MonoBehaviour
             return;
         }
 
-        if(type == null)
+        if (type == null)
         {
             callback?.Invoke(null);
             return;
         }
 
         SetTouch(false);
+        Window t = Get(type);
+        if(t == null)
+        {
+            t = (Window)Activator.CreateInstance(type);
+            mWindowDic.Add(type, t);
+        }
+        if(t == null)
+        {
+            Debug.LogError("Can't create window:" + type.Name);
+            callback?.Invoke(null);
+            return;
+        }
 
-        if (parentType != null && GetStatus(parentType) == WindowStatus.None)
+        Window parent = Get(parentType);
+
+        if (parentType!=null && (parent == null || parent.status == WindowStatus.None))
         {
             //先加载父界面
-            Open(parentType, null, (parent)=> {
+            Open(parentType, null, (p)=> {
 
                 Open(type, parentType, callback);
             });
         }
         else
         {
-            Window t = Get(type);
-            if (t == null)
+            t.parent = parent;
+
+            if (t.gameObject == null)
             {
-                WindowStatus status = GetStatus(type);
-                if (status == WindowStatus.Loading)
+                if (t.status == WindowStatus.Loading)
                 {
                     return;
                 }
-                SetStatus(type, WindowStatus.Loading);
+                t.status = WindowStatus.Loading;
                 mLoader(type.Name, (asset) =>
                 {
-                    status = GetStatus(type);
-                    if (status == WindowStatus.None)
+                    if (t.status == WindowStatus.None)
                     {
                         return;
                     }
-                    SetStatus(type, WindowStatus.LoadDone);
 
                     GameObject go = Instantiate(asset) as GameObject;
                     go.transform.SetParent(transform);
                     go.SetActive(true);
 
-                    t = go.GetComponent(type) as Window;
-                    if (t == null) t = go.AddComponent(type) as Window;
-
-                    mWindowDic.Add(type, t);
+                    t.OnLoad(go);
 
                     t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
                     t.canvas.worldCamera = mCamera;
@@ -292,16 +341,7 @@ public class WindowManager : MonoBehaviour
                     scaler.referenceResolution = new Vector2(1920, 1080);
                     scaler.referencePixelsPerUnit = 100;
 
-                    if (parentType != null)
-                    {
-                        Window parent = Get(parentType);
-                        if (parent != null)
-                        {
-                            t.parent = parent;
-                        }
-                    }
-
-
+                    
                     if (t.hidePrevious && mWindowStack.Count > 0)
                     {
                         var v = mWindowStack.Peek();
@@ -324,15 +364,6 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                if (parentType != null)
-                {
-                    Window parent = Get(parentType);
-                    if (parent != null)
-                    {
-                        t.parent = parent;
-                    }
-                }
-
                 if (t.hidePrevious && mWindowStack.Count > 0)
                 {
                     var v = mWindowStack.Peek();
@@ -381,13 +412,13 @@ public class WindowManager : MonoBehaviour
     {
         if (window == null || window.canvas == null) return;
 
-        if(window.type == WindowType.Widget && window.fixedOrder != 0)
+        if (window.type == WindowType.Widget && window.fixedOrder != 0)
         {
             window.canvas.sortingOrder = window.fixedOrder;
         }
         else
         {
-            if(window.parent!= null)
+            if (window.parent != null && window.parent.canvas != null)
             {
                 window.canvas.sortingOrder = window.parent.canvas.sortingOrder + window.widgetOrderAddition;
             }
@@ -396,18 +427,18 @@ public class WindowManager : MonoBehaviour
 
                 int maxOrder = int.MinValue;
                 var it = mWindowDic.GetEnumerator();
-                while(it.MoveNext())
+                while (it.MoveNext())
                 {
                     var v = it.Current.Value;
-                    if(v.canvas!= null && v.fixedOrder == 0 && v.parent == null)
+                    if (v.canvas != null && v.fixedOrder == 0 && v.parent == null)
                     {
-                        if(v.canvas.sortingOrder > maxOrder)
+                        if (v.canvas.sortingOrder > maxOrder)
                         {
                             maxOrder = v.canvas.sortingOrder;
                         }
                     }
                 }
-                if(maxOrder == int.MinValue)
+                if (maxOrder == int.MinValue)
                 {
                     maxOrder = 0;
                 }
@@ -434,41 +465,7 @@ public class WindowManager : MonoBehaviour
         mWindowDic.TryGetValue(type, out Window t);
         return t;
     }
-    public WindowStatus GetStatus<T>()
-    {
-       return  GetStatus(typeof(T));
-    }
-    public WindowStatus GetStatus(Type type)
-    {
-        if(type == null)
-        {
-            return WindowStatus.None;
-        }
-
-        mWindowStatus.TryGetValue(type, out WindowStatus status);
-        return status;
-    }
-    public void SetStatus<T>( WindowStatus status)
-    {
-        SetStatus(typeof(T), status);
-    }
-
-    private void SetStatus(Type type, WindowStatus status)
-    {
-        if(type == null)
-        {
-            return;
-        }
-        if (mWindowStatus.ContainsKey(type) == false)
-        {
-            mWindowStatus.Add(type, status);
-        }
-        else
-        {
-            mWindowStatus[type] = status;
-        }
-    }
-
+   
     public void CloseAll(bool destroy = true)
     {
         mCloseList.Clear();
@@ -557,7 +554,7 @@ public class WindowManager : MonoBehaviour
                 }
             }
 
-            SetActive(window, false, contains == false || destroy);
+            SetActive(window, false, contains == false && destroy);
 
             while (mWindowStackTemp.Count > 0)
             {
@@ -591,7 +588,7 @@ public class WindowManager : MonoBehaviour
         }
         mWindowDic.Remove(window.GetType());
         Destroy(window.gameObject);
-        SetStatus(window.GetType(), WindowStatus.None);
+        window.OnUnload();
     }
-   
+
 }

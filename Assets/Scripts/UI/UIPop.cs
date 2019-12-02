@@ -10,13 +10,14 @@ public class UIPop : Window
 	private Text mText;
 //BINDING_DEFINITION_END
 
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
-//BINDING_CODE_BEGIN		transform.Find("Tween/Widget/@Button.mButtonClose").TryGetComponent(out mButtonClose);
-		transform.Find("Tween/Widget/@Button.mbuttonMain").TryGetComponent(out mbuttonMain);
-		transform.Find("Tween/Widget/@Button.mButtonNormal").TryGetComponent(out mButtonNormal);
-		transform.Find("Tween/Widget/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
-		transform.Find("Tween/Widget/@Text.mText").TryGetComponent(out mText);
+        base.OnLoad(go);
+        //BINDING_CODE_BEGIN		mButtonClose = GetComponent<Button>("Tween/Widget/@Button.mButtonClose");
+		mbuttonMain = GetComponent<Button>("Tween/Widget/@Button.mbuttonMain");
+		mButtonNormal = GetComponent<Button>("Tween/Widget/@Button.mButtonNormal");
+		mButtonWidget = GetComponent<Button>("Tween/Widget/@Button.mButtonWidget");
+		mText = GetComponent<Text>("Tween/Widget/@Text.mText");
 //BINDING_CODE_END
         mButtonClose.onClick.AddListener(Close);
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());

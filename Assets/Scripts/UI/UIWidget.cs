@@ -15,13 +15,15 @@ public class UIWidget : Window
 	private Toggle mToggle;
 //BINDING_DEFINITION_END
 
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
-//BINDING_CODE_BEGIN		transform.Find("Tween/UIWidget/@Button.mClose").TryGetComponent(out mClose);
-		transform.Find("Tween/UIWidget/@Button.mNormal").TryGetComponent(out mNormal);
-		transform.Find("Tween/UIWidget/@Button.mPop").TryGetComponent(out mPop);
-		transform.Find("Tween/UIWidget/@Button.mMain").TryGetComponent(out mMain);
-		transform.Find("Tween/UIWidget/@Toggle.mToggle").TryGetComponent(out mToggle);
+        base.OnLoad(go);
+
+        //BINDING_CODE_BEGIN		mClose = GetComponent<Button>("Tween/UIWidget/@Button.mClose");
+		mNormal = GetComponent<Button>("Tween/UIWidget/@Button.mNormal");
+		mPop = GetComponent<Button>("Tween/UIWidget/@Button.mPop");
+		mMain = GetComponent<Button>("Tween/UIWidget/@Button.mMain");
+		mToggle = GetComponent<Toggle>("Tween/UIWidget/@Toggle.mToggle");
 //BINDING_CODE_END
 
         mClose.onClick.AddListener(Close);

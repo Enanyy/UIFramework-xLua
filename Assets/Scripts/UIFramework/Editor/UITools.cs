@@ -84,8 +84,9 @@ public class {classname} : Window
 //BINDING_DEFINITION_BEGIN
 {definition}//BINDING_DEFINITION_END
    
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
+        base.OnLoad(go);
 //BINDING_CODE_BEGIN
 {binding}//BINDING_CODE_END
     } 
@@ -190,7 +191,7 @@ public class {classname} : Window
         foreach (Variable variable in variableDir.Values)
         {
             definitionCode.AppendFormat("\tprivate {0} {1};\n", variable.Type, variable.Name );
-            bindCode.AppendFormat("\t\ttransform.Find(\"{0}\").TryGetComponent(out {1});\n",  variable.Path, variable.Name);
+            bindCode.AppendFormat("\t\t{0} = GetComponent<{1}>(\"{2}\");\n", variable.Name, variable.Type, variable.Path);
         }
 
         string fullpath = GetCSFileName(ui);

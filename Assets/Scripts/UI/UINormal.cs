@@ -13,12 +13,14 @@ public class UINormal : Window
         hidePrevious = true;
         fixedWidgets = new List<System.Type> { typeof(UIFixed) };
     }
-    private void Awake()
+    public override void OnLoad(GameObject go)
     {
-//BINDING_CODE_BEGIN		transform.Find("Tween/SafeArea/@Button.mButtonClose").TryGetComponent(out mButtonClose);
-		transform.Find("Tween/SafeArea/@Button.mButtonMain").TryGetComponent(out mButtonMain);
-		transform.Find("Tween/SafeArea/@Button.mButtonPop").TryGetComponent(out mButtonPop);
-		transform.Find("Tween/SafeArea/@Button.mButtonWidget").TryGetComponent(out mButtonWidget);
+        base.OnLoad(go);
+
+        //BINDING_CODE_BEGIN		mButtonClose = GetComponent<Button>("Tween/SafeArea/@Button.mButtonClose");
+		mButtonMain = GetComponent<Button>("Tween/SafeArea/@Button.mButtonMain");
+		mButtonPop = GetComponent<Button>("Tween/SafeArea/@Button.mButtonPop");
+		mButtonWidget = GetComponent<Button>("Tween/SafeArea/@Button.mButtonWidget");
 //BINDING_CODE_END
 
         mButtonClose.onClick.AddListener(Close);
