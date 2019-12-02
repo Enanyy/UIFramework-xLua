@@ -285,14 +285,16 @@ public class WindowManager : MonoBehaviour
         if(t == null)
         {
             t = (Window)Activator.CreateInstance(type);
+
+            if (t == null)
+            {
+                Debug.LogError("Can't create window:" + type.Name);
+                callback?.Invoke(null);
+                return;
+            }
             mWindowDic.Add(type, t);
         }
-        if(t == null)
-        {
-            Debug.LogError("Can't create window:" + type.Name);
-            callback?.Invoke(null);
-            return;
-        }
+       
 
         Window parent = Get(parentType);
 
@@ -332,7 +334,7 @@ public class WindowManager : MonoBehaviour
                     t.canvas.worldCamera = mCamera;
                     t.canvas.sortingLayerName = "UI";
 
-                    var scaler = go.GetComponent<CanvasScaler>();
+                    var scaler = t.GetComponent<CanvasScaler>();
                     if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
 
                     scaler.scaleFactor = 1;

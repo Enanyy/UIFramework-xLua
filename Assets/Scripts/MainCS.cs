@@ -13,8 +13,8 @@ public class MainCS : MonoBehaviour
     void Start()
     {
         WindowManager.Instance.SetLoader(LoadUI);
-        WindowManager.Instance.Open<UIMain>();
-        //WindowManager.Instance.Open<UIFixed>(typeof(UIMain));
+        //WindowManager.Instance.Open<UIMain>();
+        WindowManager.Instance.Open<UIFixed>(typeof(UIMain));
     }
 
     // Update is called once per frame
