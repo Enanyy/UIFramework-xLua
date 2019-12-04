@@ -17,6 +17,10 @@ public enum WindowStatus{
     LoadDone        = 2,     //加载完成
 }
 
+public interface IUpdateable
+{
+  void Update();
+}
 public abstract class Window 
 {
     public GameObject gameObject { get; private set; }
@@ -593,4 +597,16 @@ public class WindowManager : MonoBehaviour
         window.OnUnload();
     }
 
+    private void Update()
+    {
+        var it = mWindowDic.GetEnumerator();
+        while(it.MoveNext())
+        {
+            var update = it.Current.Value as IUpdateable;
+            if(update!= null)
+            {
+                update.Update();
+            }
+        }
+    }
 }

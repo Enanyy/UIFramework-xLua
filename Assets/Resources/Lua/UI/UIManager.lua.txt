@@ -94,10 +94,10 @@ function UIBase:GetComponent(type,path)
     end
     --使用TryGetComponent 无论是真机还是Editor都无内存分配
     if path == nil then
-        local result, component = self.gameObject:TryGetComponent(typeof(type))
+        local result, component = self.gameObject:TryGetComponent(type)
         return component
     else
-        local result, component = self.gameObject.transform:Find(path):TryGetComponent(typeof(type))
+        local result, component = self.gameObject.transform:Find(path):TryGetComponent(type)
         return component
     end
 end

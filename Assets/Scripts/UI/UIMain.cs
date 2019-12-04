@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class UIMain : Window
+public class UIMain : Window,IUpdateable
 {
     //BINDING_DEFINITION_BEGIN	private Button mButtonNormal;
 	private Text mTextNormal;
@@ -120,5 +120,10 @@ public class UIMain : Window
     void OnProgessBarChanged(float from, float to)
     {
         Debug.Log("value from: " + from + " to: " + to);
+    }
+
+    public void Update()
+    {
+        
     }
 }
