@@ -602,10 +602,13 @@ public class WindowManager : MonoBehaviour
         var it = mWindowDic.GetEnumerator();
         while(it.MoveNext())
         {
-            var update = it.Current.Value as IUpdateable;
-            if(update!= null)
+            if (it.Current.Value.active)
             {
-                update.Update();
+                var update = it.Current.Value as IUpdateable;
+                if (update != null)
+                {
+                    update.Update();
+                }
             }
         }
     }
