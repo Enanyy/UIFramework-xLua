@@ -23,7 +23,7 @@ public class UIMain : Window,IUpdateable
     private List<int> mGridScrollViewDataList = new List<int>();
     public UIMain()
     {
-        fixedWidgets = new List<System.Type> { typeof(UIFixed), typeof(UIRight) };
+        fixedWidgets = new List<System.Type> { /*typeof(UIFixed),*/ typeof(UIRight) };
     }
     public override void OnLoad(GameObject go)
     {
