@@ -19,7 +19,28 @@ public class UIMain : Window,IUpdateable
 //BINDING_DEFINITION_END
 
 
-    private Dictionary<Transform, int> mGridItemDic = new Dictionary<Transform, int>();
+    class GridItem
+    {
+        public Transform mRoot;
+        public int index;
+        public int data;
+
+        private Text mText;
+        public void Init(Transform item)
+        {
+            mRoot = item;
+            mRoot.Find("Text").TryGetComponent(out mText);
+        }
+
+        public void UpdateData( int index, int data)
+        {
+            this.index = index;
+            this.data = data;
+
+            mText.text = string.Format("{0} {1}", index, data);
+        }
+    }
+    private Dictionary<Transform, GridItem> mGridItemDic = new Dictionary<Transform, GridItem>();
     private List<int> mGridScrollViewDataList = new List<int>();
     public UIMain()
     {
@@ -76,16 +97,14 @@ public class UIMain : Window,IUpdateable
     } 
 
     void OnVerticalGridScrollItem(Transform item, int index)
-    {
-        if(mGridItemDic.ContainsKey(item)==false)
+    {    
+        if(mGridItemDic.TryGetValue(item, out GridItem gridItem)==false)
         {
-            mGridItemDic.Add(item, index);
+            gridItem = new GridItem();
+            gridItem.Init(item);
+            mGridItemDic.Add(item, gridItem);
         }
-        else
-        {
-            mGridItemDic[item] = index;
-        }
-        item.Find("Text").GetComponent<Text>().text = index.ToString();
+        gridItem.UpdateData(index, mGridScrollViewDataList[index]);
     }
 
     void OnButtonAddClick()
