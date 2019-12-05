@@ -332,13 +332,14 @@ public class WindowManager : MonoBehaviour
                     go.transform.SetParent(transform);
                     go.SetActive(true);
 
-                    t.OnLoad(go);
+                    go.TryGetComponent(out Canvas canvas);
+                    if (canvas == null) canvas = go.AddComponent<Canvas>();
+                    
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = mCamera;
+                    canvas.sortingLayerName = "UI";
 
-                    t.canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                    t.canvas.worldCamera = mCamera;
-                    t.canvas.sortingLayerName = "UI";
-
-                    var scaler = t.GetComponent<CanvasScaler>();
+                    go.TryGetComponent(out CanvasScaler scaler);
                     if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
 
                     scaler.scaleFactor = 1;
@@ -361,10 +362,13 @@ public class WindowManager : MonoBehaviour
                         }
                     }
 
+                    t.OnLoad(go);
+
                     SetActive(t, true);
                     SetTouch(true);
 
                     callback?.Invoke(t);
+
 
                 });
             }
