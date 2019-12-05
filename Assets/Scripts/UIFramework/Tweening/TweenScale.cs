@@ -14,7 +14,6 @@ public class TweenScale : UITweener
 {
 	public Vector3 from = Vector3.one;
 	public Vector3 to = Vector3.one;
-	public bool updateTable = false;
 
 	Transform mTrans;
 	
@@ -57,8 +56,8 @@ public class TweenScale : UITweener
 	public override void SetEndToCurrentValue () { to = value; }
 
 	[ContextMenu("Assume value of 'From'")]
-	void SetCurrentValueToStart () { value = from; }
+    public override void SetCurrentValueToStart () { value = from; }
 
 	[ContextMenu("Assume value of 'To'")]
-	void SetCurrentValueToEnd () { value = to; }
+	public override void SetCurrentValueToEnd () { value = to; }
 }

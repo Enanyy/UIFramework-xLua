@@ -91,4 +91,8 @@ public class TweenAlpha : UITweener
 
 	public override void SetStartToCurrentValue () { from = value; }
 	public override void SetEndToCurrentValue () { to = value; }
+
+    public override void SetCurrentValueToStart(){value = from;}
+
+    public override void SetCurrentValueToEnd(){ value = to; }
 }

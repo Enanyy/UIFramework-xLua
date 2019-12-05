@@ -398,14 +398,17 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void SetActive(Window window,bool active,bool destory = false)
+    public void SetActive(Window window, bool active, bool destory = false)
     {
-        if(window == null)
+        if (window == null)
         {
             return;
         }
+
         if (destory)
         {
+            window.active = false;
+
             DestroyWindow(window);
         }
         else

@@ -95,8 +95,8 @@ public class TweenPosition : UITweener
 	public override void SetEndToCurrentValue () { to = value; }
 
 	[ContextMenu("Assume value of 'From'")]
-	void SetCurrentValueToStart () { value = from; }
+	public override void SetCurrentValueToStart () { value = from; }
 
 	[ContextMenu("Assume value of 'To'")]
-	void SetCurrentValueToEnd () { value = to; }
+	public override void SetCurrentValueToEnd () { value = to; }
 }

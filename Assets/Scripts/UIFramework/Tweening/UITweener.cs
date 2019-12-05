@@ -436,4 +436,8 @@ public abstract class UITweener : MonoBehaviour
 	/// </summary>
 
 	public virtual void SetEndToCurrentValue () { }
+
+    public virtual void SetCurrentValueToStart() { }
+
+    public virtual void SetCurrentValueToEnd() { }
 }
