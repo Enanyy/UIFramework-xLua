@@ -11,27 +11,25 @@ namespace UnityEngine.UI
 
         public TabEvent onTabValueChanged = new TabEvent();
 
-        private bool mInited = false;
         void Start()
         {
             mGroup = GetComponent<ToggleGroup>();
 
             if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
 
-
             RegisterToggle();
-
-            mInited = true;
         }
 
         private void RegisterToggle()
         {
             for (int i = 0; i < transform.childCount; ++i)
             {
-                var toggle = transform.GetChild(i).GetComponent<Toggle>();
-                if (toggle != null && toggle.enabled && toggle.gameObject.activeInHierarchy)
+                if (transform.GetChild(i).TryGetComponent(out Toggle toggle))
                 {
-                    RegisterToggle(toggle);
+                    if (toggle != null && toggle.enabled && toggle.gameObject.activeInHierarchy)
+                    {
+                        RegisterToggle(toggle);
+                    }
                 }
             }
         }
@@ -48,14 +46,12 @@ namespace UnityEngine.UI
                 mGroup.RegisterToggle(toggle);
             }
 
-            toggle.onValueChanged.RemoveAllListeners();
-            toggle.onValueChanged.AddListener((value) => {
-
-                onTabValueChanged.Invoke(toggle);
-            });
-
-            if(mInited == false)
+            if(toggle.onValueChanged.GetPersistentEventCount() == 0)
             {
+                toggle.onValueChanged.AddListener((value) =>
+                {
+                    onTabValueChanged.Invoke(toggle);
+                });
                 onTabValueChanged.Invoke(toggle);
             }
         }
@@ -64,11 +60,9 @@ namespace UnityEngine.UI
         private void OnTransformChildrenChanged()
         {
             Debug.Log("OnTransformChildrenChanged");
-            mInited = false;
-
+          
             RegisterToggle();
 
-            mInited = true;
         }
 
         public class TabEvent : UnityEvent<Toggle>
