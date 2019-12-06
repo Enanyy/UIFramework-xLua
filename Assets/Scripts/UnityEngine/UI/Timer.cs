@@ -62,7 +62,8 @@ namespace UnityEngine.UI
         {
             this.from = from;
             this.to = to;
-            this.addtion = addtion;
+            //确保从小到大是加，从大到小是减
+            this.addtion = from > to ? -Mathf.Abs(addtion) : Mathf.Abs(addtion);
             this.interval = interval;
 
             mValue = from;
