@@ -66,7 +66,11 @@ namespace UnityEngine.UI
             this.addtion = from > to ? -Mathf.Abs(addtion) : Mathf.Abs(addtion);
             this.interval = interval;
 
+            float previous = mValue;
+
             mValue = from;
+
+            onTimerValueChanged.Invoke(this, previous);
 
             if (from < to)
             {
