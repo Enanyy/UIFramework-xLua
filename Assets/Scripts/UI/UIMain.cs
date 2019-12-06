@@ -109,14 +109,18 @@ public class UIMain : Window,IUpdateable
         });
         mProgressBar.SetValue(100, 2);
 
-        mTimer.onTimerValueChanged.AddListener((timer) => { 
+        mTimer.TryGetComponent(out Text text);
+        mTimer.onTimerValueChanged.AddListener((timer,previous) => { 
             
-            if(timer.TryGetComponent(out Text text))
+            if(text)
             {
                 text.text = string.Format("{0}s", timer.value);
             }
         });
-        mTimer.SetTimer(30, 0, 1, -1);
+        mTimer.AddTrigger(0, (timer, value) => {
+            Debug.Log("timer trigger at:" + value);
+        });
+        mTimer.Begin(5, 0, 1, -1);
     }
 
     void OnVerticalGridScrollItem(Transform item, int index)

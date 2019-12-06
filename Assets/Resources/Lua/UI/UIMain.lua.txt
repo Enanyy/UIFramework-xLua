@@ -42,29 +42,30 @@ function M:OnLoad()
 		print("Value Change from:"..from .." to:"..progressBar.value)
 	end
 	self.mProgressBar:SetMinMax(0,100)
-	self.mProgressBar:AddTrigger(0, function(progressBar,value) 
-		print("current:" ..tostring(value)) 
+	self.mProgressBar:AddTrigger(0, function(progressBar,triggerAt) 
+		print("current:" ..tostring(triggerAt)) 
 		self.mProgressBar.onValueChanged:RemoveListener(onValueChanged)
 		self.mProgressBar:SetValue(100,4)
 	end)
-	self.mProgressBar:AddTrigger(100,function(progressBar,value) 
-		print("current:" ..tostring(value)) 
+	self.mProgressBar:AddTrigger(100,function(progressBar,triggerAt) 
+		print("current:" ..tostring(triggerAt)) 
 		
 		self.mProgressBar:SetValue(0, 4) 
 	end)
-	self.mProgressBar:AddTrigger(60,function(progressBar,value) print("current:" ..tostring(value)) end)
+	self.mProgressBar:AddTrigger(60,function(progressBar,triggerAt) print("current:" ..tostring(triggerAt)) end)
 	self.mProgressBar.onValueChanged:AddListener(onValueChanged)
 
 	self.mProgressBar:SetValue(100,4)
 
-	self.mTimer.onTimerValueChanged:AddListener( function(timer)
+	self.mTimer:AddTrigger(30, function(timer, triggerAt) print("timer trigger at "..triggerAt) end)
+	local text = self.mTimer:GetComponent(typeof(Text))
+	self.mTimer.onTimerValueChanged:AddListener( function(timer, previous)
             
-			local text = timer:GetComponent(typeof(Text))
-            if text~= nil then
-                text.text = timer.value.."s"
-            end
+         if text~= nil then
+             text.text = timer.value.."s"
+         end
     end)
-    self.mTimer:SetTimer(30, 0, 1, -1);
+    self.mTimer:Begin(0, 30, 1, 1);
 
 end
 

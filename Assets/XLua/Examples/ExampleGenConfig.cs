@@ -63,7 +63,7 @@ public static class ExampleGenConfig
                 typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.Toggle,int>),
                 typeof(UnityEngine.Events.UnityAction<float>),
                 typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.ProgressBar,float>),
-                typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.Timer>),
+                typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.Timer,float>),
                 typeof(System.Collections.IEnumerator)
             };
 
