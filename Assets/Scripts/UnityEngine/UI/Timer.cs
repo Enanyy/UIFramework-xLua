@@ -99,8 +99,6 @@ namespace UnityEngine.UI
             }
 
             mTime = Time.time;
-
-            float previous = value;
             float v = value + addtion;
            
             if(to > from)
