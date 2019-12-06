@@ -373,6 +373,7 @@ public class {classname} : Window
             case "HorizontalScrollView": return typeof(HorizontalScrollView);
             case "Tab":return typeof(Tab);
             case "ProgressBar": return typeof(ProgressBar);
+            case "Timer":return typeof(Timer);
             default:
                 {         
                     return null;

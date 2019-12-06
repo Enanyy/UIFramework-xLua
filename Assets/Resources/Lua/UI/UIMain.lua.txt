@@ -19,6 +19,7 @@ function M:OnLoad()
 	self.mHorizontalScrollView = self:GetComponent(typeof(HorizontalScrollView), 'Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView')
 	self.mTab = self:GetComponent(typeof(Tab), 'Tween/SafeArea/@Tab.mTab')
 	self.mProgressBar = self:GetComponent(typeof(ProgressBar), 'Tween/SafeArea/@ProgressBar.mProgressBar')
+	self.mTimer = self:GetComponent(typeof(Timer), 'Tween/SafeArea/@Timer.mTimer')
 --BINDING_CODE_END
     self.mButtonNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
     self.mButtonPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
@@ -56,6 +57,15 @@ function M:OnLoad()
 
 	self.mProgressBar:SetValue(100,4)
 
+	self.mTimer.onTimerValueChanged:AddListener( function(timer)
+            
+			local text = timer:GetComponent(typeof(Text))
+            if text~= nil then
+                text.text = timer.value.."s"
+            end
+    end)
+    self.mTimer:SetTimer(30, 0, 1, -1);
+
 end
 
 --整个生命周期只调用一次
@@ -72,6 +82,7 @@ function M:OnUnload()
 	self.mHorizontalScrollView = nil
 	self.mTab = nil
 	self.mProgressBar = nil
+	self.mTimer = nil
 --UNBINDING_CODE_END
 
 	self.mItemDic = nil

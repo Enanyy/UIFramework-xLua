@@ -16,6 +16,7 @@ public class UIMain : Window,IUpdateable
 	private HorizontalScrollView mHorizontalScrollView;
 	private Tab mTab;
 	private ProgressBar mProgressBar;
+	private Timer mTimer;
 //BINDING_DEFINITION_END
 
 
@@ -71,6 +72,7 @@ public class UIMain : Window,IUpdateable
 		mHorizontalScrollView = GetComponent<HorizontalScrollView>("Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView");
 		mTab = GetComponent<Tab>("Tween/SafeArea/@Tab.mTab");
 		mProgressBar = GetComponent<ProgressBar>("Tween/SafeArea/@ProgressBar.mProgressBar");
+		mTimer = GetComponent<Timer>("Tween/SafeArea/@Timer.mTimer");
 //BINDING_CODE_END
 
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());
@@ -95,18 +97,27 @@ public class UIMain : Window,IUpdateable
 
         mProgressBar.SetMinMax(0, 100);
         mProgressBar.onValueChanged.AddListener(OnProgessBarChanged);
-        mProgressBar.AddTrigger(0, (progressBar, triggerAt) => {
-            Debug.Log("Trigger at:" + triggerAt);
+        mProgressBar.AddTrigger(0, (progressBar, value) => {
+            Debug.Log("Trigger at:" + value);
             mProgressBar.onValueChanged.RemoveListener(OnProgessBarChanged);
             mProgressBar.SetValue(100, 4);
         });
-        mProgressBar.AddTrigger(100, (progressBar, triggerAt) =>
+        mProgressBar.AddTrigger(100, (progressBar, value) =>
         {
-            Debug.Log("Trigger at:" + triggerAt);
+            Debug.Log("Trigger at:" + value);
             mProgressBar.SetValue(0, 2);
         });
         mProgressBar.SetValue(100, 2);
-    } 
+
+        mTimer.onTimerValueChanged.AddListener((timer) => { 
+            
+            if(timer.TryGetComponent(out Text text))
+            {
+                text.text = string.Format("{0}s", timer.value);
+            }
+        });
+        mTimer.SetTimer(30, 0, 1, -1);
+    }
 
     void OnVerticalGridScrollItem(Transform item, int index)
     {    

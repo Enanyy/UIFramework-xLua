@@ -27,6 +27,7 @@ HorizontalScrollView    = CS.UnityEngine.UI.HorizontalScrollView
 VerticalScrollView      = CS.UnityEngine.UI.VerticalScrollView
 ProgressBar             = CS.UnityEngine.UI.ProgressBar
 Tab                     = CS.UnityEngine.UI.Tab
+Timer					= CS.UnityEngine.UI.Timer
 
 local renderMode        = CS.UnityEngine.RenderMode.ScreenSpaceCamera
 local uiScaleMode       = CS.UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
