@@ -95,12 +95,12 @@ public class UIMain : Window,IUpdateable
 
         mProgressBar.SetMinMax(0, 100);
         mProgressBar.onValueChanged.AddListener(OnProgessBarChanged);
-        mProgressBar.AddTrigger(0, (value) => {
+        mProgressBar.AddTrigger(0, (progressBar, value) => {
             Debug.Log("Trigger at:" + value);
             mProgressBar.onValueChanged.RemoveListener(OnProgessBarChanged);
             mProgressBar.SetValue(100, 4);
         });
-        mProgressBar.AddTrigger(100, (value) =>
+        mProgressBar.AddTrigger(100, (progressBar, value) =>
         {
             Debug.Log("Trigger at:" + value);
             mProgressBar.SetValue(0, 2);
@@ -155,9 +155,9 @@ public class UIMain : Window,IUpdateable
         image.color = toggle.isOn ? Color.yellow : Color.white;
     }
 
-    void OnProgessBarChanged(float from, float to)
+    void OnProgessBarChanged(ProgressBar progressBar, float from)
     {
-        Debug.Log("value from: " + from + " to: " + to);
+        Debug.Log("value from: " + from + " to: " + progressBar.value);
     }
 
     public void Update()

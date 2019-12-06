@@ -11,9 +11,9 @@ namespace UnityEngine.UI
         private float mTo;
         private float mDuration;
         private float mTime;
-        private Dictionary<float, List<UnityAction<float>>> mTriggers = new Dictionary<float, List<UnityAction<float>>>();
+        private Dictionary<float, List<UnityAction<ProgressBar, float>>> mTriggers = new Dictionary<float, List<UnityAction<ProgressBar,float>>>();
 
-        public ProgressValueChanged onValueChanged = new ProgressValueChanged();
+        public ProgressBarEvent onValueChanged = new ProgressBarEvent();
         public float value
         {
             get { return mSlider.value; }
@@ -21,9 +21,11 @@ namespace UnityEngine.UI
             {
                 float from = mSlider.value;
                 mSlider.value = value;
-                onValueChanged.Invoke(from, mSlider.value);
+                onValueChanged.Invoke(this,from);
             }
         }
+        public float minValue { get { return mSlider.minValue; } set { mSlider.minValue = value; } }
+        public float maxValue { get { return mSlider.maxValue; } set { mSlider.maxValue = value; } }
         private void Awake()
         {
             mSlider = GetComponent<Slider>();
@@ -100,7 +102,7 @@ namespace UnityEngine.UI
                     {
                         if (it.Current.Value[i] != null)
                         {
-                            it.Current.Value[i].Invoke(value);
+                            it.Current.Value[i].Invoke(this,value);
                         }
                     }
                 }
@@ -111,15 +113,15 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="value"></param>
         /// <param name="call"></param>
-        public void AddTrigger(float value, UnityAction<float> call)
+        public void AddTrigger(float value, UnityAction<ProgressBar, float> call)
         {
             if(call == null)
             {
                 return;
             }
-            if(mTriggers.TryGetValue(value, out List<UnityAction<float>> list) ==false)
+            if(mTriggers.TryGetValue(value, out List<UnityAction<ProgressBar, float>> list) ==false)
             {
-                list = new List<UnityAction<float>>();
+                list = new List<UnityAction<ProgressBar, float>>();
                 mTriggers.Add(value, list);
             }
             if(list.Contains(call) ==false)
@@ -133,13 +135,13 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="vaue"></param>
         /// <param name="call"></param>
-        public void RemoveTrigger(float vaue, UnityAction<float> call)
+        public void RemoveTrigger(float vaue, UnityAction<ProgressBar, float> call)
         {
             if (call == null)
             {
                 return;
             }
-            if (mTriggers.TryGetValue(value, out List<UnityAction<float>> list))
+            if (mTriggers.TryGetValue(value, out List<UnityAction<ProgressBar, float>> list))
             {
                 list.Remove(call);
             }
@@ -149,9 +151,9 @@ namespace UnityEngine.UI
             mTriggers.Clear(); 
         }
 
-        public class ProgressValueChanged:UnityEvent<float,float>
+        public class ProgressBarEvent:UnityEvent<ProgressBar, float>
         {
-            public ProgressValueChanged() { }
+            public ProgressBarEvent() { }
         }
     }
 }
