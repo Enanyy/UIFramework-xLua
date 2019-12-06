@@ -42,6 +42,16 @@ public class UIMain : Window,IUpdateable
     }
     private Dictionary<Transform, GridItem> mGridItemDic = new Dictionary<Transform, GridItem>();
     private List<int> mGridScrollViewDataList = new List<int>();
+
+    public enum TabEnum
+    {
+        T1,
+        T2,
+        T3
+    }
+
+    TabEnum current = TabEnum.T2;
+   
     public UIMain()
     {
         fixedWidgets = new List<System.Type> { /*typeof(UIFixed),*/ typeof(UIRight) };
@@ -69,7 +79,9 @@ public class UIMain : Window,IUpdateable
 
         mButtonAdd.onClick.AddListener(OnButtonAddClick);
         mButtonRemove.onClick.AddListener(OnButtonRemoveClick);
-        mTab.onTabValueChanged.AddListener(OnTabSelectChanged);
+        
+        mTab.onTabValueChanged.AddListener(OnTabValueChanged);
+        mTab.onTabRegisterToggle.AddListener(OnRegisterToggle);
 
         mVerticalGridScrollView.onScrollItem.AddListener(OnVerticalGridScrollItem);
 
@@ -130,7 +142,14 @@ public class UIMain : Window,IUpdateable
         mVerticalGridScrollView.Refresh();
     }
 
-    void OnTabSelectChanged(Toggle toggle)
+    void OnRegisterToggle(Toggle toggle, int index)
+    {
+        if (index == (int)current)
+        {
+            toggle.isOn = true;
+        }
+    }
+    void OnTabValueChanged(Toggle toggle, int index)
     {
         var image = toggle.GetComponent<Image>();
         image.color = toggle.isOn ? Color.yellow : Color.white;

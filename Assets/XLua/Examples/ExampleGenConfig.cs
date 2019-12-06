@@ -60,7 +60,7 @@ public static class ExampleGenConfig
                 typeof(Action<double>),
                 typeof(UnityEngine.Events.UnityAction),
                 typeof(UnityEngine.Events.UnityAction<Transform,int>),
-                typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.Toggle>),
+                typeof(UnityEngine.Events.UnityAction<UnityEngine.UI.Toggle,int>),
                 typeof(UnityEngine.Events.UnityAction<float>),
                 typeof(UnityEngine.Events.UnityAction<float,float>),
                 typeof(System.Collections.IEnumerator)

@@ -35,6 +35,7 @@ function M:OnLoad()
 	self.mVerticalGridScrollView:Refill()
 
 	self.mTab.onTabValueChanged:AddListener(self:OnTabValueChanged())
+	self.mTab.onTabRegisterToggle:AddListener(self:OnTabRegisterToggle())
 
 	local onValueChanged = function(from, to) 
 		print("Value Change from:"..from .." to:"..to)
@@ -144,9 +145,19 @@ function M:OnGridScrollItem()
 
 	end
 end
---标签页实例
+
+--标签页注册
+function M:OnTabRegisterToggle()
+	return function(toggle, index)
+		if index == 1 then
+			toggle.isOn = true
+		end
+	end
+end
+
+--标签页状态改变
 function M:OnTabValueChanged()
-	return function(toggle)
+	return function(toggle, index)
 		local image = toggle:GetComponent(typeof(Image))
 		if toggle.isOn then
 			image.color = Color.yellow
