@@ -81,7 +81,7 @@ public class UIMain : Window,IUpdateable
         mButtonRemove.onClick.AddListener(OnButtonRemoveClick);
         
         mTab.onTabValueChanged.AddListener(OnTabValueChanged);
-        mTab.onTabRegisterToggle.AddListener(OnRegisterToggle);
+        mTab.onTabRegisterToggle.AddListener(OnTabRegisterToggle);
 
         mVerticalGridScrollView.onScrollItem.AddListener(OnVerticalGridScrollItem);
 
@@ -95,12 +95,12 @@ public class UIMain : Window,IUpdateable
 
         mProgressBar.SetMinMax(0, 100);
         mProgressBar.onValueChanged.AddListener(OnProgessBarChanged);
-        mProgressBar.AddListener(0, (value) => {
+        mProgressBar.AddTrigger(0, (value) => {
             Debug.Log("Trigger at:" + value);
             mProgressBar.onValueChanged.RemoveListener(OnProgessBarChanged);
             mProgressBar.SetValue(100, 4);
         });
-        mProgressBar.AddListener(100, (value) =>
+        mProgressBar.AddTrigger(100, (value) =>
         {
             Debug.Log("Trigger at:" + value);
             mProgressBar.SetValue(0, 2);
@@ -142,7 +142,7 @@ public class UIMain : Window,IUpdateable
         mVerticalGridScrollView.Refresh();
     }
 
-    void OnRegisterToggle(Toggle toggle, int index)
+    void OnTabRegisterToggle(Toggle toggle, int index)
     {
         if (index == (int)current)
         {

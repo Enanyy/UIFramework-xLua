@@ -11,7 +11,7 @@ namespace UnityEngine.UI
         private float mTo;
         private float mDuration;
         private float mTime;
-        private Dictionary<float, List<UnityAction<float>>> mListeners = new Dictionary<float, List<UnityAction<float>>>();
+        private Dictionary<float, List<UnityAction<float>>> mTriggers = new Dictionary<float, List<UnityAction<float>>>();
 
         public ProgressValueChanged onValueChanged = new ProgressValueChanged();
         public float value
@@ -90,7 +90,7 @@ namespace UnityEngine.UI
 
         private void Trigger(float previous)
         {
-            var it = mListeners.GetEnumerator();
+            var it = mTriggers.GetEnumerator();
             while (it.MoveNext())
             {
                 float key = it.Current.Key;
@@ -111,16 +111,16 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="value"></param>
         /// <param name="call"></param>
-        public void AddListener(float value, UnityAction<float> call)
+        public void AddTrigger(float value, UnityAction<float> call)
         {
             if(call == null)
             {
                 return;
             }
-            if(mListeners.TryGetValue(value, out List<UnityAction<float>> list) ==false)
+            if(mTriggers.TryGetValue(value, out List<UnityAction<float>> list) ==false)
             {
                 list = new List<UnityAction<float>>();
-                mListeners.Add(value, list);
+                mTriggers.Add(value, list);
             }
             if(list.Contains(call) ==false)
             {
@@ -133,20 +133,20 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="vaue"></param>
         /// <param name="call"></param>
-        public void RemoveListener(float vaue, UnityAction<float> call)
+        public void RemoveTrigger(float vaue, UnityAction<float> call)
         {
             if (call == null)
             {
                 return;
             }
-            if (mListeners.TryGetValue(value, out List<UnityAction<float>> list))
+            if (mTriggers.TryGetValue(value, out List<UnityAction<float>> list))
             {
                 list.Remove(call);
             }
         }
-        public void RemoveAllListener()
+        public void RemoveAllTrigger()
         {
-            mListeners.Clear(); 
+            mTriggers.Clear(); 
         }
 
         public class ProgressValueChanged:UnityEvent<float,float>
