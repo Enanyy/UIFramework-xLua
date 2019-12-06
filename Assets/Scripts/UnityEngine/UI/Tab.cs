@@ -14,12 +14,17 @@ namespace UnityEngine.UI
         public TabEvent onTabRegisterToggle = new TabEvent();
 
         private List<Toggle> mToggles = new List<Toggle>();
-        void Start()
+
+        private void Awake()
         {
             mGroup = GetComponent<ToggleGroup>();
 
             if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
 
+        }
+        void Start()
+        {
+           
             RegisterToggle();
         }
 
@@ -55,15 +60,14 @@ namespace UnityEngine.UI
             {
                 mToggles.Add(toggle);
             }
-            int index = mToggles.IndexOf(toggle);
-
+           
             if(toggle.onValueChanged.GetPersistentEventCount() == 0)
             {
                 toggle.onValueChanged.AddListener((value) =>
                 {
-                    onTabValueChanged.Invoke(toggle, index);
+                    onTabValueChanged.Invoke(toggle, mToggles.IndexOf(toggle));
                 });
-                onTabRegisterToggle.Invoke(toggle,index);
+                onTabRegisterToggle.Invoke(toggle, mToggles.IndexOf(toggle));
             }
         }
 

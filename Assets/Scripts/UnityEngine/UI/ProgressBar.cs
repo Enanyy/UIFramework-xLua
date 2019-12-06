@@ -113,16 +113,16 @@ namespace UnityEngine.UI
         /// </summary>
         /// <param name="value"></param>
         /// <param name="call"></param>
-        public void AddTrigger(float value, UnityAction<ProgressBar, float> call)
+        public void AddTrigger(float triggerAt, UnityAction<ProgressBar, float> call)
         {
             if(call == null)
             {
                 return;
             }
-            if(mTriggers.TryGetValue(value, out List<UnityAction<ProgressBar, float>> list) ==false)
+            if(mTriggers.TryGetValue(triggerAt, out List<UnityAction<ProgressBar, float>> list) ==false)
             {
                 list = new List<UnityAction<ProgressBar, float>>();
-                mTriggers.Add(value, list);
+                mTriggers.Add(triggerAt, list);
             }
             if(list.Contains(call) ==false)
             {
@@ -133,15 +133,15 @@ namespace UnityEngine.UI
         /// <summary>
         /// 移除触发器
         /// </summary>
-        /// <param name="vaue"></param>
+        /// <param name="value"></param>
         /// <param name="call"></param>
-        public void RemoveTrigger(float vaue, UnityAction<ProgressBar, float> call)
+        public void RemoveTrigger(float triggerAt, UnityAction<ProgressBar, float> call)
         {
             if (call == null)
             {
                 return;
             }
-            if (mTriggers.TryGetValue(value, out List<UnityAction<ProgressBar, float>> list))
+            if (mTriggers.TryGetValue(triggerAt, out List<UnityAction<ProgressBar, float>> list))
             {
                 list.Remove(call);
             }

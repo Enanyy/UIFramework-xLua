@@ -95,14 +95,14 @@ public class UIMain : Window,IUpdateable
 
         mProgressBar.SetMinMax(0, 100);
         mProgressBar.onValueChanged.AddListener(OnProgessBarChanged);
-        mProgressBar.AddTrigger(0, (progressBar, value) => {
-            Debug.Log("Trigger at:" + value);
+        mProgressBar.AddTrigger(0, (progressBar, triggerAt) => {
+            Debug.Log("Trigger at:" + triggerAt);
             mProgressBar.onValueChanged.RemoveListener(OnProgessBarChanged);
             mProgressBar.SetValue(100, 4);
         });
-        mProgressBar.AddTrigger(100, (progressBar, value) =>
+        mProgressBar.AddTrigger(100, (progressBar, triggerAt) =>
         {
-            Debug.Log("Trigger at:" + value);
+            Debug.Log("Trigger at:" + triggerAt);
             mProgressBar.SetValue(0, 2);
         });
         mProgressBar.SetValue(100, 2);
