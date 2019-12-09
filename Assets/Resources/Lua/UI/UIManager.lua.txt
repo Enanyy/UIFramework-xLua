@@ -330,6 +330,9 @@ function UIManager:SetParent(ui, parent)
 end
 
 function UIManager:HideOther(ui)
+    if ui == nil then
+        return
+    end
     for k,v in pairs(self.mUIDic) do
         if v ~= ui then
             if ui.mHideWindows == nil then
@@ -340,6 +343,11 @@ function UIManager:HideOther(ui)
 
             self:SetActive(v, false)
         end
+    end
+
+    if ui.mHideWindows ~= nil then
+        --按sortingOrder升序排序
+        table.sort( ui.mHideWindows , function (a , b) return a.mCanvas.sortingOrder > b.mCanvas.sortingOrder end )
     end
 end
 
@@ -485,63 +493,43 @@ function UIManager:Close(ui)
     if ui == nil then
         return
     end
-    if ui.mType == UIType.Normal  then
+    local destroy = ui.mCloseDestroy
 
-        local index = 0
-        local contains = false
+    if ui.mType == UIType.Normal  then
+        local find = false
         for i = 1,#self.mUIStack do
-            if index == 0 then
+            if find == false then
                 if self.mUIStack[i]== ui then
-                    index = i
+                    find = true
                     table.remove(self.mUIStack, i)
                     i = i -1
                 end
             else
                 if self.mUIStack[i] == ui then
-                    contains = true 
+                    destroy = false
                     break
                 end
             end
-        end
-        
-        if contains == false then
-            self:Destroy(ui)          
-        end
+        end  
+    end
 
-        if ui.mHideWindows ~= nil then
-            for i,v in ipairs(ui.mHideWindows) do
-                if v.mType == UIType.Widget then
-                    self:SetActive(v, true)
-                end
-            end
-            ui.mHideWindows = nil
+    self:Destroy(ui, destroy)
+
+    if ui.mHideWindows ~= nil then
+        for i,v in ipairs(ui.mHideWindows) do
+            self:SetActive(v, true)
         end
-      
-        for i=#self.mUIStack, index, -1 do
-            local v = self.mUIStack[i]
-            if i == index then
-                if v.mHideOther == false then
-                    local previous = self.mUIStack[index + 1]
-                    if self:IsActive(previous) == false then
-                        self:SetActive(previous,true)
-                    end
-                end
-            end
-            self:SetActive(v,true)
-        end
-        
-    else
-        self:Destroy(ui)
+        ui.mHideWindows = nil
     end
 end
 
-function UIManager:Destroy(ui)
+function UIManager:Destroy(ui,destroy)
 
     if ui == nil then return end
 
     self:SetActive(ui,false)
     --标记为Destroy才销毁
-    if ui.mCloseDestroy then
+    if destroy then
 
         self:SetParent(ui, nil)
         
