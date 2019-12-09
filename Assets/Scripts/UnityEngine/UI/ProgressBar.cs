@@ -3,10 +3,8 @@ using UnityEngine.Events;
 
 namespace UnityEngine.UI
 {
-    [RequireComponent(typeof(Slider))]
     public class ProgressBar : MonoBehaviour
     {
-        private Slider mSlider;
         private float mFrom;
         private float mTo;
         private float mDuration;
@@ -14,36 +12,61 @@ namespace UnityEngine.UI
         private Dictionary<float, List<UnityAction<ProgressBar, float>>> mTriggers = new Dictionary<float, List<UnityAction<ProgressBar,float>>>();
 
         public ProgressBarEvent onValueChanged = new ProgressBarEvent();
+
+        private float mValue;
         public float value
         {
-            get { return mSlider.value; }
+            get { return mValue; }
             set
             {
-                float from = mSlider.value;
-                mSlider.value = value;
+                float from = mValue;
+                mValue = value;
                 onValueChanged.Invoke(this,from);
+
+                UpdateSlider();
             }
         }
-        public float minValue { get { return mSlider.minValue; } set { mSlider.minValue = value; } }
-        public float maxValue { get { return mSlider.maxValue; } set { mSlider.maxValue = value; } }
-        private void Awake()
-        {
-            mSlider = GetComponent<Slider>();
-            if(mSlider == null)
-            {
-                Debug.LogError("ProgressBar 必须添加 Slider");
-            }
-        }
+        public float minValue { get; set; }
+        public float maxValue { get; set; }
+
+        /// <summary>
+        /// 要控制的Slider
+        /// </summary>
+        public Slider slider;
+        /// <summary>
+        /// 是否控制Slider
+        /// </summary>
+        public bool updateSlider = true;
+
         public void SetMinMax(float min, float max)
         {
-            mSlider.minValue = min;
-            mSlider.maxValue = max;
+            minValue = min;
+            maxValue = max;
+
+            UpdateSlider();
+        }
+
+        public void UpdateSlider()
+        {
+            if (updateSlider)
+            {
+                if (slider == null)
+                {
+                    TryGetComponent(out slider);
+                }
+                if (slider)
+                {
+                    slider.minValue = minValue;
+                    slider.maxValue = maxValue;
+                    slider.value = mValue;
+                }
+            }
         }
 
         public void SetValue(float to, float duration = 0)
         {
-            mFrom = mSlider.value;
-            mTo = Mathf.Clamp(to, mSlider.minValue, mSlider.maxValue);
+            mFrom = mValue;
+            mTo = Mathf.Clamp(to, minValue,maxValue);
             if (to == value)
             {
                 Trigger(value - 0.0001f);
@@ -75,7 +98,7 @@ namespace UnityEngine.UI
                 {
                     mTime = mDuration;
                 }
-                float previous = mSlider.value;
+                float previous = value;
 
                 float factor = mTime / mDuration;
 

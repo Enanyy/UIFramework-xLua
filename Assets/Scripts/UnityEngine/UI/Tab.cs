@@ -71,7 +71,7 @@ namespace UnityEngine.UI
             }
         }
 
-        public void SetIsOn(int index)
+        public void SetOn(int index)
         {
             if(index >=0 && index< mToggles.Count)
             {
