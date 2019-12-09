@@ -84,11 +84,16 @@ public abstract class Window
         }
     }
     public WindowType type;
-    public bool hidePrevious { get; protected set; }
+    public bool hideOther { get; protected set; }
     public int fixedOrder { get; protected set; } = 0;
 
     public List<Type> fixedWidgets { get; protected set; }
     public Dictionary<Type, Window> widgets { get; protected set; }
+
+    /// <summary>
+    /// 打开本界面隐藏了哪些界面？
+    /// </summary>
+    public List<Window> hideWindows { get; set; }
 
     public int widgetOrderAddition = 5;
 
@@ -349,10 +354,9 @@ public class WindowManager : MonoBehaviour
                     scaler.referencePixelsPerUnit = 100;
 
                     
-                    if (t.hidePrevious && mWindowStack.Count > 0)
+                    if (t.hideOther )
                     {
-                        var v = mWindowStack.Peek();
-                        SetActive(v, false);
+                        HideOther(t);
                     }
                     if (t.type == WindowType.Normal)
                     {
@@ -374,14 +378,11 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                if (t.hidePrevious && mWindowStack.Count > 0)
+                if (t.hideOther)
                 {
-                    var v = mWindowStack.Peek();
-                    if (v != t)
-                    {
-                        SetActive(v, false);
-                    }
+                    HideOther(t);
                 }
+
                 if (t.type == WindowType.Normal)
                 {
                     if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
@@ -397,6 +398,27 @@ public class WindowManager : MonoBehaviour
         }
     }
 
+    private void HideOther(Window window)
+    {
+        if(window==null)
+        {
+            return;
+        }
+
+        var it = mWindowDic.GetEnumerator();
+        while(it.MoveNext())
+        {
+            if(it.Current.Value!= window)
+            {
+                if(window.hideWindows == null)
+                {
+                    window.hideWindows = new List<Window>();
+                }
+                window.hideWindows.Add(it.Current.Value);
+                SetActive(it.Current.Value, false, false);
+            }
+        }
+    }
 
     public void SetActive(Window window, bool active, bool destory = false)
     {
@@ -574,7 +596,7 @@ public class WindowManager : MonoBehaviour
                 var v = mWindowStackTemp.Pop();
                 if (v == previous)
                 {
-                    if (mWindowStack.Count > 0 && previous.hidePrevious == false)
+                    if (mWindowStack.Count > 0 && previous.hideOther == false)
                     {
                         SetActive(mWindowStack.Peek(), true);
                     }
@@ -582,6 +604,18 @@ public class WindowManager : MonoBehaviour
 
                 mWindowStack.Push(v);
             }
+            if(window.hideWindows!= null)
+            {
+                for(int i =0; i < window.hideWindows.Count; ++i)
+                {
+                    if(window.hideWindows[i].type == WindowType.Widget)
+                    {
+                        SetActive(window.hideWindows[i], true);
+                    }
+                }
+                window.hideWindows.Clear();
+            }
+
             if (previous != null)
             {
                 SetActive(previous, true);

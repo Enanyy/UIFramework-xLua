@@ -22,13 +22,8 @@ namespace UnityEngine.UI
             if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
 
         }
-        void Start()
-        {
-           
-            RegisterToggle();
-        }
-
-        private void RegisterToggle()
+      
+        public void RegisterToggle()
         {
             mToggles.Clear();
 

@@ -1,6 +1,6 @@
 local M = {
     mName = "UINormal",
-    mHidePrevious = true,
+    mHideOther = true,
 	mWidgets = {'UIFixed'},
 }
 
@@ -8,7 +8,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonClose')
+--BINDING_CODE_BEGIN
+	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonClose')
 	self.mButtonMain = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonMain')
 	self.mButtonPop = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonPop')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonWidget')
@@ -21,7 +22,8 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mButtonClose = nil
+--UNBINDING_CODE_BEGIN
+	self.mButtonClose = nil
 	self.mButtonMain = nil
 	self.mButtonPop = nil
 	self.mButtonWidget = nil

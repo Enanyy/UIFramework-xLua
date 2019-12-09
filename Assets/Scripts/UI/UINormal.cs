@@ -10,7 +10,7 @@ public class UINormal : Window
 //BINDING_DEFINITION_END
     public UINormal()
     {
-        hidePrevious = true;
+        hideOther = true;
         fixedWidgets = new List<System.Type> { typeof(UIFixed) };
     }
     public override void OnLoad(GameObject go)

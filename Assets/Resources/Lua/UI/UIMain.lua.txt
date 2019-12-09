@@ -37,6 +37,7 @@ function M:OnLoad()
 
 	self.mTab.onTabValueChanged:AddListener(self:OnTabValueChanged())
 	self.mTab.onTabRegisterToggle:AddListener(self:OnTabRegisterToggle())
+	self.mTab:RegisterToggle()
 
 	local onValueChanged = function(progressBar, from) 
 		print("Value Change from:"..from .." to:"..progressBar.value)

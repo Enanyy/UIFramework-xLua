@@ -84,6 +84,7 @@ public class UIMain : Window,IUpdateable
         
         mTab.onTabValueChanged.AddListener(OnTabValueChanged);
         mTab.onTabRegisterToggle.AddListener(OnTabRegisterToggle);
+        mTab.RegisterToggle();
 
         mVerticalGridScrollView.onScrollItem.AddListener(OnVerticalGridScrollItem);
 
