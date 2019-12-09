@@ -15,6 +15,8 @@ namespace UnityEngine.UI
 
         private List<Toggle> mToggles = new List<Toggle>();
 
+        private bool mChildrenChanged = false;
+
         private void Awake()
         {
             mGroup = GetComponent<ToggleGroup>();
@@ -55,14 +57,22 @@ namespace UnityEngine.UI
             {
                 mToggles.Add(toggle);
             }
-           
-            if(toggle.onValueChanged.GetPersistentEventCount() == 0)
+            int index = mToggles.IndexOf(toggle);
+
+            if (toggle.onValueChanged.GetPersistentEventCount() == 0)
             {
                 toggle.onValueChanged.AddListener((value) =>
                 {
-                    onTabValueChanged.Invoke(toggle, mToggles.IndexOf(toggle));
+                    index = mToggles.IndexOf(toggle);
+                    if (index >= 0 && index < mToggles.Count)
+                    {
+                        onTabValueChanged.Invoke(toggle, index);
+                    }
                 });
-                onTabRegisterToggle.Invoke(toggle, mToggles.IndexOf(toggle));
+                if (index >= 0 && index < mToggles.Count)
+                {
+                    onTabRegisterToggle.Invoke(toggle, index);
+                }
             }
         }
 
@@ -73,13 +83,18 @@ namespace UnityEngine.UI
                 mToggles[index].isOn = true;
             }
         }
-       
+        private void Update()
+        {
+            if(mChildrenChanged)
+            {
+                mChildrenChanged = false;
+                RegisterToggle();
+            }
+        }
+
         private void OnTransformChildrenChanged()
         {
-            Debug.Log("OnTransformChildrenChanged");
-          
-            RegisterToggle();
-
+            mChildrenChanged = true;
         }
 
         public class TabEvent : UnityEvent<Toggle, int>

@@ -23,4 +23,8 @@ function main( )
     UIManager:Open('UIFixed',"UIMain")
 end
 
+function update(deltaTime)
+    UIManager:Update(deltaTime)
+end
+
 main()

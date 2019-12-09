@@ -176,6 +176,11 @@ public class UIMain : Window,IUpdateable
         Debug.Log("value from: " + from + " to: " + progressBar.value);
     }
 
+    protected override void OnShow()
+    {
+        base.OnShow();
+        Debug.Log("OnShow");
+    }
     public void Update()
     {
         

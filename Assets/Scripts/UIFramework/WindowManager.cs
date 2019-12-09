@@ -84,7 +84,7 @@ public abstract class Window
         }
     }
     public WindowType type;
-    public bool hideOther { get; protected set; }
+    public bool hideOther { get; protected set; } //隐藏其他window，减少overdraw,注意：在Scene视图的RenderMode->Overdraw。当然这里的视图只是提供了查看物体遮挡的层数关系，并不是真正的最终屏幕绘制的overdraw。
     public int fixedOrder { get; protected set; } = 0;
 
     public List<Type> fixedWidgets { get; protected set; }
@@ -336,6 +336,7 @@ public class WindowManager : MonoBehaviour
                     GameObject go = Instantiate(asset) as GameObject;
                     go.transform.SetParent(transform);
                     go.SetActive(true);
+                    go.layer = Window.LAYER_HIDE; //先设置为不显示，否则OnShow不会被调用
 
                     go.TryGetComponent(out Canvas canvas);
                     if (canvas == null) canvas = go.AddComponent<Canvas>();

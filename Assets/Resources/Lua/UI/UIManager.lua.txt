@@ -56,7 +56,7 @@ UIBase =
     mParent                 = nil,              --当前的父UI
 
     mType                   = UIType.Normal,    --UI类型
-    mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
+    mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw，注意:在Scene视图的RenderMode->Overdraw。当然这里的视图只是提供了查看物体遮挡的层数关系，并不是真正的最终屏幕绘制的overdraw。
     mHideWindows            = nil,      --打开本界面隐藏了哪些界面？
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
@@ -473,7 +473,7 @@ function UIManager:CloseAllAndOpen(ui, parent, callback)
             end
         end
         if close and v ~= nil then
-           self:Destroy(v)
+           self:Destroy(v,v.mCloseDestroy)
         end
     end
 
@@ -555,10 +555,16 @@ function UIManager:Destroy(ui,destroy)
     end
 end
 
-function UIManager:PrintStack()
-    for i,v in ipairs(self.mUIStack) do
-        print(i,v.mName, self:IsActive(v))
+function UIManager:Update(deltaTime)
+
+    for k,v in pairs(self.mUIDic) do
+        local update = v['OnUpdate']
+        --只有定义了Update函数才调用
+        if update ~= nil then
+            update(v, deltaTime)
+        end
     end
+
 end
 
 

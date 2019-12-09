@@ -7,7 +7,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
+--BINDING_CODE_BEGIN
+	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
 	self.mTextNormal = self:GetComponent(typeof(Text), 'Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal')
 	self.mButtonPop = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonPop')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonWidget')
@@ -72,7 +73,8 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mButtonNormal = nil
+--UNBINDING_CODE_BEGIN
+	self.mButtonNormal = nil
 	self.mTextNormal = nil
 	self.mButtonPop = nil
 	self.mButtonWidget = nil
@@ -178,6 +180,11 @@ function M:OnTabValueChanged()
 			image.color = Color.white
 		end
 	end
+end
+
+function M:OnUpdate(deltaTime)
+
+	print("UIMain Update:"..deltaTime)
 end
 
 return M

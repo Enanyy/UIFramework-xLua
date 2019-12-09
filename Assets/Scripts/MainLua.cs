@@ -14,6 +14,8 @@ public class MainLua : MonoBehaviour
         Instance = this;
     }
     Dictionary<string, string> luaFiles = new Dictionary<string, string>();
+
+    LuaFunction update;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,6 +30,8 @@ public class MainLua : MonoBehaviour
         luaenv = new LuaEnv();
         luaenv.AddLoader(LuaFileLoader);
         luaenv.DoString("require 'Main'");
+
+        update = luaenv.Global.Get<LuaFunction>("update");
     }
 
     byte[] LuaFileLoader(ref string name)
@@ -50,6 +54,11 @@ public class MainLua : MonoBehaviour
     void Update()
     {
         luaenv.Tick();
+
+        if(update!= null)
+        {
+            update.Action(Time.deltaTime);
+        }
      
     }
     private void OnDestroy()
