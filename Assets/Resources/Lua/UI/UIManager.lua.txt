@@ -443,7 +443,7 @@ end
 --
 function UIManager:CloseAll()
     for k,v in pairs(self.mUIDic) do
-       self:Destroy(v)
+       self:Destroy(v,v.mCloseDestroy)
     end
     self.mUIDic = {}
     self.mUIStack = {}
