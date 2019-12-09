@@ -84,7 +84,7 @@ public abstract class Window
         }
     }
     public WindowType type;
-    public bool hideOther { get; protected set; } //隐藏其他window，减少overdraw,注意：在Scene视图的RenderMode->Overdraw。当然这里的视图只是提供了查看物体遮挡的层数关系，并不是真正的最终屏幕绘制的overdraw。
+    public bool hideOther { get; protected set; }
     public int fixedOrder { get; protected set; } = 0;
 
     public List<Type> fixedWidgets { get; protected set; }
@@ -336,7 +336,6 @@ public class WindowManager : MonoBehaviour
                     GameObject go = Instantiate(asset) as GameObject;
                     go.transform.SetParent(transform);
                     go.SetActive(true);
-                    go.layer = Window.LAYER_HIDE; //先设置为不显示，否则OnShow不会被调用
 
                     go.TryGetComponent(out Canvas canvas);
                     if (canvas == null) canvas = go.AddComponent<Canvas>();
@@ -409,35 +408,19 @@ public class WindowManager : MonoBehaviour
         var it = mWindowDic.GetEnumerator();
         while(it.MoveNext())
         {
-            if(it.Current.Value!= window)
+            if (it.Current.Value != window)
             {
-                if(window.hideWindows == null)
+                if (window.hideWindows == null)
                 {
                     window.hideWindows = new List<Window>();
                 }
-                window.hideWindows.Add(it.Current.Value);
-                
-                SetActive(it.Current.Value, false, false);
+                if (window.active)
+                {
+                    window.hideWindows.Add(it.Current.Value);
+                    SetActive(it.Current.Value, false, false);
+                }
             }
         }
-
-        if(window.hideWindows!= null)
-        {
-            window.hideWindows.Sort(SortHideWindow);
-        }
-    }
-
-    private int SortHideWindow(Window a, Window b)
-    {
-        if(a.canvas.sortingOrder < b.canvas.sortingOrder)
-        {
-            return -1;
-        }
-        else if(a.canvas.sortingOrder > b.canvas.sortingOrder)
-        {
-            return 1;
-        }
-        return 0;
     }
 
     public void SetActive(Window window, bool active, bool destory = false)
@@ -580,41 +563,70 @@ public class WindowManager : MonoBehaviour
         }
         if (window.type == WindowType.Normal)
         {
+            Window previous = null;
+            bool contains = false;
+            bool find = false;
             mWindowStackTemp.Clear();
             while (mWindowStack.Count > 0)
             {
                 var v = mWindowStack.Pop();
                 if (v == window)
                 {
-                    break;
+                    if (find == false)
+                    {
+                        find = true;
+                        if (mWindowStack.Count > 0)
+                        {
+                            previous = mWindowStack.Peek();
+                        }
+                    }
+                    else
+                    {
+                        contains = true;
+                        mWindowStackTemp.Push(v);
+                    }
                 }
                 else
                 {
                     mWindowStackTemp.Push(v);
                 }
             }
+
+            SetActive(window, false, contains == false && destroy);
+
             while (mWindowStackTemp.Count > 0)
             {
                 var v = mWindowStackTemp.Pop();
+                if (v == previous)
+                {
+                    if (mWindowStack.Count > 0 && previous.hideOther == false)
+                    {
+                        SetActive(mWindowStack.Peek(), true);
+                    }
+                }
 
                 mWindowStack.Push(v);
             }
-
-            if (mWindowStack.Contains(window))
+            if(window.hideWindows!= null)
             {
-                destroy = false;
+                for(int i =0; i < window.hideWindows.Count; ++i)
+                {
+                    if(window.hideWindows[i].type == WindowType.Widget)
+                    {
+                        SetActive(window.hideWindows[i], true);
+                    }
+                }
+                window.hideWindows.Clear();
+            }
+
+            if (previous != null)
+            {
+                SetActive(previous, true);
             }
         }
-
-        SetActive(window, false, destroy);
-
-        if (window.hideWindows != null)
+        else
         {
-            for (int i = 0; i < window.hideWindows.Count; ++i)
-            {
-                SetActive(window.hideWindows[i], true);
-            }
-            window.hideWindows.Clear();
+            SetActive(window, false, destroy);
         }
     }
 

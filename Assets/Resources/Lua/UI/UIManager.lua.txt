@@ -56,7 +56,7 @@ UIBase =
     mParent                 = nil,              --当前的父UI
 
     mType                   = UIType.Normal,    --UI类型
-    mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw，注意:在Scene视图的RenderMode->Overdraw。当然这里的视图只是提供了查看物体遮挡的层数关系，并不是真正的最终屏幕绘制的overdraw。
+    mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
     mHideWindows            = nil,      --打开本界面隐藏了哪些界面？
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
@@ -330,24 +330,16 @@ function UIManager:SetParent(ui, parent)
 end
 
 function UIManager:HideOther(ui)
-    if ui == nil then
-        return
-    end
     for k,v in pairs(self.mUIDic) do
         if v ~= ui then
             if ui.mHideWindows == nil then
                 ui.mHideWindows = {}
             end
-
-            table.insert( ui.mHideWindows, v )
-
-            self:SetActive(v, false)
+            if self:IsActive(v) then
+                table.insert( ui.mHideWindows, v )
+                self:SetActive(v, false)
+            end
         end
-    end
-
-    if ui.mHideWindows ~= nil then
-        --按sortingOrder升序排序
-        table.sort( ui.mHideWindows , function (a , b) return a.mCanvas.sortingOrder > b.mCanvas.sortingOrder end )
     end
 end
 
@@ -443,7 +435,7 @@ end
 --
 function UIManager:CloseAll()
     for k,v in pairs(self.mUIDic) do
-       self:Destroy(v,v.mCloseDestroy)
+       self:Destroy(v)
     end
     self.mUIDic = {}
     self.mUIStack = {}
@@ -473,7 +465,7 @@ function UIManager:CloseAllAndOpen(ui, parent, callback)
             end
         end
         if close and v ~= nil then
-           self:Destroy(v,v.mCloseDestroy)
+           self:Destroy(v)
         end
     end
 
@@ -493,43 +485,63 @@ function UIManager:Close(ui)
     if ui == nil then
         return
     end
-    local destroy = ui.mCloseDestroy
-
     if ui.mType == UIType.Normal  then
-        local find = false
+
+        local index = 0
+        local contains = false
         for i = 1,#self.mUIStack do
-            if find == false then
+            if index == 0 then
                 if self.mUIStack[i]== ui then
-                    find = true
+                    index = i
                     table.remove(self.mUIStack, i)
                     i = i -1
                 end
             else
                 if self.mUIStack[i] == ui then
-                    destroy = false
+                    contains = true 
                     break
                 end
             end
-        end  
-    end
-
-    self:Destroy(ui, destroy)
-
-    if ui.mHideWindows ~= nil then
-        for i,v in ipairs(ui.mHideWindows) do
-            self:SetActive(v, true)
         end
-        ui.mHideWindows = nil
+        
+        if contains == false then
+            self:Destroy(ui)          
+        end
+
+        if ui.mHideWindows ~= nil then
+            for i,v in ipairs(ui.mHideWindows) do
+                if v.mType == UIType.Widget then
+                    self:SetActive(v, true)
+                end
+            end
+            ui.mHideWindows = nil
+        end
+      
+        for i=#self.mUIStack, index, -1 do
+            local v = self.mUIStack[i]
+            if i == index then
+                if v.mHideOther == false then
+                    local previous = self.mUIStack[index + 1]
+                    if self:IsActive(previous) == false then
+                        self:SetActive(previous,true)
+                    end
+                end
+            end
+            self:SetActive(v,true)
+        end
+        
+    else
+        self:Destroy(ui)
     end
 end
 
-function UIManager:Destroy(ui,destroy)
+function UIManager:Destroy(ui)
 
     if ui == nil then return end
 
     self:SetActive(ui,false)
     --标记为Destroy才销毁
-    if destroy then
+    if ui.mCloseDestroy then
 
         self:SetParent(ui, nil)
         
@@ -555,16 +567,10 @@ function UIManager:Destroy(ui,destroy)
     end
 end
 
-function UIManager:Update(deltaTime)
-
-    for k,v in pairs(self.mUIDic) do
-        local update = v['OnUpdate']
-        --只有定义了Update函数才调用
-        if update ~= nil then
-            update(v, deltaTime)
-        end
+function UIManager:PrintStack()
+    for i,v in ipairs(self.mUIStack) do
+        print(i,v.mName, self:IsActive(v))
     end
-
 end
 
 
