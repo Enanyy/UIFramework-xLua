@@ -331,11 +331,11 @@ end
 
 function UIManager:HideOther(ui)
     for k,v in pairs(self.mUIDic) do
-        if v ~= ui then
-            if ui.mHideWindows == nil then
-                ui.mHideWindows = {}
-            end
+        if v ~= ui then         
             if self:IsActive(v) then
+                if ui.mHideWindows == nil then
+                    ui.mHideWindows = {}
+                end
                 table.insert( ui.mHideWindows, v )
                 self:SetActive(v, false)
             end

@@ -400,24 +400,25 @@ public class WindowManager : MonoBehaviour
 
     private void HideOther(Window window)
     {
-        if(window==null)
+        if (window == null)
         {
             return;
         }
 
         var it = mWindowDic.GetEnumerator();
-        while(it.MoveNext())
+        while (it.MoveNext())
         {
-            if (it.Current.Value != window)
+            var w = it.Current.Value;
+            if (w != window)
             {
-                if (window.hideWindows == null)
+                if (w.active)
                 {
-                    window.hideWindows = new List<Window>();
-                }
-                if (window.active)
-                {
-                    window.hideWindows.Add(it.Current.Value);
-                    SetActive(it.Current.Value, false, false);
+                    if (window.hideWindows == null)
+                    {
+                        window.hideWindows = new List<Window>();
+                    }
+                    window.hideWindows.Add(w);
+                    SetActive(w, false, false);
                 }
             }
         }
