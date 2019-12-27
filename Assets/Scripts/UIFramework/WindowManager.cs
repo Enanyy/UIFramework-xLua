@@ -90,11 +90,6 @@ public abstract class Window
     public List<Type> fixedWidgets { get; protected set; }
     public Dictionary<Type, Window> widgets { get; protected set; }
 
-    /// <summary>
-    /// 打开本界面隐藏了哪些界面？
-    /// </summary>
-    public List<Window> hideWindows { get; set; }
-
     public int widgetOrderAddition = 5;
 
     /// <summary>
@@ -219,9 +214,15 @@ public class WindowManager : MonoBehaviour
             return mInstance;
         }
     }
+
+    private class WindowNav
+    {
+        public Window window;
+        public List<Window> hideWindows;
+    }
+
     private Dictionary<Type, Window> mWindowDic = new Dictionary<Type, Window>();
-    private Stack<Window> mWindowStack = new Stack<Window>();
-    private Stack<Window> mWindowStackTemp = new Stack<Window>();
+    private List<WindowNav> mWindowStack = new List<WindowNav>();
     private List<Type> mCloseList = new List<Type>();
 
     
@@ -353,18 +354,8 @@ public class WindowManager : MonoBehaviour
                     scaler.referenceResolution = new Vector2(1920, 1080);
                     scaler.referencePixelsPerUnit = 100;
 
-                    
-                    if (t.hideOther )
-                    {
-                        HideOther(t);
-                    }
-                    if (t.type == WindowType.Normal)
-                    {
-                        if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
-                        {
-                            mWindowStack.Push(t);
-                        }
-                    }
+
+                    Push(t);
 
                     t.OnLoad(go);
 
@@ -378,18 +369,8 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                if (t.hideOther)
-                {
-                    HideOther(t);
-                }
+                Push(t);
 
-                if (t.type == WindowType.Normal)
-                {
-                    if (mWindowStack.Count <= 0 || mWindowStack.Peek().GetType() != type)
-                    {
-                        mWindowStack.Push(t);
-                    }
-                }
                 SetActive(t, true);
                 SetTouch(true);
 
@@ -398,29 +379,39 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    private void HideOther(Window window)
+    private void Push(Window window)
     {
-        if (window == null)
+        if(window== null)
         {
             return;
         }
 
-        var it = mWindowDic.GetEnumerator();
-        while (it.MoveNext())
-        {
-            var w = it.Current.Value;
-            if (w != window)
+        if (window.type == WindowType.Normal)
+        { 
+            WindowNav nav = new WindowNav();
+            nav.window = window;
+
+            if (window.hideOther)
             {
-                if (w.active)
+                var it = mWindowDic.GetEnumerator();
+                while (it.MoveNext())
                 {
-                    if (window.hideWindows == null)
+                    var w = it.Current.Value;
+                    if (w != window)
                     {
-                        window.hideWindows = new List<Window>();
+                        if (w.active)
+                        {
+                            if (nav.hideWindows == null)
+                            {
+                                nav.hideWindows = new List<Window>();
+                            }
+                            nav.hideWindows.Add(w);
+                            SetActive(w, false, false);
+                        }
                     }
-                    window.hideWindows.Add(w);
-                    SetActive(w, false, false);
                 }
             }
+            mWindowStack.Insert(0,nav);
         }
     }
 
@@ -564,66 +555,45 @@ public class WindowManager : MonoBehaviour
         }
         if (window.type == WindowType.Normal)
         {
-            Window previous = null;
-            bool contains = false;
-            bool find = false;
-            mWindowStackTemp.Clear();
-            while (mWindowStack.Count > 0)
+            int index =  mWindowStack.FindIndex((nav) => { return nav.window == window; });
+            if (index >= 0 && index < mWindowStack.Count)
             {
-                var v = mWindowStack.Pop();
-                if (v == window)
-                {
-                    if (find == false)
-                    {
-                        find = true;
-                        if (mWindowStack.Count > 0)
-                        {
-                            previous = mWindowStack.Peek();
-                        }
-                    }
-                    else
-                    {
-                        contains = true;
-                        mWindowStackTemp.Push(v);
-                    }
-                }
-                else
-                {
-                    mWindowStackTemp.Push(v);
-                }
-            }
+                WindowNav current = mWindowStack[index];
 
-            SetActive(window, false, contains == false && destroy);
-
-            while (mWindowStackTemp.Count > 0)
-            {
-                var v = mWindowStackTemp.Pop();
-                if (v == previous)
+                WindowNav previous = null;
+                int previousIndex = index + 1;
+                if (previousIndex < mWindowStack.Count)
                 {
-                    if (mWindowStack.Count > 0 && previous.hideOther == false)
+                    previous = mWindowStack[previousIndex];
+                }
+
+                mWindowStack.RemoveAt(index);
+
+                SetActive(window, false, mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0 && destroy);
+
+                if (current != null && current.hideWindows != null)
+                {
+                    for (int i = 0; i < current.hideWindows.Count; ++i)
                     {
-                        SetActive(mWindowStack.Peek(), true);
+                        SetActive(current.hideWindows[i], true);
                     }
                 }
 
-                mWindowStack.Push(v);
-            }
-            if(window.hideWindows!= null)
-            {
-                for(int i =0; i < window.hideWindows.Count; ++i)
+                if (previous != null)
                 {
-                    if(window.hideWindows[i].type == WindowType.Widget)
+                    if(previous.window.hideOther == false && previousIndex < mWindowStack.Count)
                     {
-                        SetActive(window.hideWindows[i], true);
+                        var previousPrevious = mWindowStack[previousIndex];
+                        
+                        SetActive(previousPrevious.window, true);
                     }
+                    SetActive(previous.window, true);
                 }
-                window.hideWindows.Clear();
             }
-
-            if (previous != null)
+            else
             {
-                SetActive(previous, true);
-            }
+                SetActive(window, false, destroy);
+            }          
         }
         else
         {

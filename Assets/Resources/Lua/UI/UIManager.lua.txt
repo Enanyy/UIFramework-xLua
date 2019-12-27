@@ -57,7 +57,6 @@ UIBase =
 
     mType                   = UIType.Normal,    --UI类型
     mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
-    mHideWindows            = nil,      --打开本界面隐藏了哪些界面？
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
     mWidgetOrderAddition    = 5,        --在父界面的SortingOrder基础上加上的数值，只对Widget有效
@@ -246,15 +245,8 @@ function UIManager:Open(ui, parent, callback)
 
                 ui:OnLoad()
             
-                if ui.mHideOther == true then
-                   self:HideOther(ui)
-                end
-        
-                if ui.mType == UIType.Normal then
-                    if #self.mUIStack <= 0  or self.mUIStack[1] ~= ui then
-                        table.insert( self.mUIStack, 1, ui )
-                    end
-                end
+                self:Push(ui)
+
                 self:SetActive(ui,true)
                 self:SetTouch(true)
 
@@ -265,15 +257,7 @@ function UIManager:Open(ui, parent, callback)
 
         else 
     
-            if ui.mHideOther == true then
-                self:HideOther(ui)
-            end
-
-            if ui.mType == UIType.Normal then
-                if #self.mUIStack <= 0  or self.mUIStack[1] ~= ui then
-                    table.insert( self.mUIStack, 1, ui )
-                end
-            end
+            self:Push(ui)
 
             self:SetActive(ui,true)
             self:SetTouch(true)
@@ -282,6 +266,35 @@ function UIManager:Open(ui, parent, callback)
                 callback()
             end
         end
+    end
+end
+
+function UIManager:Push(ui)
+    if ui == nil then return end
+
+    if ui.mType == UIType.Normal then
+
+        local nav = {
+            mUI = ui,
+            mHideList  = nil,
+        }
+
+        if ui.mHideOther then
+            for k,v in pairs(self.mUIDic) do
+                if v ~= ui and  self:IsActive(v) then
+
+                    if nav.mHideList == nil then
+                        nav.mHideList = {}
+                    end
+
+                    table.insert( nav.mHideList,#nav.mHideList + 1, v)
+
+                    self:SetActive(v,false)
+                end
+            end
+        end
+
+        table.insert( self.mUIStack, nav)
     end
 end
 
@@ -329,19 +342,6 @@ function UIManager:SetParent(ui, parent)
     end
 end
 
-function UIManager:HideOther(ui)
-    for k,v in pairs(self.mUIDic) do
-        if v ~= ui then         
-            if self:IsActive(v) then
-                if ui.mHideWindows == nil then
-                    ui.mHideWindows = {}
-                end
-                table.insert( ui.mHideWindows, v )
-                self:SetActive(v, false)
-            end
-        end
-    end
-end
 
 --设置ui隐藏或者显示
 function UIManager:SetActive(ui,active)
@@ -487,17 +487,21 @@ function UIManager:Close(ui)
     end
     if ui.mType == UIType.Normal  then
 
+        local current =  nil
+        local previous = nil
         local index = 0
         local contains = false
         for i = 1,#self.mUIStack do
             if index == 0 then
-                if self.mUIStack[i]== ui then
+                if self.mUIStack[i].mUI == ui then
                     index = i
+                    current = self.mUIStack[i]
+                    previous = self.mUIStack[i + 1]
                     table.remove(self.mUIStack, i)
                     i = i -1
                 end
             else
-                if self.mUIStack[i] == ui then
+                if self.mUIStack[i].mUI == ui then
                     contains = true 
                     break
                 end
@@ -508,26 +512,21 @@ function UIManager:Close(ui)
             self:Destroy(ui)          
         end
 
-        if ui.mHideWindows ~= nil then
-            for i,v in ipairs(ui.mHideWindows) do
-                if v.mType == UIType.Widget then
-                    self:SetActive(v, true)
-                end
+        if current ~= nil and current.mHideList ~= nil then
+            for i,v in ipairs(current.mHideList) do
+                self:SetActive(v, true)
             end
-            ui.mHideWindows = nil
         end
       
-        for i=#self.mUIStack, index, -1 do
-            local v = self.mUIStack[i]
-            if i == index then
-                if v.mHideOther == false then
-                    local previous = self.mUIStack[index + 1]
-                    if self:IsActive(previous) == false then
-                        self:SetActive(previous,true)
-                    end
+        if previous~= nil then
+            if previous.mUI.mHideOther == false then
+                local  previousPrevious = self.mUIStack[index + 1]
+                if previousPrevious ~= nil then
+                    self:SetActive(previousPrevious.mUI,true)
                 end
             end
-            self:SetActive(v,true)
+
+            self:SetActive(previous.mUI, true)
         end
         
     else
@@ -567,10 +566,13 @@ function UIManager:Destroy(ui)
     end
 end
 
-function UIManager:PrintStack()
-    for i,v in ipairs(self.mUIStack) do
-        print(i,v.mName, self:IsActive(v))
-    end
+function UIManager:Update( deltaTime )
+   for k,v in pairs(self.mUIDic) do
+        local update = v["OnUpdate"]
+        if update then
+            update(v, deltaTime)
+        end
+   end
 end
 
 

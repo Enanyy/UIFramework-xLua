@@ -184,7 +184,7 @@ end
 
 function M:OnUpdate(deltaTime)
 
-	print("UIMain Update:"..deltaTime)
+	--print("UIMain Update:"..deltaTime)
 end
 
 return M
