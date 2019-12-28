@@ -397,22 +397,37 @@ public class WindowManager : MonoBehaviour
                 while (it.MoveNext())
                 {
                     var w = it.Current.Value;
-                    if (w != window)
+                    if (w != window && w.active && w.parent == null)
                     {
-                        if (w.active)
+                        if (nav.hideWindows == null)
                         {
-                            if (nav.hideWindows == null)
-                            {
-                                nav.hideWindows = new List<Window>();
-                            }
-                            nav.hideWindows.Add(w);
-                            SetActive(w, false, false);
+                            nav.hideWindows = new List<Window>();
                         }
+                        nav.hideWindows.Add(w);
+                        SetActive(w, false, false);
                     }
+                }
+
+                if(nav.hideWindows!= null)
+                {
+                    nav.hideWindows.Sort(SortWindow);
                 }
             }
             mWindowStack.Insert(0,nav);
         }
+    }
+
+    private int SortWindow(Window a, Window b)
+    {
+        if(a.canvas.sortingOrder > b.canvas.sortingOrder)
+        {
+            return -1;
+        }
+        else if (a.canvas.sortingOrder < b.canvas.sortingOrder)
+        {
+            return 1;
+        }
+        return 0;
     }
 
     public void SetActive(Window window, bool active, bool destory = false)

@@ -281,7 +281,7 @@ function UIManager:Push(ui)
 
         if ui.mHideOther then
             for k,v in pairs(self.mUIDic) do
-                if v ~= ui and  self:IsActive(v) then
+                if v ~= ui and  self:IsActive(v) and v.mParent == nil then
 
                     if nav.mHideList == nil then
                         nav.mHideList = {}
@@ -291,6 +291,13 @@ function UIManager:Push(ui)
 
                     self:SetActive(v,false)
                 end
+            end
+            if nav.mHideList ~= nil then
+                table.sort( nav.mHideList, function(a, b)
+        
+                    return  a.mCanvas.sortingOrder > b.mCanvas.sortingOrder
+
+                end )
             end
         end
 
@@ -489,6 +496,7 @@ function UIManager:Close(ui)
 
         local current =  nil
         local previous = nil
+        local previousPrevious = nil
         local index = 0
         local contains = false
         for i = 1,#self.mUIStack do
@@ -497,8 +505,7 @@ function UIManager:Close(ui)
                     index = i
                     current = self.mUIStack[i]
                     previous = self.mUIStack[i + 1]
-                    table.remove(self.mUIStack, i)
-                    i = i -1
+                    previousPrevious = self.mUIStack[i + 2]
                 end
             else
                 if self.mUIStack[i].mUI == ui then
@@ -506,6 +513,10 @@ function UIManager:Close(ui)
                     break
                 end
             end
+        end
+
+        if index > 0 then
+            table.remove(self.mUIStack, index)
         end
         
         if contains == false then
@@ -520,7 +531,6 @@ function UIManager:Close(ui)
       
         if previous~= nil then
             if previous.mUI.mHideOther == false then
-                local  previousPrevious = self.mUIStack[index + 1]
                 if previousPrevious ~= nil then
                     self:SetActive(previousPrevious.mUI,true)
                 end
@@ -568,9 +578,11 @@ end
 
 function UIManager:Update( deltaTime )
    for k,v in pairs(self.mUIDic) do
-        local update = v["OnUpdate"]
-        if update then
-            update(v, deltaTime)
+        if self:IsActive(v) then
+            local update = v["OnUpdate"]
+            if update then
+                update(v, deltaTime)
+            end
         end
    end
 end
