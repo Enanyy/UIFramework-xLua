@@ -37,12 +37,12 @@ function table.print(tbl)
     local msg = table.serialize(tbl)
     print(msg)
 end
----查找index，从1开始
+---根据条件查找，返回元素和index
 ---tb:要查找的表
 ---func:条件函数，返回布尔值
-function table.index(tb,func)
+function table.find(tb,func)
     if tb == nil or func == nil then
-        return 0
+        return nil,0
     end
     local index = 0
     for key, value in pairs(tb) do
@@ -50,13 +50,38 @@ function table.index(tb,func)
             index = index + 1
 
             if func(value) then
-                return index
+                return value, index
             end
 
         end
     end
-    return 0
+    return nil, 0
 end
+---根据查找最后一个
+---tb:要查找的表
+---func:条件函数，返回布尔值
+function table.last(tb,func)
+    if tb == nil or func == nil then
+        return nil,0
+    end
+    local ret = nil
+    local index = 0
+    for key, value in pairs(tb) do
+        if value~= nil then
+            index = index + 1
+
+            if func(value) then
+                ret = value
+            end
+
+        end
+    end
+    if ret == nil then
+        index = 0
+    end
+    return ret, index
+end
+
 ---根据条件删除
 ---tb:要删除的表
 ---func：条件函数，返回布尔值
@@ -104,6 +129,13 @@ function table.exists(tb,func)
     end
     return false
     
+end
+---判断表是否存在某个元素
+function table.contains(tb,item)
+    
+    return table.exists(tb,function (value)
+        return value == item
+    end)
 end
 
 

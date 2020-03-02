@@ -494,10 +494,10 @@ function UIManager:Close(ui)
     end
     if ui.mType == UIType.Normal  then
 
-        local index = table.index(self.mUIStack,function (nav) return nav.mUI == ui end)
+        local current, index = table.find(self.mUIStack,function (nav) return nav.mUI == ui end)
 
-        if index > 0 then
-            local current = self.mUIStack[index]
+        if current then
+           
             local previous = nil
             local previousIndex = index + 1
             if previousIndex <= #self.mUIStack then
