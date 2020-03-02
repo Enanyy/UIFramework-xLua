@@ -182,6 +182,7 @@ public abstract class Window
     {
         gameObject = go;
         status = WindowStatus.LoadDone;
+        SetLayer(LAYER_HIDE);//先隐藏
     }
     public virtual void OnUnload()
     {
@@ -358,7 +359,7 @@ public class WindowManager : MonoBehaviour
                     Push(t);
 
                     t.OnLoad(go);
-
+                   
                     SetActive(t, true);
                     SetTouch(true);
 
