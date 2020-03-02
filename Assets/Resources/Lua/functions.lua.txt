@@ -60,7 +60,7 @@ end
 ---根据查找最后一个
 ---tb:要查找的表
 ---func:条件函数，返回布尔值
-function table.last(tb,func)
+function table.findlast(tb,func)
     if tb == nil or func == nil then
         return nil,0
     end
