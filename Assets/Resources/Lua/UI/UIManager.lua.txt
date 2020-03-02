@@ -226,7 +226,7 @@ function UIManager:Open(ui, parent, callback)
 
                 local go = GameObject.Instantiate(obj)
                 go.transform:SetParent(self.mUIRoot.transform)
-                self:SetLayer(go,self.mLayer)
+                self:SetLayer(go,self.mLayerHide) --先隐藏，从而触发OnShow
         
                 ui.gameObject = go
                 ui.mCanvas = ui:GetComponent(typeof(Canvas))
