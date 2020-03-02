@@ -1,0 +1,113 @@
+
+-- 序列化tablle表--將表轉化成string
+function  table.serialize(obj)
+    local lua = ""
+    local t = type(obj)
+    if t == "number" then
+        lua = lua .. obj
+    elseif t == "boolean" then
+        lua = lua .. tostring(obj)
+    elseif t == "string" then
+        lua = lua .. string.format("%q", obj)
+    elseif t == "table" then
+        lua = lua .. "{\n"
+    for k, v in pairs(obj) do
+        lua = lua .. "[" .. table.serialize(k) .. "]=" .. table.serialize(v) .. ",\n"
+    end
+    local metatable = getmetatable(obj)
+        if metatable ~= nil and type(metatable.__index) == "table" then
+        for k, v in pairs(metatable.__index) do
+            lua = lua .. "[" .. table.serialize(k) .. "]=" .. table.serialize(v) .. ",\n"
+        end
+    end
+        lua = lua .. "}"
+    elseif t == "nil" then
+        return nil
+    else
+        return "-nil-" 
+        --error("can not serialize a " .. t .. " type.")
+    end
+    return lua
+end
+
+---
+--- @function: 打印table的内容，递归,主要用于打印信息，方便调试
+---
+function table.print(tbl)
+    local msg = table.serialize(tbl)
+    print(msg)
+end
+---查找index，从1开始
+---tb:要查找的表
+---func:条件函数，返回布尔值
+function table.index(tb,func)
+    if tb == nil or func == nil then
+        return 0
+    end
+    local index = 0
+    for key, value in pairs(tb) do
+        if value~= nil then
+            index = index + 1
+
+            if func(value) then
+                return index
+            end
+
+        end
+    end
+    return 0
+end
+---根据条件删除
+---tb:要删除的表
+---func：条件函数，返回布尔值
+function table.removewhere(tb, func)
+    if tb == nil or func == nil then
+        return
+    end
+
+    for i = #tb, 1, -1 do
+        local t = tb[i]
+        if func(t) then
+            table.remove(tb,i)
+        end
+    end
+    
+end
+---选择元素并返回列表
+---tb:要选择的表
+---func：条件函数，返回布尔值
+function table.select(tb, func)
+    if tb == nil or func == nil then
+        return nil
+    end
+    local list = {}
+    for key, value in pairs(tb) do
+        if value~= nil then
+            table.insert(list,func(value))
+        end
+    end
+    return list
+end
+--是否存在满足条件的元素
+---tb:要判断的表
+---func：条件函数，返回布尔值
+function table.exists(tb,func)
+    if tb == nil or func == nil then
+        return false
+    end
+    for key, value in pairs(tb) do
+        if value~= nil then
+            if func(value) then
+                return true
+            end
+        end
+    end
+    return false
+    
+end
+
+
+--获得32位整数num的第index(0-31)位是0还是1
+function math.getbit(num,index)
+    return (num & (0x1 << index)) >> index
+end

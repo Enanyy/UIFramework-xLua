@@ -9,6 +9,8 @@ setmetatable(_G, {
     end
 })
 
+require("functions")
+
 function main( )
     --UIManager:Open("UIMain")
     local data = DTHero.Get(1)
@@ -16,6 +18,7 @@ function main( )
     print(data.name)
     print(data.height)
     print(data.list)
+    table.print(data)
 
     UIManager:Init()
     UIManager:SetLoader(CS.MainLua.LoadUI)

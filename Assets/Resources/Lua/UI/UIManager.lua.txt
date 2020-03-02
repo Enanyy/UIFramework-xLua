@@ -287,7 +287,7 @@ function UIManager:Push(ui)
                         nav.mHideList = {}
                     end
 
-                    table.insert( nav.mHideList,#nav.mHideList + 1, v)
+                    table.insert( nav.mHideList, v)
 
                     self:SetActive(v,false)
                 end
@@ -300,8 +300,8 @@ function UIManager:Push(ui)
                 end )
             end
         end
-
-        table.insert( self.mUIStack, nav)
+        --新打开的加到栈顶
+        table.insert( self.mUIStack, 1, nav)
     end
 end
 
@@ -494,51 +494,43 @@ function UIManager:Close(ui)
     end
     if ui.mType == UIType.Normal  then
 
-        local current =  nil
-        local previous = nil
-        local previousPrevious = nil
-        local index = 0
-        local contains = false
-        for i = 1,#self.mUIStack do
-            if index == 0 then
-                if self.mUIStack[i].mUI == ui then
-                    index = i
-                    current = self.mUIStack[i]
-                    previous = self.mUIStack[i + 1]
-                    previousPrevious = self.mUIStack[i + 2]
-                end
-            else
-                if self.mUIStack[i].mUI == ui then
-                    contains = true 
-                    break
-                end
-            end
-        end
+        local index = table.index(self.mUIStack,function (nav) return nav.mUI == ui end)
 
         if index > 0 then
-            table.remove(self.mUIStack, index)
-        end
-        
-        if contains == false then
-            self:Destroy(ui)          
-        end
-
-        if current ~= nil and current.mHideList ~= nil then
-            for i,v in ipairs(current.mHideList) do
-                self:SetActive(v, true)
+            local current = self.mUIStack[index]
+            local previous = nil
+            local previousIndex = index + 1
+            if previousIndex <= #self.mUIStack then
+               previous = self.mUIStack[previousIndex] 
             end
-        end
-      
-        if previous~= nil then
-            if previous.mUI.mHideOther == false then
-                if previousPrevious ~= nil then
-                    self:SetActive(previousPrevious.mUI,true)
+            table.remove(self.mUIStack, index)
+
+            local contains = table.exists(self.mUIStack,function (nav) return nav.mUI == ui end) 
+
+            if contains == false then
+                self:Destroy(ui)          
+            else
+                self:SetActive(ui,false)
+            end
+
+            if current ~= nil and current.mHideList ~= nil then
+               
+                for i,v in ipairs(current.mHideList) do
+                    self:SetActive(v, true)
                 end
             end
 
-            self:SetActive(previous.mUI, true)
-        end
-        
+            if previous ~= nil then
+                if previous.mUI.mHideOther == false and previousIndex <= #self.mUIStack then
+                    local previousPrevious = self.mUIStack[previousIndex]
+                    self:SetActive(previousPrevious.mUI,true)
+                end
+                self:SetActive(previous.mUI,true)
+            end
+
+        else
+            self:Destroy(ui)
+        end     
     else
         self:Destroy(ui)
     end
