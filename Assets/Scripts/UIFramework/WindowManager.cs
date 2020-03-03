@@ -409,7 +409,7 @@ public class WindowManager : MonoBehaviour
                             nav.hideWindows = new List<Window>();
                         }
                         nav.hideWindows.Add(w);
-                        SetActive(w, false, false);
+                        SetActive(w, false);
                     }
                 }
 
@@ -435,28 +435,21 @@ public class WindowManager : MonoBehaviour
         return 0;
     }
 
-    public void SetActive(Window window, bool active, bool destory = false)
+    public void SetActive(Window window, bool active)
     {
         if (window == null)
         {
             return;
         }
 
-        if (destory)
-        {
-            window.active = false;
 
-            DestroyWindow(window);
-        }
-        else
+        if (active)
         {
-            if (active)
-            {
-                SetOrder(window);
-            }
-
-            window.active = active;
+            SetOrder(window);
         }
+
+        window.active = active;
+
     }
     private void SetOrder(Window window)
     {
@@ -520,9 +513,16 @@ public class WindowManager : MonoBehaviour
     {
         mCloseList.Clear();
         mCloseList.AddRange(mWindowDic.Keys);
-        for(int i = 0; i < mCloseList.Count; ++i)
+        for (int i = 0; i < mCloseList.Count; ++i)
         {
-            SetActive(Get(mCloseList[i]), false, destroy);
+            if (destroy)
+            {
+                DestroyWindow(Get(mCloseList[i]));
+            }
+            else
+            {
+                SetActive(Get(mCloseList[i]), false);
+            }
         }
         mCloseList.Clear();
         mWindowStack.Clear();
@@ -555,7 +555,14 @@ public class WindowManager : MonoBehaviour
             Type key = mCloseList[i];
             if (mWindowDic.TryGetValue(key, out Window w))
             {
-                SetActive(w, false, destroy);
+                if (destroy)
+                {
+                    DestroyWindow(window);
+                }
+                else
+                {
+                    SetActive(w, false);
+                }
             }
         }
         mWindowStack.Clear();
@@ -588,9 +595,14 @@ public class WindowManager : MonoBehaviour
                 }
 
                 mWindowStack.RemoveAt(index);
-
-                SetActive(window, false, mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0 && destroy);
-
+                if (mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0 && destroy)
+                {
+                    DestroyWindow(window);
+                }
+                else
+                {
+                    SetActive(window, false);
+                }
                 if (current != null && current.hideWindows != null)
                 {
                     for (int i = 0; i < current.hideWindows.Count; ++i)
@@ -612,12 +624,26 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                SetActive(window, false, destroy);
+                if (destroy)
+                {
+                    DestroyWindow(window);
+                }
+                else
+                {
+                    SetActive(window, false);
+                }
             }          
         }
         else
         {
-            SetActive(window, false, destroy);
+            if (destroy)
+            {
+                DestroyWindow(window);
+            }
+            else
+            {
+                SetActive(window, false);
+            }
         }
     }
 
@@ -627,6 +653,7 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
+        SetActive(window, false);
         mWindowDic.Remove(window.GetType());
         Destroy(window.gameObject);
         window.OnUnload();
