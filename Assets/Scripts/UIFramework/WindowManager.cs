@@ -174,7 +174,11 @@ public abstract class Window
         var transforms = gameObject.GetComponentsInChildren<Transform>();
         for (int i = 0; i < transforms.Length; ++i)
         {
-            transforms[i].gameObject.layer = layer;
+            var child = transforms[i].gameObject;
+            if(child.layer != LAYER_MODEL)
+            {
+                child.layer = layer;
+            }
         }
     }
 
@@ -245,7 +249,7 @@ public class WindowManager : MonoBehaviour
         mCamera.orthographic = false; //--使用透视投影，这样UI模型的3D立体感更强
         mCamera.orthographicSize = 10;
         mCamera.fieldOfView = 60;
-        mCamera.cullingMask = 1 << Window.LAYER | 1 << Window.LAYER_MODEL;
+        mCamera.cullingMask = 1 << Window.LAYER ;
 
         GameObject eventsystem = new GameObject("EventSystem");
         eventsystem.transform.SetParent(transform);

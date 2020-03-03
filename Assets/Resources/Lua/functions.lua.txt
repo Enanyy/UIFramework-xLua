@@ -100,7 +100,7 @@ function table.removewhere(tb, func)
 end
 ---选择元素并返回列表
 ---tb:要选择的表
----func：条件函数，返回布尔值
+---func：条件函数，返回要选择的元素或者值
 function table.select(tb, func)
     if tb == nil or func == nil then
         return nil

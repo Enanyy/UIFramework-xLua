@@ -143,7 +143,7 @@ function UIManager:Init()
     self.mCamera.orthographic = false  --使用透视投影，这样UI模型的3D立体感更强
     -- self.mCamera.orthographicSize = 10
     self.mCamera.fieldOfView = 60
-    self.mCamera.cullingMask = 2^self.mLayer + 2^self.mLayerModel  
+    self.mCamera.cullingMask = 2^self.mLayer 
 
     local eventsystem = GameObject("EventSystem")
     eventsystem.transform:SetParent(self.mUIRoot.transform)
@@ -314,7 +314,10 @@ function UIManager:SetLayer(go,layer)
         go.layer = layer
         local transforms = go:GetComponentsInChildren(typeof(Transform))
         for i = 0, transforms.Length - 1 do
-            transforms[i].gameObject.layer = layer
+            local child = transforms[i].gameObject
+            if child.layer ~= self.mLayerModel  then
+                child.layer = layer
+            end
         end     
     end
 end
