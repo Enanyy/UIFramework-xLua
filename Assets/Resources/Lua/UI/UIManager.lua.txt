@@ -412,7 +412,7 @@ end
 
 function UIManager:SetSortOrder(ui)
 
-    if ui == nil then return end
+    if ui == nil or ui.mCanvas == nil then return end
 
     if ui.mType == UIType.Widget and ui.mFixedOrder ~= 0 then    
         ui.mCanvas.sortingOrder = ui.mFixedOrder

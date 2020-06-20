@@ -1,0 +1,10 @@
+--用到时require
+setmetatable(_G, {
+    __index = function(t,i)
+        local ret = require(i)
+        if ret then
+            t[i] = ret
+        end
+        return ret
+    end
+})
