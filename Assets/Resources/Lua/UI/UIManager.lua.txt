@@ -457,23 +457,26 @@ function UIManager:CloseAllAndOpen(ui, parent, callback)
     if type(ui) == "string" then
         ui = self:Get(ui)
     end
+    if ui == nil then
+        return
+    end
   
     for k,v in pairs(self.mUIDic) do
         local close = true
-        if ui ~= nil and v ~= nil then
-            if v == ui then
-                close = false
-            else
-                if v.mType == UIType.Widget then
-                    for i,w in ipairs(ui.mWidgets) do
-                        if w == v.mName then
-                            close = false
-                            break
-                        end
+
+        if v ~= nil and v == ui then
+            close = false
+        else
+            if v.mType == UIType.Widget then
+                for i,w in ipairs(ui.mWidgets) do
+                    if w == v.mName then
+                        close = false
+                        break
                     end
                 end
             end
         end
+        
         if close and v ~= nil then
            self:Destroy(v)
         end

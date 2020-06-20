@@ -8,7 +8,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mClose = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mClose')
+--BINDING_CODE_BEGIN
+	self.mClose = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mClose')
 	self.mNormal = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mNormal')
 	self.mPop = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mPop')
 	self.mMain = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mMain')
@@ -17,12 +18,14 @@ function M:OnLoad()
 
     self.mClose.onClick:AddListener(function() self:Close() end )
     self.mPop.onClick:AddListener(function() UIManager:Open(UIPop) end)
-    self.mNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
+	self.mNormal.onClick:AddListener(function() UIManager:Open(UINormal) end)
+	self.mMain.onClick:AddListener(function () UIManager:CloseAllAndOpen(UIMain) end)
 end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mClose = nil
+--UNBINDING_CODE_BEGIN
+	self.mClose = nil
 	self.mNormal = nil
 	self.mPop = nil
 	self.mMain = nil

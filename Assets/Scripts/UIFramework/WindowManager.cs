@@ -557,7 +557,7 @@ public class WindowManager : MonoBehaviour
             {
                 if (destroy)
                 {
-                    DestroyWindow(window);
+                    DestroyWindow(w);
                 }
                 else
                 {
