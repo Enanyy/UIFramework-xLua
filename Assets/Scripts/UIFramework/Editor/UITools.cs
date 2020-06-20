@@ -116,11 +116,9 @@ public class {classname} : Window
             return;
 
         StringBuilder bindCode = new StringBuilder();
-        StringBuilder unBindCode = new StringBuilder();
         foreach (Variable variable in variableDir.Values)
         {
             bindCode.Append(string.Format("\tself.{0} = self:GetComponent(typeof({1}), '{2}')\n", variable.Name, variable.Type, variable.Path));
-            unBindCode.Append(string.Format("\tself.{0} = nil\n", variable.Name));
         }
 
 
@@ -135,22 +133,14 @@ public class {classname} : Window
             int endIndex = content.IndexOf("--BINDING_CODE_END");
             string part1 = content.Substring(0, startIndex + "--BINDING_CODE_BEGIN".Length + 1);
             string part2 = content.Substring(endIndex);
-            content = part1 + bindCode.ToString() + part2;
-
-            startIndex = content.IndexOf("--UNBINDING_CODE_BEGIN");
-            endIndex = content.IndexOf("--UNBINDING_CODE_END");
-            part1 = content.Substring(0, startIndex + "--UNBINDING_CODE_BEGIN".Length + 1);
-            part2 = content.Substring(endIndex);
-
-            code = part1 + unBindCode.ToString() + part2;
+            code = part1 + bindCode.ToString() + part2;
 
             File.Delete(fullpath);
         }
         else
         {
             code = lua.Replace("{classname}", ui.name)
-                    .Replace("{binding}", bindCode.ToString())
-                    .Replace("{unbinding}", unBindCode.ToString());
+                    .Replace("{binding}", bindCode.ToString());
         }
 
 

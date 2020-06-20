@@ -22,12 +22,7 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN
-	self.mButtonClose = nil
-	self.mButtonMain = nil
-	self.mButtonPop = nil
-	self.mButtonWidget = nil
---UNBINDING_CODE_END
+
 end
 --整个生命周期可能调用多次
 function M:OnShow() 

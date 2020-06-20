@@ -61,7 +61,7 @@ UIBase =
     mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
     mWidgetOrderAddition    = 5,        --在父界面的SortingOrder基础上加上的数值，只对Widget有效
 
-    mCloseDestroy           = false,     --关闭时Destroy资源
+    mCloseDestroy           = true,     --关闭时Destroy资源
 }
 UIBase.__index = UIBase
 
@@ -555,6 +555,11 @@ function UIManager:Destroy(ui)
         self.mUIDic[ui.mName] = nil
 
         ui:OnUnload()   
+        for key, value in pairs(ui) do
+            if type(value)=="userdata" then
+                ui[key] = nil
+            end
+        end
         
         if ui.gameObject then
             print("Destroy:"..ui.mName)

@@ -6,7 +6,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonClose')
+--BINDING_CODE_BEGIN
+	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonClose')
 	self.mbuttonMain = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mbuttonMain')
 	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonNormal')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/Widget/@Button.mButtonWidget')
@@ -21,12 +22,7 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN	self.mButtonClose = nil
-	self.mbuttonMain = nil
-	self.mButtonNormal = nil
-	self.mButtonWidget = nil
-	self.mText = nil
---UNBINDING_CODE_END
+
 end
 
 return M
