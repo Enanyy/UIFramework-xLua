@@ -13,7 +13,7 @@ public enum WindowStatus
     Loading = 1,     //正在加载中
     Done = 2,     //加载完成
 }
-public sealed class WindowContext
+public class WindowContext
 {
     public const int LAYER = 5;
     public const int LAYER_MODEL = 6;
@@ -39,7 +39,6 @@ public sealed class WindowContext
 
     public WindowStatus status = WindowStatus.None;
     public readonly Dictionary<string, WindowContext> widgets = new Dictionary<string, WindowContext>();
-    public int sortingOrderOffset = 0;
 
     public WindowContext(string name,
         WindowType type = WindowType.Normal,
@@ -76,6 +75,38 @@ public sealed class WindowContext
             }
         }
     }
+
+
+    public virtual void Clear()
+    {
+        mLayer = 0;
+        status = WindowStatus.None;
+
+        if (widgets != null)
+        {
+            widgets.Clear();
+        }
+    }
+}
+
+public class WidgetContext : WindowContext
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public readonly int sortingOrderOffset;
+    public WidgetContext(WindowContext context, int sortingOrderOffset) : 
+        base(context.name,
+        WindowType.Widget,
+        context.component,
+        context.hideOther,
+        context.fixedOrder,
+        context.closeDestroy
+        )
+    {
+        this.sortingOrderOffset = sortingOrderOffset;
+    }
+
     private WindowContext mParent;
     public WindowContext parent
     {
@@ -93,38 +124,9 @@ public sealed class WindowContext
         }
     }
 
-    public void RemoveFromParent()
+    public override void Clear()
     {
-        if (mParent != null && mParent.widgets != null)
-        {
-            mParent.widgets.Remove(name);
-        }
+        base.Clear();
         mParent = null;
-    }
-
-    public void Clear()
-    {
-        mLayer = 0;
-        status = WindowStatus.None;
-        mParent = null;
-        sortingOrderOffset = 0;
-        if (widgets != null)
-        {
-            widgets.Clear();
-        }
-    }
-}
-
-public sealed class WidgetContext
-{
-    /// <summary>
-    ///
-    /// </summary>
-    public readonly int sortingOrderOffset;
-    public readonly WindowContext context;
-    public WidgetContext(WindowContext context, int orderOffset)
-    {
-        this.context = context;
-        this.sortingOrderOffset = orderOffset;
     }
 }

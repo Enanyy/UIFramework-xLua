@@ -108,12 +108,10 @@ public class WindowManager : MonoBehaviour
 
         if (widget != null)
         {
-            widget.context.sortingOrderOffset = widget.sortingOrderOffset;
-            widget.context.parent = context;
+            widget.parent = context;
         }
 
-        GameObject go = null;
-        mWindowObjectDic.TryGetValue(context.name, out go);
+        GameObject go = GetObject(context);
         if (go == null)
         {
             if (context.status == WindowStatus.Loading)
@@ -134,7 +132,15 @@ public class WindowManager : MonoBehaviour
                 context.status = WindowStatus.Done;
 
                 go = Instantiate(asset) as GameObject;
-                mWindowObjectDic.Add(context.name, go);
+                if (mWindowObjectDic.ContainsKey(context.name))
+                {
+                    Destroy(mWindowObjectDic[context.name]);
+                    mWindowObjectDic[context.name] = go;
+                }
+                else
+                {
+                    mWindowObjectDic.Add(context.name, go);
+                }
                 AddComponent(go, context);
                 go.transform.SetParent(transform);
                 go.SetActive(true);
@@ -198,7 +204,7 @@ public class WindowManager : MonoBehaviour
                 while (it.MoveNext())
                 {
                     var w = it.Current.Value;
-                    if (w != window && w.active && w.parent == null)
+                    if (w != window && w.active && w.type == WindowType.Normal)
                     {
                         if (nav.hideWindows == null)
                         {
@@ -299,8 +305,7 @@ public class WindowManager : MonoBehaviour
             for (int i = 0; i < context.fixedWidgets.Count; ++i)
             {
                 var widget = context.fixedWidgets[i];
-                widget.context.sortingOrderOffset = widget.sortingOrderOffset;
-                widget.context.parent = context;
+                widget.parent = context;
             }
         }
 
@@ -309,7 +314,8 @@ public class WindowManager : MonoBehaviour
         {
             var widget = it.Current.Value;
 
-            if (widget.status == WindowStatus.Done)
+            var go = GetObject(widget);
+            if (go != null)
             {
                 SetActive(widget, active);
             }
@@ -328,28 +334,33 @@ public class WindowManager : MonoBehaviour
         return null;
     }
 
-    private void SetOrder(WindowContext window)
+    private void SetOrder(WindowContext context)
     {
-        if (window == null) return;
+        if (context == null) return;
 
-        var canvas = GetCanvas(window);
+        var canvas = GetCanvas(context);
         if(canvas == null)
         {
             return;
         }
 
-        if (window.type == WindowType.Widget && window.fixedOrder != 0)
+        if (context.type == WindowType.Widget && context.fixedOrder != 0)
         {
-            canvas.sortingOrder = window.fixedOrder;
+            canvas.sortingOrder = context.fixedOrder;
         }
         else
         {
-            if (window.parent != null)
+            
+            if (context.type == WindowType.Widget)
             {
-                var parent = GetCanvas(window.parent);
-                if (parent != null)
+                var widget = context as WidgetContext;
+                if (widget != null)
                 {
-                    canvas.sortingOrder = parent.sortingOrder + window.sortingOrderOffset;
+                    var parent = GetCanvas(widget.parent);
+                    if (parent != null)
+                    {
+                        canvas.sortingOrder = parent.sortingOrder + widget.sortingOrderOffset;
+                    }
                 }
             }
             else
@@ -361,7 +372,7 @@ public class WindowManager : MonoBehaviour
                 {
                     var v = it.Current.Value;
                     var c = GetCanvas(v);
-                    if (c != null && v.fixedOrder == 0 && v.parent == null)
+                    if (c != null && v.fixedOrder == 0 && v.type == WindowType.Normal)
                     {
                         if (c.sortingOrder > maxOrder)
                         {

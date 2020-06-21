@@ -99,16 +99,6 @@ function UIBase:AddWidget( widget)
     end
 end
 
-function UIBase:RemoveFromParent()
-    if self. mParent ~= nil and  self.mParent.mWidgets ~= nil then
-
-        table.removewhere(self.mParent.mWidgets,function (x)
-            return x == self
-        end)
-    end
-    self.mParent = nil
-end
-
 function UIBase:Clear()
     self.mWidgets = nil
     self.gameObject = nil
@@ -591,8 +581,6 @@ function UIManager:Destroy(ui)
     print("Destroy:"..ui.mName .." ".. tostring( ui.mCloseDestroy))
     if ui.mCloseDestroy then
 
-        ui:RemoveFromParent()
-        
         self.mUIDic[ui.mName] = nil
 
         ui:OnUnload()   
