@@ -54,8 +54,7 @@ end
 
 --整个生命周期只调用一次
 function M:OnUnload()
---UNBINDING_CODE_BEGIN
-{unbinding}--UNBINDING_CODE_END
+
 end
 
 

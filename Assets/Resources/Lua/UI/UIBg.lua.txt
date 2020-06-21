@@ -1,0 +1,34 @@
+local M = {{
+    mName = 'UIBg',
+    mWidgetOrderAddition = -1,
+}}
+UIBg = M
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+--BINDING_CODE_BEGIN
+	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonClose')
+--BINDING_CODE_END
+    self.mButtonClose.onClick:AddListener(function() self:Close() end )
+end
+
+--整个生命周期只调用一次
+function M:OnUnload()
+
+end
+
+
+--整个生命周期可能调用多次
+function M:OnShow()
+
+
+end
+
+--整个生命周期可能调用多次
+function M:OnHide()
+
+
+end
+
+return M

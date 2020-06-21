@@ -1,7 +1,7 @@
 local M = {
     mName = "UINormal",
     mHideOther = true,
-	mWidgets = {'UIFixed'},
+	mWidgets = {'UIBg','UIFixed'},
 }
 
 setmetatable(M, UIBase)
@@ -9,12 +9,11 @@ setmetatable(M, UIBase)
 --整个生命周期只调用一次
 function M:OnLoad()
 --BINDING_CODE_BEGIN
-	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonClose')
 	self.mButtonMain = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonMain')
 	self.mButtonPop = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonPop')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonWidget')
 --BINDING_CODE_END
-    self.mButtonClose.onClick:AddListener(function() self:Close() end )
+  
     self.mButtonMain.onClick:AddListener(function() UIManager:CloseAllAndOpen("UIMain") end)
     self.mButtonPop.onClick:AddListener(function()  UIManager:Open(UIPop) end)
     self.mButtonWidget.onClick:AddListener(function() UIManager:Open(UIWidget) end)
