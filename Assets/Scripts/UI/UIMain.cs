@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class UIMain : Window,IUpdateable
+public class UIMain : WindowComponent
 {
     //BINDING_DEFINITION_BEGIN	private Button mButtonNormal;
 	private Text mTextNormal;
@@ -52,14 +52,9 @@ public class UIMain : Window,IUpdateable
     }
 
     TabEnum current = TabEnum.T2;
-   
-    public UIMain()
+  
+    private void Awake()
     {
-        fixedWidgets = new List<System.Type> { /*typeof(UIFixed),*/ typeof(UIRight) };
-    }
-    public override void OnLoad(GameObject go)
-    {
-        base.OnLoad(go);
         //BINDING_CODE_BEGIN		mButtonNormal = GetComponent<Button>("Tween/SafeArea/@Button.mButtonNormal");
 		mTextNormal = GetComponent<Text>("Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal");
 		mButtonPop = GetComponent<Button>("Tween/SafeArea/@Button.mButtonPop");
@@ -75,9 +70,9 @@ public class UIMain : Window,IUpdateable
 		mTimer = GetComponent<Timer>("Tween/SafeArea/@Timer.mTimer");
 //BINDING_CODE_END
 
-        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open<UINormal>());
-        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open<UIPop>());
-        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open<UIWidget>());
+        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UINormal));
+        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIPop));
+        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIWidget));
 
         mButtonAdd.onClick.AddListener(OnButtonAddClick);
         mButtonRemove.onClick.AddListener(OnButtonRemoveClick);
@@ -176,11 +171,7 @@ public class UIMain : Window,IUpdateable
         Debug.Log("value from: " + from + " to: " + progressBar.value);
     }
 
-    protected override void OnShow()
-    {
-        base.OnShow();
-        Debug.Log("OnShow");
-    }
+  
     public void Update()
     {
         

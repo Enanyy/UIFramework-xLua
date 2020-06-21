@@ -14,7 +14,7 @@ public class MainCS : MonoBehaviour
     {
         WindowManager.Instance.SetLoader(LoadUI);
         //WindowManager.Instance.Open<UIMain>();
-        WindowManager.Instance.Open<UIFixed>(typeof(UIMain));
+        WindowManager.Instance.Open(UIDefine.UIMain);
     }
 
     // Update is called once per frame
