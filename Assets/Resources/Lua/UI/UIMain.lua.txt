@@ -1,13 +1,17 @@
 local M = {
 	mName = 'UIMain',
-	mWidgets = {'UIRight'},
+	mFixedWidets = {
+		{ mName = 'UIFixed', mSortingOrderOffset = 1},
+		{ mName ='UIRight',mSortingOrderOffset = 1}
+	},
 }
 UIMain = M
 setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
+--BINDING_CODE_BEGIN
+	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
 	self.mTextNormal = self:GetComponent(typeof(Text), 'Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal')
 	self.mButtonPop = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonPop')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonWidget')

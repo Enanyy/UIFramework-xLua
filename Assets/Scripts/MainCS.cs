@@ -13,7 +13,7 @@ public class MainCS : MonoBehaviour
     void Start()
     {
         WindowManager.Instance.SetLoader(LoadUI);
-        //WindowManager.Instance.Open<UIMain>();
+       // WindowManager.Instance.Open(UIDefine.UIPop, new WidgetContext(UIDefine.UIFixed, 5));
         WindowManager.Instance.Open(UIDefine.UIMain);
     }
 

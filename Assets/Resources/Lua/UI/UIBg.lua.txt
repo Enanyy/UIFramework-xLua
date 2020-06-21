@@ -1,7 +1,8 @@
-local M = {{
+local M = {
     mName = 'UIBg',
     mWidgetOrderAddition = -1,
-}}
+    mType = UIType.Widget
+}
 UIBg = M
 setmetatable(M, UIBase)
 
@@ -10,7 +11,13 @@ function M:OnLoad()
 --BINDING_CODE_BEGIN
 	self.mButtonClose = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonClose')
 --BINDING_CODE_END
-    self.mButtonClose.onClick:AddListener(function() self:Close() end )
+    self.mButtonClose.onClick:AddListener(function() 
+        if self.mParent ~= nil then
+            self.mParent:Close()
+        else
+            self:Close() 
+        end
+    end )
 end
 
 --整个生命周期只调用一次

@@ -40,9 +40,9 @@ public class Variable
 
 public static class UITools
 {
-    static string lua = @"local M = {{
+    static string lua = @"local M = {
     mName = '{classname}'
-}}
+}
 {classname} = M
 setmetatable(M, UIBase)
 

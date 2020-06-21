@@ -14,7 +14,7 @@ function main( )
     UIManager:Init()
     UIManager:SetLoader(CS.MainLua.LoadUI)
     --UIManager:Open(UIMain)
-    UIManager:Open('UIFixed',"UIMain")
+    UIManager:Open("UIMain")
 end
 
 function update(deltaTime)

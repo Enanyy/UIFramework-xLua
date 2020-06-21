@@ -2,6 +2,7 @@
 using System.Collections;
 public class WindowComponent : MonoBehaviour
 {
+    public WindowContext context;
     public T GetComponent<T>(string path) where T : Component
     {
         if (string.IsNullOrEmpty(path))

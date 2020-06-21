@@ -1,7 +1,10 @@
 local M = {
     mName = "UINormal",
     mHideOther = true,
-	mWidgets = {'UIBg','UIFixed'},
+    mFixedWidets = {
+		{ mName = 'UIBg', mSortingOrderOffset = -1},
+		{ mName ='UIFixed',mSortingOrderOffset = 1}
+	},
 }
 
 setmetatable(M, UIBase)

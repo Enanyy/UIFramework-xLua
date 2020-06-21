@@ -26,9 +26,10 @@ public sealed class WindowContext
     /// 固定层级，只对Widget有效
     /// </summary>
     public readonly int fixedOrder;
-
-    public readonly List<WindowContext> fixedWidgets;
-    public readonly int widgetOrderAddition = 5;
+    /// <summary>
+    /// 固定的子UI
+    /// </summary>
+    public readonly List<WidgetContext> fixedWidgets;
 
     /// <summary>
     /// 关闭是是否Destroy
@@ -38,27 +39,25 @@ public sealed class WindowContext
 
     public WindowStatus status = WindowStatus.None;
     public readonly Dictionary<string, WindowContext> widgets = new Dictionary<string, WindowContext>();
-
+    public int sortingOrderOffset = 0;
 
     public WindowContext(string name,
         WindowType type = WindowType.Normal,
         Type component = null,
         bool hideOther = false,
         int fixedOrder = 0,
-        int widgetOrderAddition = 1,
         bool closeDestroy = true,
-        params WindowContext[] fixedWidgets)
+        params WidgetContext[] fixedWidgets)
     {
         this.name = name;
         this.type = type;
         this.component = component;
         this.hideOther = hideOther;
         this.fixedOrder = fixedOrder;
-        this.widgetOrderAddition = widgetOrderAddition;
         this.closeDestroy = closeDestroy;
         if (fixedWidgets != null)
         {
-            this.fixedWidgets = new List<WindowContext>(fixedWidgets);
+            this.fixedWidgets = new List<WidgetContext>(fixedWidgets);
         }
 
         Clear();
@@ -108,9 +107,24 @@ public sealed class WindowContext
         mLayer = 0;
         status = WindowStatus.None;
         mParent = null;
+        sortingOrderOffset = 0;
         if (widgets != null)
         {
             widgets.Clear();
         }
+    }
+}
+
+public sealed class WidgetContext
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public readonly int sortingOrderOffset;
+    public readonly WindowContext context;
+    public WidgetContext(WindowContext context, int orderOffset)
+    {
+        this.context = context;
+        this.sortingOrderOffset = orderOffset;
     }
 }

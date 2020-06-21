@@ -12,7 +12,7 @@ public class UIBg : WindowComponent
 //BINDING_CODE_BEGIN
 		mButtonClose = GetComponent<Button>("Tween/SafeArea/@Button.mButtonClose");
 //BINDING_CODE_END
-        mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close(UIDefine.UINormal));
+        mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close(context.parent!=null? context.parent:context));
 
     }
 }

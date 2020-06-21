@@ -58,12 +58,70 @@ UIBase =
     mType                   = UIType.Normal,    --UI类型
     mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
     mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
-    mWidgets                = nil,      --子界面,配置方式填写其他UI名字，如:{'UIFixed','UITask'}
-    mWidgetOrderAddition    = 5,        --在父界面的SortingOrder基础上加上的数值，只对Widget有效
+    mWidgets                = nil,      --子界面
+    mFixedWidets            = nil,      --配置的子界面，,配置方式填写其他UI名字，如:mFixedWidets = {
+                                                                                            -- 	    { mName = 'UIFixed', mSortingOrderOffset = 1},
+                                                                                            -- 	    { mName ='UIRight',mSortingOrderOffset = 1}
+                                                                                            -- }
+    mSortingOrderOffset     = 1,        --在父界面的SortingOrder基础上加上的数值，只对Widget有效
 
     mCloseDestroy           = true,     --关闭时Destroy资源
 }
 UIBase.__index = UIBase
+
+
+function UIBase:AddWidget( widget)
+
+    if  widget == nil then return end
+
+    widget.mParent = self
+
+    if self.mWidgets == nil then
+        self.mWidgets = {}
+    end
+
+    local exsit = false
+    for i,v in ipairs(self.mWidgets) do
+        if type(v) == "string" then
+            if v == widget.mName then
+                exsit = true
+                break
+            end
+        else
+            if v.mName == widget.mName then
+                exsit = true
+                break
+            end
+        end
+    end
+    if exsit == false then
+        table.insert(self.mWidgets, widget)
+    end
+end
+
+function UIBase:RemoveFromParent()
+    if self. mParent ~= nil and  self.mParent.mWidgets ~= nil then
+
+        table.removewhere(self.mParent.mWidgets,function (x)
+            return x == self
+        end)
+    end
+    self.mParent = nil
+end
+
+function UIBase:Clear()
+    self.mWidgets = nil
+    self.gameObject = nil
+    self.mCanvas = nil
+    self.mStatus = UIStatus.None
+
+     --置空非lua对象，比如Unity的对象
+     for key, value in pairs(self) do
+        if type(value)=="userdata" then
+            self[key] = nil
+        end
+    end
+end
 
 ----------------------用户接口Begin------------------------
 --整个生命周期只调用一次
@@ -168,7 +226,7 @@ function UIManager:SetLoader(func)
 end
 
 ---打开一个UI
-function UIManager:Open(ui, parent, callback)
+function UIManager:Open(ui, widget, callback)
 
     self:Init()
 
@@ -191,72 +249,58 @@ function UIManager:Open(ui, parent, callback)
         return 
     end
 
-    if type(parent) == "string" then
-        parent = self:Get(parent)
+    if type(widget) == "string" then
+        widget = self:Get(widget)
     end
 
-    if ui.mType == UIType.Widget and parent ~= nil and parent.mType == UIType.Normal and parent.mStatus == UIStatus.None then
-        
-        self:Open(parent, nil, function () self:Open(ui, parent, callback) end)
-       
-    else
-    
-        self:SetParent(ui, parent)
+   
 
-        --禁用点击,防止重复点击打开界面
-        self:SetTouch(false)
+    if widget ~= nil then
+        ui:AddWidget(widget)
+    end
 
-        if self.mUIDic[ui.mName] == nil then
-            self.mUIDic[ui.mName] = ui
+    --禁用点击,防止重复点击打开界面
+    self:SetTouch(false)
+
+    if self.mUIDic[ui.mName] == nil then
+        self.mUIDic[ui.mName] = ui
+    end
+
+
+    if ui.gameObject == nil then
+
+        if ui.mStatus == UIStatus.Loading  then
+            return
         end
+        ui.mStatus = UIStatus.Loading
 
-
-        if ui.gameObject == nil then
-
-            if ui.mStatus == UIStatus.Loading  then
+        self.mLoader(ui.mName,function(obj) 
+        
+            if ui.mStatus == UIStatus.None then
                 return
             end
-            ui.mStatus = UIStatus.Loading
 
-            self.mLoader(ui.mName,function(obj) 
-            
-                if ui.mStatus == UIStatus.None then
-                    return
-                end
-
-                local go = GameObject.Instantiate(obj)
-                go.transform:SetParent(self.mUIRoot.transform)
-                self:SetLayer(go,self.mLayerHide) --先隐藏，从而触发OnShow
-        
-                ui.gameObject = go
-                ui.mCanvas = ui:GetComponent(typeof(Canvas))
-                ui.mCanvas.renderMode = renderMode
-                ui.mCanvas.worldCamera = self.mCamera
-                ui.mCanvas.sortingLayerName = "UI"
-            
-                local scaler = ui:GetComponent(typeof(CanvasScaler))
-                scaler.scaleFactor = 1
-                scaler.uiScaleMode = uiScaleMode
-                scaler.screenMatchMode = screenMatchMode
-                scaler.referenceResolution = Vector2(1920, 1080)
-                scaler.referencePixelsPerUnit = 100
-        
-                ui.mStatus = UIStatus.LoadDone
-
-                ui:OnLoad()
-            
-                self:Push(ui)
-
-                self:SetActive(ui,true)
-                self:SetTouch(true)
-
-                if callback ~= nil then
-                    callback()
-                end
-            end)
-
-        else 
+            local go = GameObject.Instantiate(obj)
+            go.transform:SetParent(self.mUIRoot.transform)
+            self:SetLayer(go,self.mLayerHide) --先隐藏，从而触发OnShow
     
+            ui.gameObject = go
+            ui.mCanvas = ui:GetComponent(typeof(Canvas))
+            ui.mCanvas.renderMode = renderMode
+            ui.mCanvas.worldCamera = self.mCamera
+            ui.mCanvas.sortingLayerName = "UI"
+        
+            local scaler = ui:GetComponent(typeof(CanvasScaler))
+            scaler.scaleFactor = 1
+            scaler.uiScaleMode = uiScaleMode
+            scaler.screenMatchMode = screenMatchMode
+            scaler.referenceResolution = Vector2(1920, 1080)
+            scaler.referencePixelsPerUnit = 100
+    
+            ui.mStatus = UIStatus.LoadDone
+
+            ui:OnLoad()
+        
             self:Push(ui)
 
             self:SetActive(ui,true)
@@ -265,8 +309,20 @@ function UIManager:Open(ui, parent, callback)
             if callback ~= nil then
                 callback()
             end
+        end)
+
+    else 
+
+        self:Push(ui)
+
+        self:SetActive(ui,true)
+        self:SetTouch(true)
+
+        if callback ~= nil then
+            callback()
         end
     end
+
 end
 
 function UIManager:Push(ui)
@@ -322,35 +378,6 @@ function UIManager:SetLayer(go,layer)
     end
 end
 
-function UIManager:SetParent(ui, parent)
-
-    if ui == nil then return end
-
-    ui.mParent = parent
-
-    if ui.mParent ~= nil then
-        if  ui.mParent.mWidgets == nil then
-            ui.mParent.mWidgets = {} 
-        end
-        local exsit = false
-        for i,v in ipairs(ui.mParent.mWidgets) do
-            if type(v) == "string" then
-                if v == ui.mName then
-                    exsit = true
-                    break
-                end
-            else
-                if v.mName == ui.mName then
-                    exsit = true
-                    break
-                end
-            end
-        end
-        if exsit == false then
-            table.insert( ui.mParent.mWidgets, ui)
-        end
-    end
-end
 
 
 --设置ui隐藏或者显示
@@ -385,19 +412,30 @@ end
 
 function UIManager:SetWidgetActive(ui, active)
 
-    if ui == nil or ui.mWidgets == nil then return end
+    if ui == nil then return end
 
-    for i,v in ipairs(ui.mWidgets) do
-        local widget = v
-        if type(v) == "string" then
-            widget = self:Get(v)
+    if ui.mFixedWidets ~=nil then
+        for i, value in ipairs(ui.mFixedWidets) do
+            local widget = self:Get(value.mName)
+            if widget ~= nil then
+
+                widget.mSortingOrderOffset = value.mSortingOrderOffset
+
+                ui:AddWidget(widget)
+            end
+
         end
+    end
+    if ui.mWidgets == nil then
+        return
+    end
+
+    for i,widget in ipairs(ui.mWidgets) do
 
         if widget and widget.mType == UIType.Widget then
-            self:SetParent(widget, ui)
             if active then
                 if widget.mStatus == UIStatus.None then
-                    self:Open(widget, ui)
+                    self:Open(widget, nil)
                 elseif widget.mStatus == UIStatus.LoadDone  then
                     self:SetActive(widget,active)
                 end
@@ -406,6 +444,8 @@ function UIManager:SetWidgetActive(ui, active)
                     self:SetActive(widget,active)
                 end
             end
+        else
+            error(widget.mName.. " type is "..widget.mType.." ui="..ui.mName)
         end
     end
 end
@@ -418,7 +458,7 @@ function UIManager:SetSortOrder(ui)
         ui.mCanvas.sortingOrder = ui.mFixedOrder
     else
         if ui.mType == UIType.Widget and ui.mParent ~= nil then
-            ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + ui.mWidgetOrderAddition
+            ui.mCanvas.sortingOrder = ui.mParent.mCanvas.sortingOrder + ui.mSortingOrderOffset
         else
             local minOrder = - 9999
             local maxOrder = minOrder
@@ -453,7 +493,7 @@ end
 --
 --关闭所有ui以外的所有界面，如果ui没打开则打开
 --
-function UIManager:CloseAllAndOpen(ui, parent, callback)
+function UIManager:CloseAllAndOpen(ui, widget, callback)
     if type(ui) == "string" then
         ui = self:Get(ui)
     end
@@ -484,7 +524,7 @@ function UIManager:CloseAllAndOpen(ui, parent, callback)
 
     self.mUIStack = {}
     if ui ~= nil  then
-        self:Open(ui, parent, callback)
+        self:Open(ui, widget, callback)
     end
 
 end
@@ -548,34 +588,26 @@ function UIManager:Destroy(ui)
 
     self:SetActive(ui,false)
     --标记为Destroy才销毁
+    print("Destroy:"..ui.mName .." ".. tostring( ui.mCloseDestroy))
     if ui.mCloseDestroy then
 
-        self:SetParent(ui, nil)
+        ui:RemoveFromParent()
         
         self.mUIDic[ui.mName] = nil
 
         ui:OnUnload()   
-        for key, value in pairs(ui) do
-            if type(value)=="userdata" then
-                ui[key] = nil
+
+        if ui.mWidgets ~= nil then
+            for i, widget in ipairs(ui.mWidgets) do
+                self:Destroy(widget)
             end
         end
-        
+         
         if ui.gameObject then
-            print("Destroy:"..ui.mName)
             GameObject.Destroy(ui.gameObject)
         end
-        if ui.mWidgets ~= nil then
-            for i=#ui.mWidgets, 1, -1 do
-                local widget = ui.mWidgets[i]
-                if type(widget) == "table" then
-                    table.remove(ui.mWidgets, i)
-                end
-            end
-        end
-        ui.gameObject = nil
-        ui.mCanvas = nil
-        ui.mStatus = UIStatus.None
+       
+        ui:Clear()
     end
 end
 
