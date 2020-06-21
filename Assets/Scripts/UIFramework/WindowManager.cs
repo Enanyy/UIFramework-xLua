@@ -38,6 +38,9 @@ public class WindowManager : MonoBehaviour
     private Camera mCamera;
     private EventSystem mEventSystem;
 
+    /// <summary>
+    /// 两个normal之间层级差
+    /// </summary>
     private int mOrderAddition = 50;
 
     private Action<string, Action<UnityEngine.Object>> mLoader;

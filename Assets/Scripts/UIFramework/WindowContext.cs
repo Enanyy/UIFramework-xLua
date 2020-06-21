@@ -22,6 +22,9 @@ public sealed class WindowContext
     public readonly string name;
     public readonly WindowType type;
     public readonly bool hideOther;
+    /// <summary>
+    /// 固定层级，只对Widget有效
+    /// </summary>
     public readonly int fixedOrder;
 
     public readonly List<WindowContext> fixedWidgets;

@@ -76,17 +76,13 @@ return M";
     static string cshape = @"using UnityEngine;
 using UnityEngine.UI;
 
-public class {classname} : Window
+public class {classname} : WindowComponent
 {
-    public {classname}()
-    {
-    }
 //BINDING_DEFINITION_BEGIN
 {definition}//BINDING_DEFINITION_END
    
-    public override void OnLoad(GameObject go)
+    private void Awake()
     {
-        base.OnLoad(go);
 //BINDING_CODE_BEGIN
 {binding}//BINDING_CODE_END
     } 

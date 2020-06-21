@@ -17,7 +17,6 @@ public class UINormal : WindowComponent
 		mButtonWidget = GetComponent<Button>("Tween/SafeArea/@Button.mButtonWidget");
 //BINDING_CODE_END
 
-        mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close(UIDefine.UINormal));
         mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIPop));
         mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIWidget));
         mButtonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen(UIDefine.UIMain));
