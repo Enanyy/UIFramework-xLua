@@ -171,7 +171,17 @@ public class UIMain : WindowComponent
         Debug.Log("value from: " + from + " to: " + progressBar.value);
     }
 
-  
+    public override void OnShow()
+    {
+        Debug.LogError("OnShow");
+    }
+
+    public override void OnHide()
+    {
+        Debug.LogError("OnHide");
+    }
+
+
     public void Update()
     {
         

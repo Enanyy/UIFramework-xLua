@@ -226,10 +226,14 @@ public class WindowManager : MonoBehaviour
 
     private void AddComponent(GameObject go, WindowContext context)
     {
-        if (go.GetComponent(context.component) == null)
+        if(go== null)
+        {
+            return;
+        }
+        if( context.component !=null && go.GetComponent(context.component) == null)
         {
             var component = go.AddComponent(context.component) as WindowComponent;
-            if (component != null)
+            if(component!=null)
             {
                 component.context = context;
             }
@@ -240,6 +244,26 @@ public class WindowManager : MonoBehaviour
             components[i].context = context;
         }
     }
+    private void SetComponentActive(GameObject go, bool active)
+    {
+        if(go == null)
+        {
+            return;
+        }
+        var components = go.GetComponentsInChildren<WindowComponent>();
+        for (int i = 0; i < components.Length; ++i)
+        {
+            if(active)
+            {
+                components[i].OnShow();
+            }
+            else
+            {
+                components[i].OnHide();
+            }
+        }
+    }
+
     private int SortWindow(WindowContext a, WindowContext b)
     {
         var canvasA = GetCanvas(a);
@@ -288,12 +312,16 @@ public class WindowManager : MonoBehaviour
                 canvas.sortingOrder = 0;
             }
         }
-
-        context.active = active;
-
         GameObject go = GetObject(context);
 
-        SetLayer(go, active ? WindowContext.LAYER : WindowContext.LAYER_HIDE);
+        if (context.active != active)
+        {
+            context.active = active;
+
+            SetComponentActive(go, active);
+        }
+
+        SetLayer(go, context.layer);
 
         SetWidgetActive(context, active);
 

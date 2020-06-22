@@ -21,4 +21,14 @@ public class WindowComponent : MonoBehaviour
         }
         return null;
     }
+
+    public virtual void OnShow()
+    {
+
+    }
+
+    public virtual void OnHide()
+    {
+
+    }
 }

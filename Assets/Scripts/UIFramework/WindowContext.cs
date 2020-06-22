@@ -63,15 +63,15 @@ public class WindowContext
 
     }
 
-    private int mLayer;
+    public int layer;
     public bool active
     {
-        get { return mLayer == LAYER; }
+        get { return layer == LAYER; }
         set
         {
             if (active != value)
             {
-                mLayer = value ? LAYER : LAYER_HIDE;
+                layer = value ? LAYER : LAYER_HIDE;
             }
         }
     }
@@ -79,7 +79,7 @@ public class WindowContext
 
     public virtual void Clear()
     {
-        mLayer = 0;
+        layer = 0;
         status = WindowStatus.None;
 
         if (widgets != null)
