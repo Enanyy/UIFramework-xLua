@@ -28,11 +28,11 @@ public class WindowManager : MonoBehaviour
         public List<WindowContext> hideWindows;
     }
 
-    private Dictionary<string, WindowContext> mWindowContextDic = new Dictionary<string, WindowContext>();
-    private Dictionary<string, GameObject> mWindowObjectDic = new Dictionary<string, GameObject>();
+    private Dictionary<ulong, WindowContext> mWindowContextDic = new Dictionary<ulong, WindowContext>();
+    private Dictionary<ulong, GameObject> mWindowObjectDic = new Dictionary<ulong, GameObject>();
 
     private List<WindowNav> mWindowStack = new List<WindowNav>();
-    private List<string> mCloseList = new List<string>();
+    private List<ulong> mCloseList = new List<ulong>();
 
     
     private Camera mCamera;
@@ -100,9 +100,9 @@ public class WindowManager : MonoBehaviour
 
         SetTouch(false);
 
-        if (mWindowContextDic.ContainsKey(context.name) == false)
+        if (mWindowContextDic.ContainsKey(context.id) == false)
         {
-            mWindowContextDic.Add(context.name, context);
+            mWindowContextDic.Add(context.id, context);
         }
 
 
@@ -123,7 +123,7 @@ public class WindowManager : MonoBehaviour
             {
                 if (asset == null || context.status == WindowStatus.None)
                 {
-                    mWindowContextDic.Remove(context.name);
+                    mWindowContextDic.Remove(context.id);
                     context.Clear();
                     return;
                 }
@@ -132,14 +132,14 @@ public class WindowManager : MonoBehaviour
                 context.status = WindowStatus.Done;
 
                 go = Instantiate(asset) as GameObject;
-                if (mWindowObjectDic.ContainsKey(context.name))
+                if (mWindowObjectDic.ContainsKey(context.id))
                 {
-                    Destroy(mWindowObjectDic[context.name]);
-                    mWindowObjectDic[context.name] = go;
+                    Destroy(mWindowObjectDic[context.id]);
+                    mWindowObjectDic[context.id] = go;
                 }
                 else
                 {
-                    mWindowObjectDic.Add(context.name, go);
+                    mWindowObjectDic.Add(context.id, go);
                 }
                 AddComponent(go, context);
                 go.transform.SetParent(transform);
@@ -355,7 +355,7 @@ public class WindowManager : MonoBehaviour
     }
     private Canvas GetCanvas(WindowContext context)
     {
-        if(mWindowObjectDic.TryGetValue(context.name, out GameObject go))
+        if(mWindowObjectDic.TryGetValue(context.id, out GameObject go))
         {
             return go.GetComponent<Canvas>();
         }
@@ -421,9 +421,9 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    public WindowContext Get(string name)
+    private WindowContext Get(ulong id)
     {
-        mWindowContextDic.TryGetValue(name, out WindowContext context);
+        mWindowContextDic.TryGetValue(id, out WindowContext context);
         return context;
     }
 
@@ -433,7 +433,7 @@ public class WindowManager : MonoBehaviour
         {
             return null;
         }
-        mWindowObjectDic.TryGetValue(context.name, out GameObject go);
+        mWindowObjectDic.TryGetValue(context.id, out GameObject go);
         return go;
     }
    
@@ -465,7 +465,7 @@ public class WindowManager : MonoBehaviour
         var it = mWindowContextDic.GetEnumerator();
         while(it.MoveNext())
         {
-            if( context == null || it.Current.Key!= context.name)
+            if( context == null || it.Current.Key!= context.id)
             {
                 if(context == null || context.widgets.ContainsKey(it.Current.Key) ==false)
                 {
@@ -476,7 +476,7 @@ public class WindowManager : MonoBehaviour
         }
         for(int i = 0; i< mCloseList.Count; ++i)
         {
-            string key = mCloseList[i];
+            ulong key = mCloseList[i];
             if (mWindowContextDic.TryGetValue(key, out WindowContext w))
             {
                 if (destroy)
@@ -575,13 +575,13 @@ public class WindowManager : MonoBehaviour
         }
         SetActive(context, false);
 
-        mWindowContextDic.Remove(context.name);
+        mWindowContextDic.Remove(context.id);
 
         GameObject go = GetObject(context);
    
         Destroy(go);
         
-        mWindowObjectDic.Remove(context.name);
+        mWindowObjectDic.Remove(context.id);
 
         var it = context.widgets.GetEnumerator();
         while(it.MoveNext())

@@ -19,6 +19,9 @@ public class WindowContext
     public const int LAYER_MODEL = 6;
     public const int LAYER_HIDE = 7;
 
+    private static ulong ID = 0;
+
+    public readonly ulong id;
     public readonly string name;
     public readonly WindowType type;
     public readonly bool hideOther;
@@ -38,7 +41,7 @@ public class WindowContext
     public readonly Type component;
 
     public WindowStatus status = WindowStatus.None;
-    public readonly Dictionary<string, WindowContext> widgets = new Dictionary<string, WindowContext>();
+    public readonly Dictionary<ulong, WindowContext> widgets = new Dictionary<ulong, WindowContext>();
 
     public WindowContext(string name,
         WindowType type = WindowType.Normal,
@@ -48,6 +51,8 @@ public class WindowContext
         bool closeDestroy = true,
         params WidgetContext[] fixedWidgets)
     {
+        id = ID++;
+        
         this.name = name;
         this.type = type;
         this.component = component;
@@ -116,9 +121,9 @@ public class WidgetContext : WindowContext
             mParent = value;
             if (mParent != null)
             {
-                if (mParent.widgets.ContainsKey(name) == false)
+                if (mParent.widgets.ContainsKey(id) == false)
                 {
-                    mParent.widgets.Add(name, this);
+                    mParent.widgets.Add(id, this);
                 }
             }
         }
