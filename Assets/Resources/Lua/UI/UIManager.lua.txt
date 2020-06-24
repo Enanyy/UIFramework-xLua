@@ -271,8 +271,8 @@ function UIManager:Open(ui, widget, callback)
     --禁用点击,防止重复点击打开界面
     self:SetTouch(false)
 
-    if self.mUIDic[ui.mName] == nil then
-        self.mUIDic[ui.mName] = ui
+    if self.mUIDic[ui.mID] == nil then
+        self.mUIDic[ui.mID] = ui
     end
 
 
@@ -518,9 +518,6 @@ end
 --关闭所有ui以外的所有界面，如果ui没打开则打开
 --
 function UIManager:CloseAllAndOpen(ui, widget, callback)
-    if type(ui) == "string" then
-        ui = self:Get(ui)
-    end
     if ui == nil then
         return
     end
@@ -555,10 +552,6 @@ end
 
 ---调用每个UI自己的Close
 function UIManager:Close(ui)
-    if type(ui) == "string" then
-        ui = self:Get(ui)
-    end
-
     if ui == nil then
         return
     end
@@ -615,7 +608,7 @@ function UIManager:Destroy(ui)
     print("Destroy:"..ui.mName .." ".. tostring( ui.mCloseDestroy))
     if ui.mCloseDestroy then
 
-        self.mUIDic[ui.mName] = nil
+        self.mUIDic[ui.mID] = nil
 
         ui:OnUnload()   
 
