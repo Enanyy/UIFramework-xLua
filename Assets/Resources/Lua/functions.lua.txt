@@ -138,6 +138,25 @@ function table.contains(tb,item)
     end)
 end
 
+---复制表
+function table.clone(org)
+    local function copy(org, res)
+        for k,v in pairs(org) do
+            if type(v) ~= "table" then
+                res[k] = v;
+            else
+                res[k] = {};
+                copy(v, res[k])
+            end
+        end
+    end
+ 
+    local res = {}
+    copy(org, res)
+    return res
+end
+
+
 
 --获得32位整数num的第index(0-31)位是0还是1
 function math.getbit(num,index)
