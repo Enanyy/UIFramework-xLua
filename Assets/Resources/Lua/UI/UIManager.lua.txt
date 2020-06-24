@@ -49,6 +49,7 @@ UIStatus = {
 
 UIBase = 
 {
+    mID                     = 0,
     mName                   = "",               --UI名字
     gameObject              = nil,              --gameObject
     mCanvas                 = nil,              --画布
@@ -66,9 +67,25 @@ UIBase =
     mSortingOrderOffset     = 1,        --在父界面的SortingOrder基础上加上的数值，只对Widget有效
 
     mCloseDestroy           = true,     --关闭时Destroy资源
+    mSingleton              = true,     --是否是单例
+
 }
 UIBase.__index = UIBase
 
+function UIBase.GetID()
+    if UIBase.ID == nil then
+        UIBase.ID = 0
+    end
+    UIBase.ID = UIBase.ID + 1
+    return UIBase.ID
+end
+
+function UIBase:Clone()
+    local o = table.clone(self)
+    o = setmetatable(o,{__index = self})
+    o.mID = UIBase.GetID()
+    return o
+end
 
 function UIBase:AddWidget( widget)
 
@@ -155,6 +172,7 @@ end
 
 UIManager =
 {
+    mID             = 0,
     mUIDic          = {},       --存储所有ui的字典
     mUIStack        = {},       --Normal类型的UI导航栈，下标1为栈顶
 
@@ -201,9 +219,9 @@ function UIManager:Init()
     self.mEventSystem.pixelDragThreshold = 5
 
     eventsystem:AddComponent(typeof(CS.UnityEngine.EventSystems.StandaloneInputModule))
-    
-
 end
+
+
 
 function UIManager:SetTouch(touchable)
     if self.mEventSystem then
@@ -243,11 +261,12 @@ function UIManager:Open(ui, widget, callback)
         widget = self:Get(widget)
     end
 
-   
-
     if widget ~= nil then
+        widget = self:Clone(widget)
         ui:AddWidget(widget)
     end
+
+    ui = self:Clone(ui)
 
     --禁用点击,防止重复点击打开界面
     self:SetTouch(false)
@@ -352,8 +371,23 @@ function UIManager:Push(ui)
 end
 
 function UIManager:Get(name)
-    return require(name)
+    local ui = require(name)
+    return ui
 end
+
+function UIManager:IsSource(ui)
+    local source = self:Get(ui.mName)
+    return source == ui
+end
+
+function UIManager:Clone(ui)
+    if self:IsSource(ui) and ui.mSingleton == false then
+        local o = ui:Clone()
+        return o
+    end
+    return ui
+end
+
 
 function UIManager:SetLayer(go,layer)
     if go and go.layer ~= layer then
@@ -408,7 +442,7 @@ function UIManager:SetWidgetActive(ui, active)
         for i, value in ipairs(ui.mFixedWidets) do
             local widget = self:Get(value.mName)
             if widget ~= nil then
-
+                widget = self:Clone(widget)
                 widget.mSortingOrderOffset = value.mSortingOrderOffset
 
                 ui:AddWidget(widget)

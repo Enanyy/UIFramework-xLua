@@ -1,4 +1,5 @@
 local M = {
+    mID = UIBase.GetID(),
     mName = "UIWidget",
     mType = UIType.Widget,
     mFixedOrder = 1000
@@ -8,7 +9,8 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN	self.mClose = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mClose')
+--BINDING_CODE_BEGIN
+	self.mClose = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mClose')
 	self.mNormal = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mNormal')
 	self.mPop = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mPop')
 	self.mMain = self:GetComponent(typeof(Button), 'Tween/UIWidget/@Button.mMain')

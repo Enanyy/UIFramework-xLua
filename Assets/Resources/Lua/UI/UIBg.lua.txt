@@ -1,7 +1,9 @@
 local M = {
+    mID = UIBase.GetID(),
     mName = 'UIBg',
     mWidgetOrderAddition = -1,
-    mType = UIType.Widget
+    mType = UIType.Widget,
+    mSingleton = false,
 }
 UIBg = M
 setmetatable(M, UIBase)
@@ -18,6 +20,8 @@ function M:OnLoad()
             self:Close() 
         end
     end )
+    print("OnLoad UIBg")
+
 end
 
 --整个生命周期只调用一次
@@ -28,6 +32,7 @@ end
 
 --整个生命周期可能调用多次
 function M:OnShow()
+    print("OnShow UIBg")
 
 
 end

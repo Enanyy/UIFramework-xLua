@@ -1,9 +1,10 @@
 local M = {
+    mID = UIBase.GetID(),
     mName = "UINormal",
     mHideOther = true,
     mFixedWidets = {
-		{ mName = 'UIBg', mSortingOrderOffset = -1},
-		{ mName ='UIFixed',mSortingOrderOffset = 1}
+		{ mID = UIBase.GetID(), mName = 'UIBg', mSortingOrderOffset = -1},
+		{ mID = UIBase.GetID(), mName ='UIFixed',mSortingOrderOffset = 1}
 	},
 }
 

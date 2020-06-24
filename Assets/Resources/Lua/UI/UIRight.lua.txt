@@ -1,4 +1,5 @@
 local M = {
+    mID = UIBase.GetID(),
     mName = 'UIRight',
     mType = UIType.Widget,
 }
