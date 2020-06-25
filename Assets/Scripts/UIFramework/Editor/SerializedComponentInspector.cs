@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Timeline;
 
 [ExecuteInEditMode]
 [CustomEditor(typeof(SerializedComponent))]
@@ -92,9 +93,9 @@ public class SerializedComponentInspector : Editor
                             {
                                 var go = objectValue as GameObject;
                                 components = go.GetComponents<Component>();
-                                if (field.GetObjectType() == gameObjectType)
+                                if (field.GetTypeName() == gameObjectType)
                                 {
-                                    field.SetObject(gameObjectType, go);
+                                    field.SetObject(go);
                                 }
                             }
                             else
@@ -103,9 +104,9 @@ public class SerializedComponentInspector : Editor
                                 if (component != null)
                                 {
                                     components = component.GetComponents<Component>();
-                                    if (field.GetObjectType() == gameObjectType)
+                                    if (field.GetTypeName() == gameObjectType)
                                     {
-                                        field.SetObject(gameObjectType, component.gameObject);
+                                        field.SetObject( component.gameObject);
                                     }
                                 }
                             }
@@ -116,9 +117,9 @@ public class SerializedComponentInspector : Editor
                                     var componentType = components[j].GetType().FullName;
 
                                     types.Add(componentType);
-                                    if (field.GetObjectType() == componentType)
+                                    if (field.GetTypeName() == componentType)
                                     {
-                                        field.SetObject(componentType, components[j]);
+                                        field.SetObject(components[j]);
                                     }
 
                                 }
@@ -126,28 +127,28 @@ public class SerializedComponentInspector : Editor
                         }
                         else
                         {
-                            field.SetObjectType(gameObjectType);
+                            field.SetTypeName( SerializedFieldType.Object, gameObjectType);
                         }
-                        if (string.IsNullOrEmpty(field.GetObjectType()))
+                        if (string.IsNullOrEmpty(field.GetTypeName()))
                         {
-                            field.SetObjectType(gameObjectType);
+                            field.SetTypeName(SerializedFieldType.Object,gameObjectType);
                         }
-                        var type = GetType(field.GetObjectType());
-                        field.SetObject(type.FullName, EditorGUILayout.ObjectField(field.objectValue, type, true));
+                        var type = GetType(field.GetTypeName());
+                        field.SetObject( EditorGUILayout.ObjectField(field.objectValue, type, true));
 
-                        int index = types.FindIndex(x => x == field.GetObjectType());
+                        int index = types.FindIndex(x => x == field.GetTypeName());
                         if (index >= 0)
                         {
                             index = EditorGUILayout.Popup(index, types.ToArray());
 
-                            field.SetObjectType(types[index]);
+                            field.SetTypeName( SerializedFieldType.Object, types[index]);
                         }
                     }
                     break;
                 case SerializedFieldType.Enum:
                     {
 
-                        int index = enums.FindIndex(x => x == field.GetEnumType());
+                        int index = enums.FindIndex(x => x == field.GetTypeName());
                         if (index == -1) index = 0;
                         if (enums.Count > 0)
                         {
@@ -158,15 +159,16 @@ public class SerializedComponentInspector : Editor
                                 value = 0;
                             }
                             index = k;
-                            field.SetEnum(enums[index], value);
+                            field.SetTypeName(SerializedFieldType.Enum, enums[index]);
+                            field.SetEnum( value);
                         }
-                        if (string.IsNullOrEmpty(field.GetEnumType()) == false)
+                        if (string.IsNullOrEmpty(field.GetTypeName()) == false)
                         {
-                            var type = typeof(SerializedField).Assembly.GetType(field.GetEnumType());
+                            var type = typeof(SerializedField).Assembly.GetType(field.GetTypeName());
 
                             Enum value = (Enum)Enum.ToObject(type, field.GetEnum());
-
-                            field.SetEnum(field.GetEnumType(), Convert.ToInt32(EditorGUILayout.EnumPopup(value)));
+                            field.SetTypeName(SerializedFieldType.Enum, field.GetTypeName());
+                            field.SetEnum( Convert.ToInt32(EditorGUILayout.EnumPopup(value)));
                         }
 
                     }
@@ -230,20 +232,38 @@ public class SerializedComponentInspector : Editor
             }
             if (GUILayout.Button("Save"))
             {
-                GameObject go = PrefabUtility.GetNearestPrefabInstanceRoot(mTarget.gameObject);
-                if (go != null)
-                {
-                    string assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(mTarget.gameObject);
-                    if (string.IsNullOrEmpty(assetPath) == false)
-                    {
-                        PrefabUtility.SaveAsPrefabAssetAndConnect(go, assetPath, InteractionMode.AutomatedAction);
-                    }
-                }
+                Save();
             }
 
             EditorGUILayout.EndHorizontal();
         }
 
+    }
+
+    private void Save()
+    {
+        GameObject go = PrefabUtility.GetNearestPrefabInstanceRoot(mTarget.gameObject);
+        if (go != null)
+        {
+            string assetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(go);
+            if (string.IsNullOrEmpty(assetPath) == false)
+            {
+                PrefabUtility.SaveAsPrefabAssetAndConnect(go, assetPath, InteractionMode.AutomatedAction);
+            }
+        }
+        else
+        {
+            GameObject prefab = mTarget.transform.root.gameObject;
+            string assetPath = AssetDatabase.GetAssetPath(prefab);
+
+            if (string.IsNullOrEmpty(assetPath) == false)
+            {
+                go = Instantiate(prefab);
+                PrefabUtility.SaveAsPrefabAssetAndConnect(go, assetPath, InteractionMode.AutomatedAction);
+
+                DestroyImmediate(go);
+            }
+        }
     }
 
     string GetFieldName(string type)

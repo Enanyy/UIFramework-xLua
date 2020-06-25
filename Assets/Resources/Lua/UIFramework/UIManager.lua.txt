@@ -177,7 +177,6 @@ end
 
 UIManager =
 {
-    mID             = 0,
     mUIDic          = {},       --存储所有ui的字典
     mUIStack        = {},       --Normal类型的UI导航栈，下标1为栈顶
 

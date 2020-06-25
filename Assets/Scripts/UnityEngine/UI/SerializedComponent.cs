@@ -45,7 +45,7 @@ public class SerializedField
 
         type = SerializedFieldType.Integer;
     }
-    public int GetInt()
+    public int GetInt(int defaultValue = 0)
     {
         if (type == SerializedFieldType.Integer)
         {
@@ -54,7 +54,7 @@ public class SerializedField
                 return (int)values[0];
             }
         }
-        return 0;
+        return defaultValue;
     }
     public void SetFloat(float value)
     {
@@ -70,7 +70,7 @@ public class SerializedField
         type = SerializedFieldType.Float;
     }
 
-    public float GetFloat()
+    public float GetFloat(float defaultValue = 0)
     {
         if (type == SerializedFieldType.Float)
         {
@@ -79,7 +79,7 @@ public class SerializedField
                 return values[0];
             }
         }
-        return 0;
+        return defaultValue;
     }
 
     public void SetBool(bool value)
@@ -95,7 +95,7 @@ public class SerializedField
 
         type = SerializedFieldType.Boolean;
     }
-    public bool GetBool()
+    public bool GetBool(bool defaultValue = false)
     {
         if (type == SerializedFieldType.Boolean)
         {
@@ -104,7 +104,7 @@ public class SerializedField
                 return values[0] > 0;
             }
         }
-        return false;
+        return defaultValue;
     }
     public void SetString(string value)
     {
@@ -115,13 +115,13 @@ public class SerializedField
 
         type = SerializedFieldType.String;
     }
-    public string GetString()
+    public string GetString(string defaultValue = "")
     {
         if (type == SerializedFieldType.String)
         {
             return stringValue;
         }
-        return null;
+        return defaultValue;
     }
 
     public void SetVector2(Vector2 value)
@@ -209,20 +209,19 @@ public class SerializedField
     }
 
 
-    public void SetEnum(string type, int value)
+    public void SetEnum(int value)
     {
         if (values == null || values.Length != 1)
         {
             values = new float[1];
         }
         values[0] = value;
-        stringValue = type;
 
         objectValue = null;
 
-        this.type = SerializedFieldType.Enum;
+        type = SerializedFieldType.Enum;
     }
-    public int GetEnum()
+    public int GetEnum(int defaultValue = 0)
     {
         if (type == SerializedFieldType.Enum)
         {
@@ -231,20 +230,25 @@ public class SerializedField
                 return (int)values[0];
             }
         }
-        return 0;
+        return defaultValue;
     }
-    public string GetEnumType()
+    public string GetTypeName()
     {
-        if (type == SerializedFieldType.Enum)
-        {
-            return stringValue;
-        }
-        return null;
+        return stringValue;
     }
-    public void SetObject(string type, UnityEngine.Object obj)
+
+    public void SetTypeName(SerializedFieldType type, string typeName)
+    {
+        this.type = type;
+        this.stringValue = typeName;
+    }
+    public void SetObject(UnityEngine.Object obj)
     {
         objectValue = obj;
-        stringValue = type;
+        if (obj != null)
+        {
+            stringValue = obj.GetType().FullName;
+        }
 
         values = null;
 
@@ -258,24 +262,6 @@ public class SerializedField
         }
         return null;
     }
-
-    public void SetObjectType(string type)
-    {
-        values = null;
-
-        this.type = SerializedFieldType.Object;
-        stringValue = type;
-    }
-
-    public string GetObjectType()
-    {
-        if (type == SerializedFieldType.Object)
-        {
-            return stringValue;
-        }
-        return null;
-    }
-
 }
 public class SerializedComponent : MonoBehaviour
 {
@@ -303,8 +289,85 @@ public class SerializedComponent : MonoBehaviour
             return null;
         }
     }
+    public bool GetBoolField(string name, bool defaultValue = false)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetBool(defaultValue);
+        }
+        return defaultValue;
+    }
 
-    public Component GetSerializedComponent(string name)
+    public int GetIntField(int defaultValue = 0)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetInt(defaultValue);
+        }
+        return defaultValue;
+    }
+    public float GetFloadField(float defaultValue = 0)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetFloat(defaultValue);
+        }
+        return defaultValue;
+    }
+
+    public string GetStringField(string defaultValue = "")
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetString();
+        }
+        return defaultValue;
+    }
+
+    public int GetEnumField(string name, int defaultValue = 0)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetEnum();
+        }
+        return defaultValue;
+    }
+
+    public Vector2 GetVector2Field(string name, Vector2 defaultValue)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetVector2();
+        }
+        return defaultValue;
+    }
+
+    public Vector3 GetVector3Field(string name, Vector3 defaultValue)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetVector3();
+        }
+        return defaultValue;
+    }
+    public Vector4 GetVector4Field(string name, Vector4 defaultValue)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetVector4();
+        }
+        return defaultValue;
+    }
+
+    public Component GetComponentField(string name)
     {
         var field = this[name];
         if(field!=null)
@@ -314,7 +377,7 @@ public class SerializedComponent : MonoBehaviour
         return null;
     }
 
-    public T GetSerializedComponent<T>(string name) where T:Component
+    public T GetComponentField<T>(string name) where T:Component
     {
         var field = this[name];
         if (field != null)
@@ -324,7 +387,26 @@ public class SerializedComponent : MonoBehaviour
         return null;
     }
 
-    public GameObject GetSerializedGameObject(string name)
+    public T GetObjectField<T>(string name) where T: UnityEngine.Object
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetObject() as T;
+        }
+        return null;
+    }
+    public UnityEngine.Object GetObjectField(string name)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetObject();
+        }
+        return null;
+    }
+
+    public GameObject GetGameObjectField(string name)
     {
         var field = this[name];
         if (field != null)
@@ -334,9 +416,11 @@ public class SerializedComponent : MonoBehaviour
         return null;
     }
 
+
+
     public void AddClick(string name,UnityAction call)
     {
-        Button button = GetSerializedComponent<Button>(name);
+        Button button = GetComponentField<Button>(name);
         if(button!=null)
         {
             button.onClick.AddListener(call);
@@ -344,7 +428,7 @@ public class SerializedComponent : MonoBehaviour
     }
     public void SetText(string name,string text)
     {
-        Text button = GetSerializedComponent<Text>(name);
+        Text button = GetComponentField<Text>(name);
         if (button != null)
         {
             button.text = text;
