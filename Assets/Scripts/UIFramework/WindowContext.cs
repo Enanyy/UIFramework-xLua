@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public enum WindowType
 {
-    Normal = 0,    //0、普通界面,会加入到导航栈
+    Normal = 0,    //0、普通界面,会加入到导航栈,要fixedOrder等于0
     Widget = 1,    //1、小组件，比如飘字或者子界面
 }
 
@@ -26,7 +26,7 @@ public class WindowContext
     public readonly WindowType type;
     public readonly bool hideOther;
     /// <summary>
-    /// 固定层级，只对Widget有效
+    /// 固定层级
     /// </summary>
     public readonly int fixedOrder;
     /// <summary>

@@ -3,8 +3,8 @@ local M = {
     mName = "UINormal",
     mHideOther = true,
     mFixedWidets = {
-		{ mID = UIBase.GetID(), mName = 'UIBg', mSortingOrderOffset = -1},
-		{ mID = UIBase.GetID(), mName ='UIFixed',mSortingOrderOffset = 1}
+		{ mName = 'UIBg', mSortingOrderOffset = -1},
+		{ mName ='UIFixed',mSortingOrderOffset = 1}
 	},
 }
 
@@ -20,7 +20,7 @@ function M:OnLoad()
   
     self.mButtonMain.onClick:AddListener(function() UIManager:CloseAllAndOpen("UIMain") end)
     self.mButtonPop.onClick:AddListener(function()  UIManager:Open(UIPop) end)
-    self.mButtonWidget.onClick:AddListener(function() UIManager:Open(UIWidget) end)
+    self.mButtonWidget.onClick:AddListener(function() UIManager:Open('UISerialized') end)
 end
 
 --整个生命周期只调用一次

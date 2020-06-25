@@ -36,7 +36,7 @@ local screenMatchMode   = CS.UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWi
 
 UIType = 
 {
-    Normal  = 0,    --0、普通界面,会加入到导航栈
+    Normal  = 0,    --0、普通界面,会加入到导航栈,mFixedOrder要等于0
     Widget  = 1,    --1、小组件，比如飘字或者子界面
 }
 
@@ -58,7 +58,7 @@ UIBase =
 
     mType                   = UIType.Normal,    --UI类型
     mHideOther              = false,    --隐藏所有其他窗口,一般用在打开一个全屏界面，隐藏上一个来减少overdraw（场景摄像机也可以关闭）
-    mFixedOrder             = 0,        --固定SortingOrder,只对Widget有效
+    mFixedOrder             = 0,        --固定SortingOrder
     mWidgets                = nil,      --子界面
     mFixedWidets            = nil,      --配置的子界面，,配置方式填写其他UI名字，如:mFixedWidets = {
                                                                                             -- 	    { mName = 'UIFixed', mSortingOrderOffset = 1},
@@ -90,6 +90,11 @@ end
 function UIBase:AddWidget( widget)
 
     if  widget == nil then return end
+
+    if widget.mType ~= UIType.Widget then
+        error(widget.mName.. "' type is not UIType.Widget,can't add to widgets.")
+        return
+    end
 
     widget.mParent = self
 
@@ -336,8 +341,8 @@ end
 
 function UIManager:Push(ui)
     if ui == nil then return end
-
-    if ui.mType == UIType.Normal then
+    --只有Normal界面和mFixedOrder不等于0会加入导航
+    if ui.mType == UIType.Normal and ui.mFixedOrder == 0 then
 
         local nav = {
             mUI = ui,
@@ -416,8 +421,9 @@ function UIManager:SetActive(ui,active)
             ui:OnShow()
         end
     else
-        ui.mCanvas.sortingOrder = 0
-
+        if ui.mCanvas ~= nil then
+            ui.mCanvas.sortingOrder = 0
+        end
         if self:IsActive(ui) then
             self:SetLayer(ui.gameObject, self.mLayerHide)
             ui:OnHide()   
@@ -478,7 +484,7 @@ function UIManager:SetSortOrder(ui)
 
     if ui == nil or ui.mCanvas == nil then return end
 
-    if ui.mType == UIType.Widget and ui.mFixedOrder ~= 0 then    
+    if  ui.mFixedOrder ~= 0 then    
         ui.mCanvas.sortingOrder = ui.mFixedOrder
     else
         if ui.mType == UIType.Widget and ui.mParent ~= nil then
@@ -521,7 +527,17 @@ function UIManager:CloseAllAndOpen(ui, widget, callback)
     if ui == nil then
         return
     end
-  
+
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+        if ui~= nil and ui.mSingleton ==false then
+            error("close "..ui.mName .." is not singleton.")
+        end
+    end 
+
+    if ui == nil then
+        return
+    end
     for k,v in pairs(self.mUIDic) do
         local close = true
 
@@ -555,6 +571,18 @@ function UIManager:Close(ui)
     if ui == nil then
         return
     end
+
+    if type(ui) == "string" then
+        ui = self:Get(ui)
+        if ui~= nil and ui.mSingleton ==false then
+            error("close "..ui.mName .." is not singleton.")
+        end
+    end 
+
+    if ui == nil then
+        return
+    end
+
     if ui.mType == UIType.Normal  then
 
         local current, index = table.find(self.mUIStack,function (nav) return nav.mUI == ui end)

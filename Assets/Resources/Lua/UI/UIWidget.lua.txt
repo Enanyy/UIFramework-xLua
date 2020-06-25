@@ -1,7 +1,7 @@
 local M = {
     mID = UIBase.GetID(),
     mName = "UIWidget",
-    mType = UIType.Widget,
+    --mType = UIType.Widget,
     mFixedOrder = 1000
 }
 

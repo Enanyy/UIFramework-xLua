@@ -2,8 +2,8 @@ local M = {
     mID = UIBase.GetID(),
 	mName = 'UIMain',
 	mFixedWidets = {
-		{ mID = UIBase.GetID(), mName = 'UIFixed', mSortingOrderOffset = 1},
-		{ mID = UIBase.GetID(), mName ='UIRight',mSortingOrderOffset = 1}
+		{ mName = 'UIFixed', mSortingOrderOffset = 1},
+		{ mName ='UIRight',mSortingOrderOffset = 1}
 	},
 }
 UIMain = M

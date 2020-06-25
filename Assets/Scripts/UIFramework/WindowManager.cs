@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Unity.Collections;
 
 public class WindowManager : MonoBehaviour
 {
@@ -186,25 +185,25 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    private void Push(WindowContext window)
+    private void Push(WindowContext context)
     {
-        if(window== null)
+        if(context== null)
         {
             return;
         }
 
-        if (window.type == WindowType.Normal)
+        if (context.type == WindowType.Normal && context.fixedOrder == 0)
         { 
             WindowNav nav = new WindowNav();
-            nav.window = window;
+            nav.window = context;
 
-            if (window.hideOther)
+            if (context.hideOther)
             {
                 var it = mWindowContextDic.GetEnumerator();
                 while (it.MoveNext())
                 {
                     var w = it.Current.Value;
-                    if (w != window && w.active && w.type == WindowType.Normal)
+                    if (w != context && w.active && w.type == WindowType.Normal)
                     {
                         if (nav.hideWindows == null)
                         {
@@ -371,8 +370,8 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
-
-        if (context.type == WindowType.Widget && context.fixedOrder != 0)
+        //固定层级
+        if (context.fixedOrder != 0)
         {
             canvas.sortingOrder = context.fixedOrder;
         }

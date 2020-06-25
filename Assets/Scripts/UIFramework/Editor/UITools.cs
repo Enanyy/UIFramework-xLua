@@ -41,6 +41,7 @@ public class Variable
 public static class UITools
 {
     static string lua = @"local M = {
+    mID = UIBase.GetID(),
     mName = '{classname}'
 }
 {classname} = M

@@ -205,7 +205,7 @@ GameObject:
   - component: {fileID: 4894814128065007386}
   - component: {fileID: 5112490074267060466}
   m_Layer: 5
-  m_Name: '@Button.mButtonPop'
+  m_Name: ButtonPop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -388,7 +388,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: UISerialized
+  m_Text: UIWidget
 --- !u!1 &2449687935612046965
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: UINormal
+  m_Text: 
 --- !u!1 &3642163971251717097
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,8 +479,9 @@ GameObject:
   - component: {fileID: 7722436365964127346}
   - component: {fileID: 960090696376086234}
   - component: {fileID: 8821629908275044522}
+  - component: {fileID: 541079881455883303}
   m_Layer: 5
-  m_Name: UINormal
+  m_Name: UISerialized
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -566,6 +567,39 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &541079881455883303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3642163971251717097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ea089c1be2e5db41bbb28808af384d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fields:
+  - name: ButtonMain
+    type: 5
+    values: []
+    stringValue: UnityEngine.UI.Button
+    objectValue: {fileID: 2200391944490978330}
+  - name: ButtonPop
+    type: 5
+    values: []
+    stringValue: UnityEngine.UI.Button
+    objectValue: {fileID: 5112490074267060466}
+  - name: ButtonWidget
+    type: 5
+    values: []
+    stringValue: UnityEngine.UI.Button
+    objectValue: {fileID: 6694481684077679352}
+  - name: Text
+    type: 5
+    values: []
+    stringValue: UnityEngine.UI.Text
+    objectValue: {fileID: 986986525864639527}
 --- !u!1 &3810986407056610015
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,7 +613,7 @@ GameObject:
   - component: {fileID: 2648460178651284396}
   - component: {fileID: 2200391944490978330}
   m_Layer: 5
-  m_Name: '@Button.mButtonMain'
+  m_Name: ButtonMain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -760,7 +794,7 @@ GameObject:
   - component: {fileID: 1669790204796172209}
   - component: {fileID: 6694481684077679352}
   m_Layer: 5
-  m_Name: '@Button.mButtonWidget'
+  m_Name: ButtonWidget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

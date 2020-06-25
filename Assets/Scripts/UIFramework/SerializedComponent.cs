@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
+
 public enum SerializedFieldType
 {
     None = -1,
@@ -279,11 +282,72 @@ public class SerializedComponent : MonoBehaviour
     [HideInInspector]
     public List<SerializedField> fields = new List<SerializedField>();
 
+    private Dictionary<string, int> name2IndexDic = new Dictionary<string, int>();
+
     public SerializedField this[string name]
     {
         get
         {
-            return fields.Find(x => x.name == name);
+            if(name2IndexDic.Count == 0)
+            {
+                for (int i = 0; i < fields.Count; ++i)
+                {
+                    name2IndexDic.Add(fields[i].name, i);
+                }
+            }
+            name2IndexDic.TryGetValue(name, out int index);
+            if (index >= 0)
+            {
+                return fields[index];
+            }
+            return null;
+        }
+    }
+
+    public Component GetSerializedComponent(string name)
+    {
+        var field = this[name];
+        if(field!=null)
+        {
+            return field.GetObject() as Component;
+        }
+        return null;
+    }
+
+    public T GetSerializedComponent<T>(string name) where T:Component
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetObject() as T;
+        }
+        return null;
+    }
+
+    public GameObject GetSerializedGameObject(string name)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            return field.GetObject() as GameObject;
+        }
+        return null;
+    }
+
+    public void AddClick(string name,UnityAction call)
+    {
+        Button button = GetSerializedComponent<Button>(name);
+        if(button!=null)
+        {
+            button.onClick.AddListener(call);
+        }
+    }
+    public void SetText(string name,string text)
+    {
+        Text button = GetSerializedComponent<Text>(name);
+        if (button != null)
+        {
+            button.text = text;
         }
     }
 }

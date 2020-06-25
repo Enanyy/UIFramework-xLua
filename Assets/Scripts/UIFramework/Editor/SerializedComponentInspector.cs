@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class SerializedComponentInspector : Editor
     static List<string> types = new List<string>();
     static HashSet<string> names = new HashSet<string>();
     static List<string> enums = new List<string>();
+    static List<Assembly> assemblies = new List<Assembly>();
     private void Awake()
     {
         mTarget = target as SerializedComponent;   
@@ -28,6 +30,13 @@ public class SerializedComponentInspector : Editor
             {
                 enums.Add(type.FullName);
             }
+        }
+        if(assemblies.Count == 0)
+        {
+            assemblies.Add(typeof(GameObject).Assembly);
+            assemblies.Add(typeof(UnityEngine.UI.Button).Assembly);
+            assemblies.Add(typeof(SerializedComponent).Assembly);
+
         }
     }
   
@@ -123,11 +132,7 @@ public class SerializedComponentInspector : Editor
                         {
                             field.SetObjectType(gameObjectType);
                         }
-                        var type = typeof(GameObject).Assembly.GetType(field.GetObjectType());
-                        if (type == null)
-                        {
-                            type = typeof(SerializedField).Assembly.GetType(field.GetObjectType());
-                        }
+                        var type = GetType(field.GetObjectType());
                         field.SetObject(type.FullName, EditorGUILayout.ObjectField(field.objectValue, type, true));
 
                         int index = types.FindIndex(x => x == field.GetObjectType());
@@ -274,6 +279,19 @@ public class SerializedComponentInspector : Editor
             else
             {
                 names.Add(field.name);
+            }
+        }
+        return null;
+    }
+
+    private static Type GetType(string name)
+    {
+        for(int i = 0; i <assemblies.Count;++i)
+        {
+            var type = assemblies[i].GetType(name);
+            if(type!=null)
+            {
+                return type;
             }
         }
         return null;

@@ -1,0 +1,40 @@
+local M = {
+    mID = UIBase.GetID(),
+    mName = 'UISerialized',
+    mFixedWidets = {
+		{ mName = 'UIBg', mSortingOrderOffset = -1},
+	},
+}
+UISerialized = M
+setmetatable(M, UIBase)
+
+--整个生命周期只调用一次
+function M:OnLoad()
+--BINDING_CODE_BEGIN
+--BINDING_CODE_END
+
+    self.Serialized = self:GetComponent(typeof(CS.SerializedComponent))
+    self.Serialized:AddClick("ButtonMain",function() UIManager:CloseAllAndOpen("UIMain") end)
+    self.Serialized:AddClick("ButtonPop",function() UIManager:Open(UIPop) end)
+    self.Serialized:AddClick("ButtonWidget",function() UIManager:Open(UIWidget) end)
+end
+
+--整个生命周期只调用一次
+function M:OnUnload()
+
+end
+
+
+--整个生命周期可能调用多次
+function M:OnShow()
+
+
+end
+
+--整个生命周期可能调用多次
+function M:OnHide()
+
+
+end
+
+return M
