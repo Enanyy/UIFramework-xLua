@@ -263,6 +263,15 @@ public class SerializedComponentInspector : Editor
 
                 DestroyImmediate(go);
             }
+            else
+            {
+                if (AssetDatabase.IsOpenForEdit(prefab))
+                {
+                    EditorUtility.SetDirty(prefab);
+                    AssetDatabase.SaveAssets();
+                }
+
+            }
         }
     }
 

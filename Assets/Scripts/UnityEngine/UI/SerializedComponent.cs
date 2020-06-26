@@ -382,7 +382,61 @@ public class SerializedComponent : MonoBehaviour
         var field = this[name];
         if (field != null)
         {
-            return field.GetObject() as T;
+            T component = field.GetObject() as T;
+            if(component != null)
+            {
+                return component;
+            }
+            else
+            {
+                GameObject go;
+                if (component != null)
+                {
+                    go = component.gameObject;
+                }
+                else
+                {
+                    go = GetGameObjectField(name);
+                }
+                if (go!= null)
+                {
+                    go.TryGetComponent(out component);
+
+                    return component;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Component GetComponentField(string name, Type type)
+    {
+        var field = this[name];
+        if (field != null)
+        {
+            Component component = field.GetObject() as Component;
+            if (component != null && component.GetType() == type)
+            {
+                return component;
+            }
+            else
+            {
+                GameObject go;
+                if(component!=null)
+                {
+                    go = component.gameObject;
+                }
+                else
+                {
+                    go = GetGameObjectField(name);
+                }
+                if (go != null)
+                {
+                    go.TryGetComponent( type, out component);
+
+                    return component;
+                }
+            }
         }
         return null;
     }
@@ -411,10 +465,23 @@ public class SerializedComponent : MonoBehaviour
         var field = this[name];
         if (field != null)
         {
-            return field.GetObject() as GameObject;
+            GameObject go = field.GetObject() as GameObject;
+            if(go!=null)
+            {
+                return go;
+            }
+            else
+            {
+                Component component = field.GetObject() as Component;
+                if(component!=null)
+                {
+                    return component.gameObject;
+                }
+            }
         }
         return null;
     }
+
 
 
 
@@ -432,6 +499,15 @@ public class SerializedComponent : MonoBehaviour
         if (button != null)
         {
             button.text = text;
+        }
+    }
+
+    public void SetActive(string name, bool active)
+    {
+        GameObject go = GetGameObjectField(name);
+        if(go!=null && go.activeSelf != active)
+        {
+            go.SetActive(active);
         }
     }
 }
