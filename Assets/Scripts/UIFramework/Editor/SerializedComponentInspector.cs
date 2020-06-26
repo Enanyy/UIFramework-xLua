@@ -56,8 +56,8 @@ public class SerializedComponentInspector : Editor
             var field = mTarget.fields[i];
             EditorGUILayout.LabelField(i.ToString(), GUILayout.Width(20));
             field.name = EditorGUILayout.TextField(field.name, GUILayout.Width(100));
-            var propertyType = (SerializedFieldType)EditorGUILayout.EnumPopup(field.type, GUILayout.Width(80));
-            if (propertyType != SerializedFieldType.None && propertyType != SerializedFieldType.Object)
+            var propertyType = (SerializedType)EditorGUILayout.EnumPopup(field.type, GUILayout.Width(80));
+            if (propertyType != SerializedType.None && propertyType != SerializedType.Object)
             {
                 if (string.IsNullOrEmpty(field.name))
                 {
@@ -67,14 +67,14 @@ public class SerializedComponentInspector : Editor
             field.type = propertyType;
             switch (field.type)
             {
-                case SerializedFieldType.Boolean: field.SetBool(EditorGUILayout.Toggle(field.GetBool())); break;
-                case SerializedFieldType.Integer: field.SetInt(EditorGUILayout.IntField(field.GetInt())); break;
-                case SerializedFieldType.Float: field.SetFloat(EditorGUILayout.FloatField(field.GetFloat())); break;
-                case SerializedFieldType.String: field.SetString(EditorGUILayout.TextField(field.GetString())); break;
-                case SerializedFieldType.Vector2: field.SetVector2(EditorGUILayout.Vector2Field("", field.GetVector2())); break;
-                case SerializedFieldType.Vector3: field.SetVector3(EditorGUILayout.Vector3Field("", field.GetVector3())); break;
-                case SerializedFieldType.Vector4: field.SetVector4(EditorGUILayout.Vector4Field("", field.GetVector4())); break;
-                case SerializedFieldType.Object:
+                case SerializedType.Boolean: field.SetBool(EditorGUILayout.Toggle(field.GetBool())); break;
+                case SerializedType.Integer: field.SetInt(EditorGUILayout.IntField(field.GetInt())); break;
+                case SerializedType.Float: field.SetFloat(EditorGUILayout.FloatField(field.GetFloat())); break;
+                case SerializedType.String: field.SetString(EditorGUILayout.TextField(field.GetString())); break;
+                case SerializedType.Vector2: field.SetVector2(EditorGUILayout.Vector2Field("", field.GetVector2())); break;
+                case SerializedType.Vector3: field.SetVector3(EditorGUILayout.Vector3Field("", field.GetVector3())); break;
+                case SerializedType.Vector4: field.SetVector4(EditorGUILayout.Vector4Field("", field.GetVector4())); break;
+                case SerializedType.Object:
                     {
                         types.Clear();
                         var gameObjectType = typeof(GameObject).FullName;
@@ -127,11 +127,11 @@ public class SerializedComponentInspector : Editor
                         }
                         else
                         {
-                            field.SetTypeName( SerializedFieldType.Object, gameObjectType);
+                            field.SetTypeName(SerializedType.Object, gameObjectType);
                         }
                         if (string.IsNullOrEmpty(field.GetTypeName()))
                         {
-                            field.SetTypeName(SerializedFieldType.Object,gameObjectType);
+                            field.SetTypeName(SerializedType.Object,gameObjectType);
                         }
                         var type = GetType(field.GetTypeName());
                         field.SetObject( EditorGUILayout.ObjectField(field.objectValue, type, true));
@@ -141,11 +141,11 @@ public class SerializedComponentInspector : Editor
                         {
                             index = EditorGUILayout.Popup(index, types.ToArray());
 
-                            field.SetTypeName( SerializedFieldType.Object, types[index]);
+                            field.SetTypeName(SerializedType.Object, types[index]);
                         }
                     }
                     break;
-                case SerializedFieldType.Enum:
+                case SerializedType.Enum:
                     {
 
                         int index = enums.FindIndex(x => x == field.GetTypeName());
@@ -159,7 +159,7 @@ public class SerializedComponentInspector : Editor
                                 value = 0;
                             }
                             index = k;
-                            field.SetTypeName(SerializedFieldType.Enum, enums[index]);
+                            field.SetTypeName(SerializedType.Enum, enums[index]);
                             field.SetEnum( value);
                         }
                         if (string.IsNullOrEmpty(field.GetTypeName()) == false)
@@ -167,7 +167,7 @@ public class SerializedComponentInspector : Editor
                             var type = typeof(SerializedField).Assembly.GetType(field.GetTypeName());
 
                             Enum value = (Enum)Enum.ToObject(type, field.GetEnum());
-                            field.SetTypeName(SerializedFieldType.Enum, field.GetTypeName());
+                            field.SetTypeName(SerializedType.Enum, field.GetTypeName());
                             field.SetEnum( Convert.ToInt32(EditorGUILayout.EnumPopup(value)));
                         }
 

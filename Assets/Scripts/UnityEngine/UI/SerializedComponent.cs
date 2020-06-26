@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-public enum SerializedFieldType
+public enum SerializedType
 {
     None = -1,
     Boolean = 0,
@@ -27,8 +27,11 @@ public class SerializedEnumAttribute : Attribute
 public class SerializedField
 {
     public string name;
-    public SerializedFieldType type = SerializedFieldType.None;
+    public SerializedType type = SerializedType.None;
 
+    /// <summary>
+    /// 相当于联合体
+    /// </summary>
     public float[] values;
     public string stringValue;
     public UnityEngine.Object objectValue;
@@ -43,11 +46,11 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Integer;
+        type = SerializedType.Integer;
     }
     public int GetInt(int defaultValue = 0)
     {
-        if (type == SerializedFieldType.Integer)
+        if (type == SerializedType.Integer)
         {
             if (values != null && values.Length == 1)
             {
@@ -67,12 +70,12 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Float;
+        type = SerializedType.Float;
     }
 
     public float GetFloat(float defaultValue = 0)
     {
-        if (type == SerializedFieldType.Float)
+        if (type == SerializedType.Float)
         {
             if (values != null && values.Length == 1)
             {
@@ -93,11 +96,11 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Boolean;
+        type = SerializedType.Boolean;
     }
     public bool GetBool(bool defaultValue = false)
     {
-        if (type == SerializedFieldType.Boolean)
+        if (type == SerializedType.Boolean)
         {
             if (values != null && values.Length == 1)
             {
@@ -113,11 +116,11 @@ public class SerializedField
         values = null;
         objectValue = null;
 
-        type = SerializedFieldType.String;
+        type = SerializedType.String;
     }
     public string GetString(string defaultValue = "")
     {
-        if (type == SerializedFieldType.String)
+        if (type == SerializedType.String)
         {
             return stringValue;
         }
@@ -136,12 +139,12 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Vector2;
+        type = SerializedType.Vector2;
 
     }
     public Vector2 GetVector2()
     {
-        if (type == SerializedFieldType.Vector2)
+        if (type == SerializedType.Vector2)
         {
             if (values != null && values.Length == 2)
             {
@@ -164,11 +167,11 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Vector3;
+        type = SerializedType.Vector3;
     }
     public Vector3 GetVector3()
     {
-        if (type == SerializedFieldType.Vector3)
+        if (type == SerializedType.Vector3)
         {
             if (values != null && values.Length == 3)
             {
@@ -193,11 +196,11 @@ public class SerializedField
         objectValue = null;
         stringValue = null;
 
-        type = SerializedFieldType.Vector4;
+        type = SerializedType.Vector4;
     }
     public Vector4 GetVector4()
     {
-        if (type == SerializedFieldType.Vector4)
+        if (type == SerializedType.Vector4)
         {
             if (values != null && values.Length == 4)
             {
@@ -219,11 +222,11 @@ public class SerializedField
 
         objectValue = null;
 
-        type = SerializedFieldType.Enum;
+        type = SerializedType.Enum;
     }
     public int GetEnum(int defaultValue = 0)
     {
-        if (type == SerializedFieldType.Enum)
+        if (type == SerializedType.Enum)
         {
             if (values != null && values.Length == 1)
             {
@@ -237,7 +240,7 @@ public class SerializedField
         return stringValue;
     }
 
-    public void SetTypeName(SerializedFieldType type, string typeName)
+    public void SetTypeName(SerializedType type, string typeName)
     {
         this.type = type;
         this.stringValue = typeName;
@@ -252,11 +255,11 @@ public class SerializedField
 
         values = null;
 
-        this.type = SerializedFieldType.Object;
+        this.type = SerializedType.Object;
     }
     public UnityEngine.Object GetObject()
     {
-        if (type == SerializedFieldType.Object)
+        if (type == SerializedType.Object)
         {
             return objectValue;
         }
