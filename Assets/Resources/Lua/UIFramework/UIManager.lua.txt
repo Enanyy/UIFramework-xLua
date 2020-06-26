@@ -266,11 +266,11 @@ function UIManager:Open(ui, widget, callback)
     end
 
     if widget ~= nil then
-        widget = self:Clone(widget)
+        widget = self:CloneFrom(widget)
         ui:AddWidget(widget)
     end
 
-    ui = self:Clone(ui)
+    ui = self:CloneFrom(ui)
 
     --禁用点击,防止重复点击打开界面
     self:SetTouch(false)
@@ -384,7 +384,7 @@ function UIManager:IsSource(ui)
     return source == ui
 end
 
-function UIManager:Clone(ui)
+function UIManager:CloneFrom(ui)
     if self:IsSource(ui) and ui.mSingleton == false then
         local o = ui:Clone()
         return o
@@ -447,7 +447,7 @@ function UIManager:SetWidgetActive(ui, active)
         for i, value in ipairs(ui.mFixedWidets) do
             local widget = self:Get(value.mName)
             if widget ~= nil then
-                widget = self:Clone(widget)
+                widget = self:CloneFrom(widget)
                 widget.mSortingOrderOffset = value.mSortingOrderOffset
 
                 ui:AddWidget(widget)
