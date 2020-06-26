@@ -492,7 +492,7 @@ function UIManager:SetSortOrder(ui)
             local minOrder = - 9999
             local maxOrder = minOrder
             for k,v in pairs(self.mUIDic) do
-                if v ~= nil and v ~= ui and v.mCanvas ~= nil and v.mFixedOrder == 0 and v.mParent == nil  then   
+                if v ~= nil and v ~= ui and v.mCanvas ~= nil and v.mFixedOrder == 0 and v.mType == UIType.Normal  then   
                     if maxOrder == minOrder or  v.mCanvas.sortingOrder > maxOrder then 
                         maxOrder = v.mCanvas.sortingOrder
                     end
