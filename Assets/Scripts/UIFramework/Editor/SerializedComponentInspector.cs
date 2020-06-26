@@ -254,24 +254,9 @@ public class SerializedComponentInspector : Editor
         else
         {
             GameObject prefab = mTarget.transform.root.gameObject;
-            string assetPath = AssetDatabase.GetAssetPath(prefab);
 
-            if (string.IsNullOrEmpty(assetPath) == false)
-            {
-                go = Instantiate(prefab);
-                PrefabUtility.SaveAsPrefabAssetAndConnect(go, assetPath, InteractionMode.AutomatedAction);
-
-                DestroyImmediate(go);
-            }
-            else
-            {
-                if (AssetDatabase.IsOpenForEdit(prefab))
-                {
-                    EditorUtility.SetDirty(prefab);
-                    AssetDatabase.SaveAssets();
-                }
-
-            }
+            EditorUtility.SetDirty(prefab);
+            AssetDatabase.SaveAssets();
         }
     }
 
