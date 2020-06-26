@@ -250,6 +250,7 @@ function UIManager:Open(ui, widget, callback)
         self.mUIDic[ui.mID] = ui
     end
 
+    print("open:"..ui.mName)
 
     if ui.gameObject == nil then
 
@@ -494,34 +495,31 @@ end
 --关闭所有ui以外的所有界面，如果ui没打开则打开
 --
 function UIManager:CloseAllAndOpen(ui, widget, callback)
-    if ui == nil then
-        return
-    end
-
-    if type(ui) == "string" then
+  
+    if ui ~= nil and type(ui) == "string" then
         ui = self:Get(ui)
         if ui~= nil and ui.mSingleton ==false then
             error("close "..ui.mName .." is not singleton.")
         end
     end 
 
-    if ui == nil then
-        return
-    end
     for k,v in pairs(self.mUIDic) do
         local close = true
 
-        if v ~= nil and v == ui then
-            close = false
-        else
-            if v.mType == UIType.Widget then
-                for i,w in ipairs(ui.mWidgets) do
-                    if w == v.mName then
-                        close = false
-                        break
+        if ui ~= nil then
+            if v == ui then
+                close = false
+            else
+                if v.mType == UIType.Widget then
+                    for i,w in ipairs(ui.mWidgets) do
+                        if w.mID == v.mID then
+                            close = false
+                            break
+                        end
                     end
                 end
             end
+
         end
         
         if close and v ~= nil then
