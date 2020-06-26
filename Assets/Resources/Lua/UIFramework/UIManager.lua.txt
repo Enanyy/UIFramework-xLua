@@ -1,34 +1,3 @@
-Application             = CS.UnityEngine.Application
-GameObject              = CS.UnityEngine.GameObject
-Transform               = CS.UnityEngine.Transform
-Vector2                 = CS.UnityEngine.Vector2
-Vector3                 = CS.UnityEngine.Vector3
-Quaternion              = CS.UnityEngine.Quaternion
-Camera                  = CS.UnityEngine.Camera
-RectTransform           = CS.UnityEngine.RectTransform
-Canvas                  = CS.UnityEngine.Canvas
-Screen                  = CS.UnityEngine.Screen
-Input                   = CS.UnityEngine.Input
-
-Color                   = CS.UnityEngine.Color
-Image                   = CS.UnityEngine.UI.Image
-Button                  = CS.UnityEngine.UI.Button
-Text                    = CS.UnityEngine.UI.Text
-TextMeshProUGUI         = CS.TMPro.TextMeshProUGUI
-Toggle                  = CS.UnityEngine.UI.Toggle
-Slider                  = CS.UnityEngine.UI.Slider
-Scrollbar               = CS.UnityEngine.UI.Scrollbar
-Dropdown                = CS.UnityEngine.UI.Dropdown
-InputField              = CS.UnityEngine.UI.InputField
-ScrollRect              = CS.UnityEngine.UI.ScrollRect
-CanvasScaler            = CS.UnityEngine.UI.CanvasScaler
-
-HorizontalScrollView    = CS.UnityEngine.UI.HorizontalScrollView
-VerticalScrollView      = CS.UnityEngine.UI.VerticalScrollView
-ProgressBar             = CS.UnityEngine.UI.ProgressBar
-Tab                     = CS.UnityEngine.UI.Tab
-Timer					= CS.UnityEngine.UI.Timer
-
 local renderMode        = CS.UnityEngine.RenderMode.ScreenSpaceCamera
 local uiScaleMode       = CS.UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize
 local screenMatchMode   = CS.UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight
@@ -191,6 +160,8 @@ UIManager =
     mLayerHide      = 7,        --隐藏层
 
     mLoader         = nil,      --加载函数
+
+    mReferenceResolution      = Vector2(1920, 1080),
 }
 
 function UIManager:Init()
@@ -307,7 +278,7 @@ function UIManager:Open(ui, widget, callback)
             scaler.scaleFactor = 1
             scaler.uiScaleMode = uiScaleMode
             scaler.screenMatchMode = screenMatchMode
-            scaler.referenceResolution = Vector2(1920, 1080)
+            scaler.referenceResolution = self.mReferenceResolution
             scaler.referencePixelsPerUnit = 100
     
             ui.mStatus = UIStatus.LoadDone
