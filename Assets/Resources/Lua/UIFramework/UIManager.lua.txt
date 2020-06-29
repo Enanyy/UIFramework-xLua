@@ -232,6 +232,8 @@ function UIManager:Open(ui, widget, callback)
         return 
     end
 
+    ui = self:CloneFrom(ui)
+
     if type(widget) == "string" then
         widget = self:Get(widget)
     end
@@ -240,8 +242,6 @@ function UIManager:Open(ui, widget, callback)
         widget = self:CloneFrom(widget)
         ui:AddWidget(widget)
     end
-
-    ui = self:CloneFrom(ui)
 
     --禁用点击,防止重复点击打开界面
     self:SetTouch(false)
@@ -352,12 +352,15 @@ function UIManager:Get(name)
 end
 
 function UIManager:IsSource(ui)
+    if ui == nil then
+        return false
+    end
     local source = self:Get(ui.mName)
     return source == ui
 end
 
 function UIManager:CloneFrom(ui)
-    if self:IsSource(ui) and ui.mSingleton == false then
+    if ui ~= nil and self:IsSource(ui) and ui.mSingleton == false then
         local o = ui:Clone()
         return o
     end

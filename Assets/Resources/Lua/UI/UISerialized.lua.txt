@@ -13,7 +13,7 @@ function M:OnLoad()
 --BINDING_CODE_BEGIN
 --BINDING_CODE_END
 
-    self.Serialized = self:GetComponent(typeof(CS.SerializedComponent))
+    self.Serialized = self:GetComponent(typeof(CS.UnityEngine.UI.SerializedView))
     self.Serialized:AddClick("ButtonMain",function() UIManager:CloseAllAndOpen("UIMain") end)
     self.Serialized:AddClick("ButtonPop",function() UIManager:Open(UIPop) end)
     self.Serialized:AddClick("ButtonWidget",function() UIManager:Open(UIWidget) end)

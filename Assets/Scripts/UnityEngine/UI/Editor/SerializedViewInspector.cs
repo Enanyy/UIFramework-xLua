@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Timeline;
+using UnityEngine.UI;
 
 [ExecuteInEditMode]
-[CustomEditor(typeof(SerializedComponent))]
-public class SerializedComponentInspector : Editor
+[CustomEditor(typeof(SerializedView))]
+public class SerializedViewInspector : Editor
 {
-    private SerializedComponent mTarget;
+    private SerializedView mTarget;
     static List<string> types = new List<string>();
     static HashSet<string> names = new HashSet<string>();
     static List<string> enums = new List<string>();
     static List<Assembly> assemblies = new List<Assembly>();
     private void Awake()
     {
-        mTarget = target as SerializedComponent;   
+        mTarget = target as SerializedView;   
     }
     private void OnEnable()
     {
@@ -36,7 +36,7 @@ public class SerializedComponentInspector : Editor
         {
             assemblies.Add(typeof(GameObject).Assembly);
             assemblies.Add(typeof(UnityEngine.UI.Button).Assembly);
-            assemblies.Add(typeof(SerializedComponent).Assembly);
+            assemblies.Add(typeof(SerializedView).Assembly);
 
         }
     }
