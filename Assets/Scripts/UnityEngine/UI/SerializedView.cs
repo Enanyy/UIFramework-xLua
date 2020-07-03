@@ -302,7 +302,7 @@ namespace UnityEngine.UI
             return defaultValue;
         }
 
-        public int GetIntField(int defaultValue = 0)
+        public int GetIntField(string name, int defaultValue = 0)
         {
             var field = this[name];
             if (field != null)
@@ -311,7 +311,7 @@ namespace UnityEngine.UI
             }
             return defaultValue;
         }
-        public float GetFloadField(float defaultValue = 0)
+        public float GetFloadField(string name, float defaultValue = 0)
         {
             var field = this[name];
             if (field != null)
@@ -321,7 +321,7 @@ namespace UnityEngine.UI
             return defaultValue;
         }
 
-        public string GetStringField(string defaultValue = "")
+        public string GetStringField(string name, string defaultValue = "")
         {
             var field = this[name];
             if (field != null)
