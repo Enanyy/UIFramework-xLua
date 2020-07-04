@@ -355,8 +355,7 @@ public class {classname} : WindowComponent
             case "Dropdown": return typeof(Dropdown);
             case "InputField": return typeof(InputField);
             case "ScrollRect": return typeof(ScrollRect);
-            case "VerticalScrollView": return typeof(VerticalScrollView);
-            case "HorizontalScrollView": return typeof(HorizontalScrollView);
+            case "ScrollView": return typeof(ScrollView);
             case "Tab":return typeof(Tab);
             case "ProgressBar": return typeof(ProgressBar);
             case "Timer":return typeof(Timer);

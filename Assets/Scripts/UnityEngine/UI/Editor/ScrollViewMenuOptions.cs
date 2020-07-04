@@ -137,14 +137,14 @@ namespace UnityEditor.UI
         [MenuItem("GameObject/UI/Horizontal Scroll View", false, 2151)]
         static public void AddHorizontalScrollView(MenuCommand menuCommand)
         {
-            GameObject go = ScrollViewDefaultControls.CreateHorizontalScrollView(GetStandardResources());
+            GameObject go = ScrollViewDefaultControls.CreateScrollView(GetStandardResources(), ScrollView.Direction.Horizontal);
             PlaceUIElementRoot(go, menuCommand);
         }
 
         [MenuItem("GameObject/UI/Vertical Scroll View", false, 2152)]
         static public void AddVerticalScrollView(MenuCommand menuCommand)
         {
-            GameObject go = ScrollViewDefaultControls.CreateVerticalScrollView(GetStandardResources());
+            GameObject go = ScrollViewDefaultControls.CreateScrollView(GetStandardResources(), ScrollView.Direction.Vertical);
             PlaceUIElementRoot(go, menuCommand);
         }
     }

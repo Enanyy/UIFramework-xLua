@@ -7,10 +7,10 @@ using System.Collections.Generic;
 
 namespace UnityEngine.UI
 {
-    [AddComponentMenu("")]
+    [AddComponentMenu("UI/Scroll View", 50)]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform))]
-    public abstract class ScrollView : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup
+    public class ScrollView : UIBehaviour, IInitializePotentialDragHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IScrollHandler, ICanvasElement, ILayoutElement, ILayoutGroup
     {
         public class ScrollItemEvent : UnityEvent<Transform, int> { }
 
@@ -37,10 +37,40 @@ namespace UnityEngine.UI
         protected int itemTypeStart = 0;
         protected int itemTypeEnd = 0;
 
-        protected abstract float GetSize(RectTransform item);
-        protected abstract float GetDimension(Vector2 vector);
-        protected abstract Vector2 GetVector(float value);
-        protected int directionSign = 0;
+        protected float GetSize(RectTransform item)
+        {
+            float size = contentSpacing;
+            if (m_GridLayout != null)
+            {
+                size += direction == Direction.Horizontal? m_GridLayout.cellSize.x: m_GridLayout.cellSize.y;
+            }
+            else
+            {
+                size += direction == Direction.Horizontal ? LayoutUtility.GetPreferredWidth(item) : LayoutUtility.GetPreferredHeight(item);
+            }
+            return size;
+        }
+        protected  float GetDimension(Vector2 vector)
+        {
+            return direction == Direction.Horizontal ? -vector.x: vector.y;
+        }
+        protected  Vector2 GetVector(float value)
+        {
+            return direction == Direction.Horizontal ? new Vector2(-value, 0) : new Vector2(0, value);
+        }
+
+        public enum Direction
+        {
+            Horizontal,
+            Vertical,
+        }
+        [SerializeField]
+        protected Direction m_Direction = Direction.Vertical;
+        public Direction direction
+        {
+            get { return m_Direction; }
+            set { m_Direction = value; }
+        }
 
         private float m_ContentSpacing = -1;
         protected GridLayoutGroup m_GridLayout = null;
@@ -123,7 +153,107 @@ namespace UnityEngine.UI
             }
         }
 
-        protected virtual bool UpdateItems(Bounds viewBounds, Bounds contentBounds) { return false; }
+        protected virtual bool UpdateItems(Bounds viewBounds, Bounds contentBounds) 
+        {
+            bool changed = false;
+            if (direction == Direction.Horizontal)
+            {
+                if (viewBounds.max.x > contentBounds.max.x)
+                {
+                    float size = NewItemAtEnd(), totalSize = size;
+                    while (size > 0 && viewBounds.max.x > contentBounds.max.x + totalSize)
+                    {
+                        size = NewItemAtEnd();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+                else if (viewBounds.max.x < contentBounds.max.x - threshold)
+                {
+                    float size = DeleteItemAtEnd(), totalSize = size;
+                    while (size > 0 && viewBounds.max.x < contentBounds.max.x - threshold - totalSize)
+                    {
+                        size = DeleteItemAtEnd();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+
+                if (viewBounds.min.x < contentBounds.min.x)
+                {
+                    float size = NewItemAtStart(), totalSize = size;
+                    while (size > 0 && viewBounds.min.x < contentBounds.min.x - totalSize)
+                    {
+                        size = NewItemAtStart();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+                else if (viewBounds.min.x > contentBounds.min.x + threshold)
+                {
+                    float size = DeleteItemAtStart(), totalSize = size;
+                    while (size > 0 && viewBounds.min.x > contentBounds.min.x + threshold + totalSize)
+                    {
+                        size = DeleteItemAtStart();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+            }
+            else
+            { 
+                if (viewBounds.min.y < contentBounds.min.y)
+                {
+                    float size = NewItemAtEnd(), totalSize = size;
+                    while (size > 0 && viewBounds.min.y < contentBounds.min.y - totalSize)
+                    {
+                        size = NewItemAtEnd();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+                else if (viewBounds.min.y > contentBounds.min.y + threshold)
+                {
+                    float size = DeleteItemAtEnd(), totalSize = size;
+                    while (size > 0 && viewBounds.min.y > contentBounds.min.y + threshold + totalSize)
+                    {
+                        size = DeleteItemAtEnd();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+
+                if (viewBounds.max.y > contentBounds.max.y)
+                {
+                    float size = NewItemAtStart(), totalSize = size;
+                    while (size > 0 && viewBounds.max.y > contentBounds.max.y + totalSize)
+                    {
+                        size = NewItemAtStart();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+                else if (viewBounds.max.y < contentBounds.max.y - threshold)
+                {
+                    float size = DeleteItemAtStart(), totalSize = size;
+                    while (size > 0 && viewBounds.max.y < contentBounds.max.y - threshold - totalSize)
+                    {
+                        size = DeleteItemAtStart();
+                        totalSize += size;
+                    }
+                    if (totalSize > 0)
+                        changed = true;
+                }
+            }
+            return changed;
+        }
         //==========ScrollRect==========
 
         public enum MovementType
@@ -146,14 +276,6 @@ namespace UnityEngine.UI
         [SerializeField]
         private RectTransform m_Content;
         public RectTransform content { get { return m_Content; } set { m_Content = value; } }
-
-        [SerializeField]
-        private bool m_Horizontal = true;
-        public bool horizontal { get { return m_Horizontal; } set { m_Horizontal = value; } }
-
-        [SerializeField]
-        private bool m_Vertical = true;
-        public bool vertical { get { return m_Vertical; } set { m_Vertical = value; } }
 
         [SerializeField]
         private MovementType m_MovementType = MovementType.Elastic;
@@ -318,6 +440,11 @@ namespace UnityEngine.UI
                 }
             }
 
+            GridLayoutGroup layout = content.GetComponent<GridLayoutGroup>();
+            if (layout != null && layout.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
+            {
+                Debug.LogError("[HorizontalScrollRect] unsupported GridLayoutGroup constraint");
+            }
         }
 
         
@@ -374,9 +501,9 @@ namespace UnityEngine.UI
                         m_ViewBounds = new Bounds(viewRect.rect.center, viewRect.rect.size);
                         var m_ItemBounds = GetBounds4Item(index);
                         var offset = 0.0f;
-                        if (directionSign == -1)
+                        if (direction ==  Direction.Vertical)
                             offset = reverseDirection ? (m_ViewBounds.min.y - m_ItemBounds.min.y) : (m_ViewBounds.max.y - m_ItemBounds.max.y);
-                        else if (directionSign == 1)
+                        else if (direction == Direction.Horizontal)
                             offset = reverseDirection ? (m_ItemBounds.max.x - m_ViewBounds.max.x) : (m_ItemBounds.min.x - m_ViewBounds.min.x);
                         // check if we cannot move on
                         if (totalCount >= 0)
@@ -385,8 +512,8 @@ namespace UnityEngine.UI
                             {
                                 m_ItemBounds = GetBounds4Item(totalCount - 1);
                                 // reach bottom
-                                if ((directionSign == -1 && m_ItemBounds.min.y > m_ViewBounds.min.y) ||
-                                    (directionSign == 1 && m_ItemBounds.max.x < m_ViewBounds.max.x))
+                                if ((direction == Direction.Vertical && m_ItemBounds.min.y > m_ViewBounds.min.y) ||
+                                    (direction == Direction.Horizontal && m_ItemBounds.max.x < m_ViewBounds.max.x))
                                 {
                                     needMoving = false;
                                     break;
@@ -395,8 +522,8 @@ namespace UnityEngine.UI
                             else if (offset < 0 && itemTypeStart == 0 && reverseDirection)
                             {
                                 m_ItemBounds = GetBounds4Item(0);
-                                if ((directionSign == -1 && m_ItemBounds.max.y < m_ViewBounds.max.y) ||
-                                    (directionSign == 1 && m_ItemBounds.min.x > m_ViewBounds.min.x))
+                                if ((direction == Direction.Vertical && m_ItemBounds.max.y < m_ViewBounds.max.y) ||
+                                    (direction == Direction.Horizontal && m_ItemBounds.min.x > m_ViewBounds.min.x))
                                 {
                                     needMoving = false;
                                     break;
@@ -479,7 +606,7 @@ namespace UnityEngine.UI
             }
 
             float sizeToFill = 0, sizeFilled = 0;
-            if (directionSign == -1)
+            if (direction == Direction.Vertical)
                 sizeToFill = viewRect.rect.size.y;
             else
                 sizeToFill = viewRect.rect.size.x;
@@ -495,9 +622,9 @@ namespace UnityEngine.UI
             float dist = Mathf.Max(0, sizeFilled - sizeToFill);
             if (reverseDirection)
                 dist = -dist;
-            if (directionSign == -1)
+            if (direction == Direction.Vertical)
                 pos.y = dist;
-            else if (directionSign == 1)
+            else if (direction == Direction.Horizontal)
                 pos.x = -dist;
             m_Content.anchoredPosition = pos;
         }
@@ -522,7 +649,7 @@ namespace UnityEngine.UI
 
             float sizeToFill = 0, sizeFilled = 0;
             // m_ViewBounds may be not ready when Refill on Start
-            if (directionSign == -1)
+            if (direction == Direction.Vertical)
                 sizeToFill = viewRect.rect.size.y;
             else
                 sizeToFill = viewRect.rect.size.x;
@@ -535,9 +662,9 @@ namespace UnityEngine.UI
             }
 
             Vector2 pos = m_Content.anchoredPosition;
-            if (directionSign == -1)
+            if (direction == Direction.Vertical)
                 pos.y = 0;
-            else if (directionSign == 1)
+            else if (direction == Direction.Horizontal)
                 pos.x = 0;
             m_Content.anchoredPosition = pos;
         }
@@ -821,13 +948,13 @@ namespace UnityEngine.UI
             Vector2 delta = data.scrollDelta;
             // Down is positive for scroll events, while in UI system up is positive.
             delta.y *= -1;
-            if (vertical && !horizontal)
+            if (direction == Direction.Vertical)
             {
                 if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
                     delta.y = delta.x;
                 delta.x = 0;
             }
-            if (horizontal && !vertical)
+            if (direction == Direction.Horizontal)
             {
                 if (Mathf.Abs(delta.y) > Mathf.Abs(delta.x))
                     delta.x = delta.y;
@@ -910,9 +1037,9 @@ namespace UnityEngine.UI
 
         protected virtual void SetContentAnchoredPosition(Vector2 position)
         {
-            if (!m_Horizontal)
+            if (direction != Direction.Horizontal)
                 position.x = m_Content.anchoredPosition.x;
-            if (!m_Vertical)
+            if (direction != Direction.Vertical)
                 position.y = m_Content.anchoredPosition.y;
 
             if (position != m_Content.anchoredPosition)
@@ -1383,7 +1510,7 @@ namespace UnityEngine.UI
             Vector2 min = m_ContentBounds.min;
             Vector2 max = m_ContentBounds.max;
 
-            if (m_Horizontal)
+            if (direction == Direction.Horizontal)
             {
                 min.x += delta.x;
                 max.x += delta.x;
@@ -1393,7 +1520,7 @@ namespace UnityEngine.UI
                     offset.x = m_ViewBounds.max.x - max.x;
             }
 
-            if (m_Vertical)
+            if (direction == Direction.Vertical)
             {
                 min.y += delta.y;
                 max.y += delta.y;

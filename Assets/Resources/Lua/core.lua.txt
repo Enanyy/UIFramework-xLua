@@ -37,8 +37,7 @@ ScrollRect              = CS.UnityEngine.UI.ScrollRect
 CanvasScaler            = CS.UnityEngine.UI.CanvasScaler
 
 --UnityEngine.UI Custom
-HorizontalScrollView    = CS.UnityEngine.UI.HorizontalScrollView
-VerticalScrollView      = CS.UnityEngine.UI.VerticalScrollView
+ScrollView              = CS.UnityEngine.UI.ScrollView
 ProgressBar             = CS.UnityEngine.UI.ProgressBar
 Tab                     = CS.UnityEngine.UI.Tab
 Timer					= CS.UnityEngine.UI.Timer

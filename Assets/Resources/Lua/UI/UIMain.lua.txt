@@ -11,17 +11,16 @@ setmetatable(M, UIBase)
 
 --整个生命周期只调用一次
 function M:OnLoad()
---BINDING_CODE_BEGIN
-	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
+--BINDING_CODE_BEGIN	self.mButtonNormal = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonNormal')
 	self.mTextNormal = self:GetComponent(typeof(Text), 'Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal')
 	self.mButtonPop = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonPop')
 	self.mButtonWidget = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonWidget')
 	self.mText = self:GetComponent(typeof(Text), 'Tween/SafeArea/@Text.mText')
-	self.mVerticalGridScrollView = self:GetComponent(typeof(VerticalScrollView), 'Tween/SafeArea/@VerticalScrollView.mVerticalGridScrollView')
+	self.mVerticalGridScrollView = self:GetComponent(typeof(ScrollView), 'Tween/SafeArea/@ScrollView.mVerticalGridScrollView')
 	self.mButtonAdd = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonAdd')
 	self.mButtonRemove = self:GetComponent(typeof(Button), 'Tween/SafeArea/@Button.mButtonRemove')
-	self.mVerticalScrollView = self:GetComponent(typeof(VerticalScrollView), 'Tween/SafeArea/@VerticalScrollView.mVerticalScrollView')
-	self.mHorizontalScrollView = self:GetComponent(typeof(HorizontalScrollView), 'Tween/SafeArea/@HorizontalScrollView.mHorizontalScrollView')
+	self.mVerticalScrollView = self:GetComponent(typeof(ScrollView), 'Tween/SafeArea/@ScrollView.mVerticalScrollView')
+	self.mHorizontalScrollView = self:GetComponent(typeof(ScrollView), 'Tween/SafeArea/@ScrollView.mHorizontalScrollView')
 	self.mTab = self:GetComponent(typeof(Tab), 'Tween/SafeArea/@Tab.mTab')
 	self.mProgressBar = self:GetComponent(typeof(ProgressBar), 'Tween/SafeArea/@ProgressBar.mProgressBar')
 	self.mTimer = self:GetComponent(typeof(Timer), 'Tween/SafeArea/@Timer.mTimer')

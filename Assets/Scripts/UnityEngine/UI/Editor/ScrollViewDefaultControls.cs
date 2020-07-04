@@ -78,11 +78,11 @@ namespace UnityEngine.UI
                 SetLayerRecursively(t.GetChild(i).gameObject, layer);
         }
         #endregion
-        
-        public static GameObject CreateHorizontalScrollView(DefaultControls.Resources resources)
+
+        public static GameObject CreateScrollView(DefaultControls.Resources resources, ScrollView.Direction direction)
         {
             GameObject root = CreateUIElementRoot(" Horizontal Scroll Rect", new Vector2(200, 200));
-            
+
             GameObject content = CreateUIObject("Content", root);
 
             RectTransform contentRT = content.GetComponent<RectTransform>();
@@ -93,18 +93,17 @@ namespace UnityEngine.UI
 
             // Setup UI components.
 
-            HorizontalScrollView scrollRect = root.AddComponent<HorizontalScrollView>();
+            ScrollView scrollRect = root.AddComponent<ScrollView>();
+            scrollRect.direction = direction;
             scrollRect.content = contentRT;
             scrollRect.viewport = null;
             scrollRect.horizontalScrollbar = null;
             scrollRect.verticalScrollbar = null;
-            scrollRect.horizontal = true;
-            scrollRect.vertical = false;
             scrollRect.horizontalScrollbarVisibility = ScrollView.ScrollbarVisibility.Permanent;
             scrollRect.verticalScrollbarVisibility = ScrollView.ScrollbarVisibility.Permanent;
             scrollRect.horizontalScrollbarSpacing = 0;
             scrollRect.verticalScrollbarSpacing = 0;
-            
+
             root.AddComponent<RectMask2D>();
 
             HorizontalLayoutGroup layoutGroup = content.AddComponent<HorizontalLayoutGroup>();
@@ -115,46 +114,6 @@ namespace UnityEngine.UI
             ContentSizeFitter sizeFitter = content.AddComponent<ContentSizeFitter>();
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
-
-            return root;
-        }
-
-        public static GameObject CreateVerticalScrollView(DefaultControls.Resources resources)
-        {
-            GameObject root = CreateUIElementRoot(" Vertical Scroll Rect", new Vector2(200, 200));
-            
-            GameObject content = CreateUIObject("Content", root);
-            
-            RectTransform contentRT = content.GetComponent<RectTransform>();
-            contentRT.anchorMin = new Vector2(0.5f, 1);
-            contentRT.anchorMax = new Vector2(0.5f, 1);
-            contentRT.sizeDelta = new Vector2(200, 0);
-            contentRT.pivot = new Vector2(0.5f, 1);
-
-            // Setup UI components.
-
-            VerticalScrollView scrollRect = root.AddComponent<VerticalScrollView>();
-            scrollRect.content = contentRT;
-            scrollRect.viewport = null;
-            scrollRect.horizontalScrollbar = null;
-            scrollRect.verticalScrollbar = null;
-            scrollRect.horizontal = false;
-            scrollRect.vertical = true;
-            scrollRect.horizontalScrollbarVisibility = ScrollView.ScrollbarVisibility.Permanent;
-            scrollRect.verticalScrollbarVisibility = ScrollView.ScrollbarVisibility.Permanent;
-            scrollRect.horizontalScrollbarSpacing = 0;
-            scrollRect.verticalScrollbarSpacing = 0;
-
-            root.AddComponent<RectMask2D>();
-
-            VerticalLayoutGroup layoutGroup = content.AddComponent<VerticalLayoutGroup>();
-            layoutGroup.childAlignment = TextAnchor.UpperCenter;
-            layoutGroup.childForceExpandWidth = true;
-            layoutGroup.childForceExpandHeight = false;
-
-            ContentSizeFitter sizeFitter = content.AddComponent<ContentSizeFitter>();
-            sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             return root;
         }
