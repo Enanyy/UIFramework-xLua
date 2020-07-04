@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class WindowComponent : MonoBehaviour
 {
    
-    public WindowContext context;
+    public WindowContextBase context;
 
    
 

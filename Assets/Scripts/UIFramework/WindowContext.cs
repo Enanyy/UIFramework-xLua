@@ -13,26 +13,18 @@ public enum WindowStatus
     Loading = 1,     //正在加载中
     Done = 2,     //加载完成
 }
-public class WindowContext
+
+public abstract class WindowContextBase
 {
     public const int LAYER = 5;
     public const int LAYER_MODEL = 6;
     public const int LAYER_HIDE = 7;
 
     private static ulong ID = 0;
-
     public readonly ulong id;
     public readonly string name;
     public readonly WindowType type;
-    public readonly bool hideOther;
-    /// <summary>
-    /// 固定层级
-    /// </summary>
-    public readonly int fixedOrder;
-    /// <summary>
-    /// 固定的子UI
-    /// </summary>
-    public readonly List<WidgetContext> fixedWidgets;
+
 
     /// <summary>
     /// 关闭是是否Destroy
@@ -41,32 +33,6 @@ public class WindowContext
     public readonly Type component;
 
     public WindowStatus status = WindowStatus.None;
-    public readonly Dictionary<ulong, WindowContext> widgets = new Dictionary<ulong, WindowContext>();
-
-    public WindowContext(string name,
-        WindowType type = WindowType.Normal,
-        Type component = null,
-        bool hideOther = false,
-        int fixedOrder = 0,
-        bool closeDestroy = true,
-        params WidgetContext[] fixedWidgets)
-    {
-        id = ID++;
-        
-        this.name = name;
-        this.type = type;
-        this.component = component;
-        this.hideOther = hideOther;
-        this.fixedOrder = fixedOrder;
-        this.closeDestroy = closeDestroy;
-        if (fixedWidgets != null)
-        {
-            this.fixedWidgets = new List<WidgetContext>(fixedWidgets);
-        }
-
-        Clear();
-
-    }
 
     public int layer;
     public bool active
@@ -82,11 +48,68 @@ public class WindowContext
     }
 
 
+    public WindowContextBase(string name,
+        WindowType type,
+        Type component = null,
+        bool closeDestroy = true)
+    {
+        id = ID++;
+
+        this.name = name;
+        this.type = type;
+        this.component = component;
+        this.closeDestroy = closeDestroy;
+    }
+
+
     public virtual void Clear()
     {
-        layer = 0;
         status = WindowStatus.None;
+    }
+}
 
+public sealed class WindowContext: WindowContextBase
+{
+    /// <summary>
+    /// 固定层级
+    /// </summary>
+    public readonly int fixedOrder;
+    /// <summary>
+    ///打开时是否隐藏别的UI
+    /// </summary>
+    public readonly bool hideOther;
+  
+    /// <summary>
+    /// 固定的子UI
+    /// </summary>
+    public readonly List<WidgetContext> fixedWidgets;
+
+
+    public readonly Dictionary<ulong, WidgetContext> widgets = new Dictionary<ulong, WidgetContext>();
+
+    public WindowContext(string name,
+        Type component = null,
+        bool hideOther = false,
+        int fixedOrder = 0,
+        bool closeDestroy = true,
+        params WidgetContext[] fixedWidgets):base(name, WindowType.Normal, component,closeDestroy)
+
+    {
+        this.fixedOrder = fixedOrder;
+        this.hideOther = hideOther;
+
+        if (fixedWidgets != null)
+        {
+            this.fixedWidgets = new List<WidgetContext>(fixedWidgets);
+        }
+        Clear();
+    }
+
+    
+    public override void Clear()
+    {
+        base.Clear();
+        layer = 0;
         if (widgets != null)
         {
             widgets.Clear();
@@ -94,20 +117,20 @@ public class WindowContext
     }
 }
 
-public class WidgetContext : WindowContext
+public class WidgetContext : WindowContextBase
 {
     /// <summary>
-    ///
+    ///相当于父界面的层级差
     /// </summary>
     public readonly int sortingOrderOffset;
-    public WidgetContext(WindowContext context, int sortingOrderOffset) : 
-        base(context.name,
-        WindowType.Widget,
-        context.component,
-        context.hideOther,
-        context.fixedOrder,
-        context.closeDestroy
-        )
+    public WidgetContext(string name,
+        Type component = null,
+        bool closeDestroy = true,
+        int sortingOrderOffset = 1) : base(name, WindowType.Widget, component, closeDestroy)
+    {
+        this.sortingOrderOffset = sortingOrderOffset;
+    }
+    public WidgetContext(WidgetContext widget, int sortingOrderOffset = 1) : base(widget.name, widget.type, widget.component, widget.closeDestroy)
     {
         this.sortingOrderOffset = sortingOrderOffset;
     }
