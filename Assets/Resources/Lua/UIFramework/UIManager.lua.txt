@@ -90,6 +90,16 @@ function UIBase:AddWidget( widget)
     end
 end
 
+function UIBase:GetWidget(name)
+
+    for i, v in ipairs(self.mWidgets) do
+        if v.mName == name then
+            return v
+        end
+    end
+    return nil    
+end
+
 function UIBase:Clear()
     self.mWidgets = nil
     self.gameObject = nil

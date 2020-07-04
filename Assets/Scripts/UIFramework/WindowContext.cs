@@ -105,6 +105,19 @@ public sealed class WindowContext: WindowContextBase
         Clear();
     }
 
+    public WidgetContext GetWidget(string name)
+    {
+        var it = widgets.GetEnumerator();
+        while(it.MoveNext())
+        {
+            if(it.Current.Value.name == name)
+            {
+                return it.Current.Value;
+            }
+        }
+        return null;
+    }
+
     
     public override void Clear()
     {
