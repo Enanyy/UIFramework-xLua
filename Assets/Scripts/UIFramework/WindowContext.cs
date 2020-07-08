@@ -33,7 +33,6 @@ public abstract class WindowContextBase
     public readonly Type component;
 
     public WindowStatus status = WindowStatus.None;
-
     public int layer;
     public bool active
     {
@@ -65,6 +64,7 @@ public abstract class WindowContextBase
     public virtual void Clear()
     {
         status = WindowStatus.None;
+       
     }
 }
 
