@@ -479,6 +479,7 @@ GameObject:
   - component: {fileID: 7722436365964127346}
   - component: {fileID: 960090696376086234}
   - component: {fileID: 8821629908275044522}
+  - component: {fileID: 1181866964006047844}
   m_Layer: 5
   m_Name: UINormal
   m_TagString: Untagged
@@ -566,6 +567,25 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!95 &1181866964006047844
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3642163971251717097}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c34300a96ad5e0a4fb219c654d1a0a72, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &3810986407056610015
 GameObject:
   m_ObjectHideFlags: 0

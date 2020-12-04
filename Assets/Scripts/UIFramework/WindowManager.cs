@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class WindowManager : MonoBehaviour
 {
@@ -348,13 +349,13 @@ public class WindowManager : MonoBehaviour
         {
             context.active = active;
 
+
             SetLayer(go, context.layer);
+
 
             SetComponentActive(go, active);
         }
-
         SetWidgetActive(context as WindowContext, active);
-
     }
     private void SetWidgetActive(WindowContext context, bool active)
     {
@@ -467,7 +468,12 @@ public class WindowManager : MonoBehaviour
         {
             return null;
         }
-        mWindowObjectDic.TryGetValue(context.id, out GameObject go);
+        return GetObject(context.id);
+    }
+
+    public GameObject GetObject(ulong id)
+    {
+        mWindowObjectDic.TryGetValue(id, out GameObject go);
         return go;
     }
 
@@ -492,9 +498,8 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void CloseAllAndOpen(WindowContextBase context, WidgetContext widget = null, Action<GameObject> callback = null, bool destroy = true)
+    public void CloseAllAndOpen(WindowContextBase context, WidgetContext widget = null, Action<GameObject> callback = null)
     {
-
         mCloseList.Clear();
         var it = mWindowContextDic.GetEnumerator();
         while (it.MoveNext())
@@ -520,14 +525,9 @@ public class WindowManager : MonoBehaviour
             ulong key = mCloseList[i];
             if (mWindowContextDic.TryGetValue(key, out WindowContextBase w))
             {
-                if (destroy)
-                {
-                    DestroyWindow(w);
-                }
-                else
-                {
-                    SetActive(w, false);
-                }
+
+                DestroyWindow(w);
+
             }
         }
         mWindowStack.Clear();
@@ -535,7 +535,7 @@ public class WindowManager : MonoBehaviour
         Open(context, widget, callback);
     }
 
-    public void Close(WindowContextBase window, bool destroy = true)
+    public void Close(WindowContextBase window)
     {
         if (window == null)
         {
@@ -556,7 +556,7 @@ public class WindowManager : MonoBehaviour
                 }
 
                 mWindowStack.RemoveAt(index);
-                if (mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0 && destroy)
+                if (mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0)
                 {
                     DestroyWindow(window);
                 }
@@ -585,26 +585,12 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                if (destroy)
-                {
-                    DestroyWindow(window);
-                }
-                else
-                {
-                    SetActive(window, false);
-                }
+                DestroyWindow(window);
             }
         }
         else
         {
-            if (destroy)
-            {
-                DestroyWindow(window);
-            }
-            else
-            {
-                SetActive(window, false);
-            }
+            DestroyWindow(window);
         }
     }
 
@@ -616,6 +602,14 @@ public class WindowManager : MonoBehaviour
         }
         SetActive(context, false);
 
+        if (context.closeDestroy)
+        {
+            DestroyWindowObject(context);
+        }
+    }
+
+    private void DestroyWindowObject(WindowContextBase context)
+    {
         mWindowContextDic.Remove(context.id);
 
         GameObject go = GetObject(context);

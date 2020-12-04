@@ -32,6 +32,11 @@ public class WindowComponent : MonoBehaviour
 
     public virtual void OnShow() { }
     public virtual void OnHide() { }
+
+    public virtual void OnAnimationEvent(string param)
+    {
+
+    }
 }
 
 #region Test Enum
