@@ -13,9 +13,16 @@ public class WindowManager : MonoBehaviour
         {
             if (mInstance == null)
             {
-                GameObject go = new GameObject(typeof(WindowManager).Name);
-                mInstance = go.AddComponent<WindowManager>();
-                DontDestroyOnLoad(go);
+                mInstance = FindObjectOfType<WindowManager>();
+                if (mInstance == null)
+                {
+                    GameObject go = new GameObject(typeof(WindowManager).Name);
+                    mInstance = go.AddComponent<WindowManager>();
+                    if (Application.isPlaying)
+                    {
+                        DontDestroyOnLoad(go);
+                    }
+                }
             }
             return mInstance;
         }
@@ -44,8 +51,21 @@ public class WindowManager : MonoBehaviour
 
     private Action<string, Action<UnityEngine.Object>> mLoader;
 
+    private bool mInitialized = false;
+
     void Awake()
     {
+        Initialize();
+    }
+
+    public void Initialize()
+    {
+        if(mInitialized)
+        {
+            return;
+        }
+        mInitialized = true;
+
         GameObject camera = new GameObject("Camera");
         camera.transform.SetParent(transform);
         camera.layer = WindowContextBase.LAYER;
@@ -66,6 +86,7 @@ public class WindowManager : MonoBehaviour
 
         eventsystem.AddComponent<StandaloneInputModule>();
     }
+
     public void SetTouch(bool touchable)
     {
         if (mEventSystem)
@@ -131,8 +152,18 @@ public class WindowManager : MonoBehaviour
 
 
                 context.status = WindowStatus.Done;
-
-                go = Instantiate(asset) as GameObject;
+                if (Application.isPlaying)
+                {
+                    go = Instantiate(asset) as GameObject;
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    go = UnityEditor.PrefabUtility.InstantiatePrefab(asset) as GameObject;
+#else
+                    return;
+#endif
+                }
                 if (mWindowObjectDic.ContainsKey(context.id))
                 {
                     Destroy(mWindowObjectDic[context.id]);

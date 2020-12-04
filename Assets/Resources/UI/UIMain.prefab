@@ -201,6 +201,7 @@ GameObject:
   - component: {fileID: 8978554914343259896}
   - component: {fileID: 1539710566027187958}
   - component: {fileID: 946015627154161697}
+  - component: {fileID: -6245788758842025741}
   m_Layer: 5
   m_Name: UIMain
   m_TagString: Untagged
@@ -237,7 +238,7 @@ Canvas:
   m_GameObject: {fileID: 1172777178813318690}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -247,7 +248,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 50
   m_TargetDisplay: 0
 --- !u!114 &1539710566027187958
 MonoBehaviour:
@@ -288,6 +289,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &-6245788758842025741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1172777178813318690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59c7c1290c5e0be499d3fa3364ed492f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1279757094211882104
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,7 +1010,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 5022383087352491762}
   reverseDirection: 0
   rubberScale: 1
-  direction: 1
+  m_Direction: 1
   m_Content: {fileID: 7738015343682065586}
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -1585,7 +1598,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 8952354793029074643}
   reverseDirection: 0
   rubberScale: 1
-  direction: 1
+  m_Direction: 1
   m_Content: {fileID: 353495481895340792}
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -1993,7 +2006,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 3673560645499832958}
   reverseDirection: 0
   rubberScale: 1
-  direction: 0
+  m_Direction: 1
   m_Content: {fileID: 5927949804311038346}
   m_MovementType: 1
   m_Elasticity: 0.1
