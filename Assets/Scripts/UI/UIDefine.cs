@@ -31,8 +31,28 @@ public class UIDefineWindow : UnityEditor.EditorWindow
         WindowManager.Instance.SetLoader(LoadInEditor);
     }
     Vector2 mScroll;
+    string mKey;
     private void OnGUI()
     {
+        GUILayout.Space(10);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(UnityEditor.EditorGUIUtility.TrTextContent("搜索"),GUILayout.Width(30), GUILayout.Height(30));
+        mKey = GUILayout.TextField(mKey, GUILayout.Width(200), GUILayout.Height(30));
+        if(string.IsNullOrEmpty(mKey)==false)
+        {
+            mKey = mKey.Trim().ToLower();
+
+            if (GUILayout.Button("Reset", GUILayout.Width(60), GUILayout.Height(30)))
+            {
+                mKey = null;
+            }
+        }
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
         mScroll = GUILayout.BeginScrollView(mScroll,false, true);
         float width = 200f;
         int count = (int)(position.width / width);
@@ -51,13 +71,24 @@ public class UIDefineWindow : UnityEditor.EditorWindow
                     var val = fields[index].GetValue(null) as WindowContextBase;
                     if (val != null)
                     {
-                        bool open = WindowManager.Instance.GetObject(val);
-                        GUIStyle style = GUI.skin.button;
-                        style.normal.textColor = open ? Color.yellow : Color.white;
-
-                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                        bool visible = true;
+                        if(string.IsNullOrEmpty(mKey)==false)
                         {
-                            OpenWindow(val);
+                            if(val.name.ToLower().Contains(mKey) ==false)
+                            {
+                                visible = false;
+                            }
+                        }
+                        if (visible)
+                        {
+                            bool open = WindowManager.Instance.GetObject(val);
+                            GUIStyle style = GUI.skin.button;
+                            style.normal.textColor = open ? Color.yellow : Color.white;
+
+                            if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                            {
+                                OpenWindow(val);
+                            }
                         }
                     }
                 }
