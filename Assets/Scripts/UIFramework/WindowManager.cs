@@ -390,7 +390,7 @@ public class WindowManager : MonoBehaviour
     }
     private Canvas GetCanvas(WindowContextBase context)
     {
-        if (mWindowObjectDic.TryGetValue(context.id, out GameObject go))
+        if (context !=null && mWindowObjectDic.TryGetValue(context.id, out GameObject go))
         {
             return go.GetComponent<Canvas>();
         }

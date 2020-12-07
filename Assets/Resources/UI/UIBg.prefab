@@ -412,11 +412,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6741675621312934554}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6bcfcb26b62a3f45a8fb71b192538be, type: 3}
+  m_Script: {fileID: 11500000, guid: b9310489e17e87a4d963f4ae352992d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 3796495037406351063}
-  clip: Anim_Scale_Clip
 --- !u!1 &7683096370843816987
 GameObject:
   m_ObjectHideFlags: 0
