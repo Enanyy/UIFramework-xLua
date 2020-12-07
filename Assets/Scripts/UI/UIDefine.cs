@@ -26,6 +26,9 @@ public class UIDefineWindow : UnityEditor.EditorWindow
     private static void OpenDefineWindow()
     {
         GetWindow<UIDefineWindow>("UIDefineWindow");
+
+        WindowManager.Instance.Initialize();
+        WindowManager.Instance.SetLoader(LoadInEditor);
     }
     Vector2 mScroll;
     private void OnGUI()
@@ -48,9 +51,13 @@ public class UIDefineWindow : UnityEditor.EditorWindow
                     var val = fields[index].GetValue(null) as WindowContextBase;
                     if (val != null)
                     {
-                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), GUILayout.Width(width), GUILayout.Height(30)))
+                        bool open = WindowManager.Instance.GetObject(val);
+                        GUIStyle style = GUI.skin.button;
+                        style.normal.textColor = open ? Color.yellow : Color.white;
+
+                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
                         {
-                            OpendWindow(val);
+                            OpenWindow(val);
                         }
                     }
                 }
@@ -61,16 +68,19 @@ public class UIDefineWindow : UnityEditor.EditorWindow
         GUILayout.EndScrollView();
     }
 
-
-    private void OpendWindow(WindowContextBase obj)
+    private void OpenWindow(WindowContextBase obj)
     {
-        WindowManager.Instance.Initialize();
-        WindowManager.Instance.SetLoader(LoadInEditor);
-        WindowManager.Instance.Open(obj);
+        bool open = WindowManager.Instance.GetObject(obj) != null;
 
-        Close();
+        if (!open)
+        {
+            WindowManager.Instance.Open(obj);
+        }
+        else
+        {
+            WindowManager.Instance.Close(obj);
+        }
     }
-
 
     public static void LoadInEditor(string name, Action<GameObject> callback)
     {
