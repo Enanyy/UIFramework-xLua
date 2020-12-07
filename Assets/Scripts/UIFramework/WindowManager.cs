@@ -613,8 +613,14 @@ public class WindowManager : MonoBehaviour
         mWindowContextDic.Remove(context.id);
 
         GameObject go = GetObject(context);
-
-        Destroy(go);
+        if (Application.isPlaying)
+        {
+            Destroy(go);
+        }
+        else
+        {
+            DestroyImmediate(go);
+        }
 
         mWindowObjectDic.Remove(context.id);
 
