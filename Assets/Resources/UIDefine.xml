@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Root>
   <WidgetContexts>
-    <WidgetContext name ="UIBg" closeDestroy="true" sortingOrderOffset="-1" path ="UIBg">
+    <WidgetContext name ="UIBg" closeDestroy="true" sortingOrderOffset="-1" group ="0" path ="UIBg">
       <Component type="UIBg"></Component>
     </WidgetContext>
-    <WidgetContext name ="UIFixed" closeDestroy="true" sortingOrderOffset="1" path ="UIFixed">
+    <WidgetContext name ="UIFixed" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIFixed">
       <Component type="UIFixed"></Component>
     </WidgetContext>
-    <WidgetContext name ="UIRight" closeDestroy="true" sortingOrderOffset="1" path ="UIRight">
+    <WidgetContext name ="UIRight" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIRight">
       <Component type="UIRight"></Component>
     </WidgetContext>
   </WidgetContexts>
@@ -15,14 +15,14 @@
   <WindowContexts>
     <WindowContext name ="UIMain" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIMain">
       <Component type="UIMain"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" clone="true"></WidgetContext>
-      <WidgetContext name="UIFixed" sortingOrderOffset="1" clone="false"></WidgetContext>
-      <WidgetContext name="UIRight" sortingOrderOffset="1" clone="false"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
+      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
+      <WidgetContext name="UIRight" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
       <Component type="UINormal"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" clone="true"></WidgetContext>
-      <WidgetContext name="UIFixed" sortingOrderOffset="1" clone="false"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
+      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UIPop" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIPop">
       <Component type="UIPop"></Component>
@@ -32,7 +32,7 @@
     </WindowContext>
     <WindowContext name ="UISerialized" closeDestroy="true" hideOther="false" fixedOrder="0" path ="UISerialized">
       <Component type="UISerialized"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" clone="true"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
     </WindowContext>
   </WindowContexts>
 

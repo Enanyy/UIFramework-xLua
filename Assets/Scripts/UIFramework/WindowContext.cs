@@ -216,10 +216,12 @@ public sealed class WindowContext : WindowContextBase
                         else
                         {
                             int sortingOrderOffset = int.Parse(child.GetAttribute("sortingOrderOffset"));
+                            int group = int.Parse(child.GetAttribute("group"));
 
                             WidgetContext cloneWidget = new WidgetContext();
                             cloneWidget.CopyFrom(widget);
                             cloneWidget.sortingOrderOffset = sortingOrderOffset;
+                            cloneWidget.group = group;
                             AddFixedWidget(cloneWidget);
                         }
                     }
@@ -235,6 +237,7 @@ public class WidgetContext : WindowContextBase
     ///相当于父界面的层级差
     /// </summary>
     public int sortingOrderOffset { get; set; }
+    public int group { get; set; }
 
     public override WindowType type => WindowType.Widget;
     public WidgetContext()
@@ -249,6 +252,7 @@ public class WidgetContext : WindowContextBase
         if(widget!=null)
         {
             sortingOrderOffset = widget.sortingOrderOffset;
+            group = widget.group;
         }
     }
   
