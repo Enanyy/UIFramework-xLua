@@ -351,21 +351,22 @@ public class WindowManager : MonoBehaviour
 
             if (context.hideOther)
             {
-                var it = mWindowContextDic.GetEnumerator();
-                while (it.MoveNext())
+                using (var it = mWindowContextDic.GetEnumerator())
                 {
-                    var w = it.Current.Value as WindowContext;
-                    if (w != null && w != context && w.active)
+                    while (it.MoveNext())
                     {
-                        if (nav.hideWindows == null)
+                        var w = it.Current.Value as WindowContext;
+                        if (w != null && w != context && w.active)
                         {
-                            nav.hideWindows = new List<WindowContext>();
+                            if (nav.hideWindows == null)
+                            {
+                                nav.hideWindows = new List<WindowContext>();
+                            }
+                            nav.hideWindows.Add(w);
+                            SetActive(w, false);
                         }
-                        nav.hideWindows.Add(w);
-                        SetActive(w, false);
                     }
                 }
-
                 if (nav.hideWindows != null)
                 {
                     nav.hideWindows.Sort(SortWindow);
@@ -495,26 +496,33 @@ public class WindowManager : MonoBehaviour
         }
         if (context.fixedWidgets != null && active)
         {
-            for (int i = 0; i < context.fixedWidgets.Count; ++i)
+            using (var it = context.fixedWidgets.GetEnumerator())
             {
-                var widget = context.fixedWidgets[i];
-                widget.parent = context;
+                while (it.MoveNext())
+                {
+                    if (it.Current.Value)
+                    {
+                        it.Current.Key.parent = context;
+                    }
+                }
             }
         }
 
-        var it = context.widgets.GetEnumerator();
-        while (it.MoveNext())
+        using (var it = context.widgets.GetEnumerator())
         {
-            var widget = it.Current.Value;
+            while (it.MoveNext())
+            {
+                var widget = it.Current.Value;
 
-            var go = GetObject(widget);
-            if (go != null)
-            {
-                SetActive(widget, active);
-            }
-            else
-            {
-                Open(widget);
+                var go = GetObject(widget);
+                if (go != null)
+                {
+                    SetActive(widget, active);
+                }
+                else
+                {
+                    Open(widget);
+                }
             }
         }
     }
@@ -557,18 +565,20 @@ public class WindowManager : MonoBehaviour
             else
             {
                 int maxOrder = int.MinValue;
-                var it = mWindowContextDic.GetEnumerator();
-                while (it.MoveNext())
+                using (var it = mWindowContextDic.GetEnumerator())
                 {
-                    var v = it.Current.Value as WindowContext;
-                    if (v != null)
+                    while (it.MoveNext())
                     {
-                        var c = GetCanvas(v);
-                        if (c != null && v.fixedOrder == 0)
+                        var v = it.Current.Value as WindowContext;
+                        if (v != null)
                         {
-                            if (c.sortingOrder > maxOrder)
+                            var c = GetCanvas(v);
+                            if (c != null && v.fixedOrder == 0)
                             {
-                                maxOrder = c.sortingOrder;
+                                if (c.sortingOrder > maxOrder)
+                                {
+                                    maxOrder = c.sortingOrder;
+                                }
                             }
                         }
                     }
@@ -631,21 +641,23 @@ public class WindowManager : MonoBehaviour
     public void CloseAllAndOpen(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
     {
         mCloseList.Clear();
-        var it = mWindowContextDic.GetEnumerator();
-        while (it.MoveNext())
+        using (var it = mWindowContextDic.GetEnumerator())
         {
-            if (context == null || it.Current.Key != context.id)
+            while (it.MoveNext())
             {
-                if (context == null)
+                if (context == null || it.Current.Key != context.id)
                 {
-                    mCloseList.Add(it.Current.Key);
-                }
-                else
-                {
-                    var window = context as WindowContext;
-                    if (window == null || window.widgets.ContainsKey(it.Current.Key) == false)
+                    if (context == null)
                     {
                         mCloseList.Add(it.Current.Key);
+                    }
+                    else
+                    {
+                        var window = context as WindowContext;
+                        if (window == null || window.widgets.ContainsKey(it.Current.Key) == false)
+                        {
+                            mCloseList.Add(it.Current.Key);
+                        }
                     }
                 }
             }
@@ -655,9 +667,7 @@ public class WindowManager : MonoBehaviour
             ulong key = mCloseList[i];
             if (mWindowContextDic.TryGetValue(key, out WindowContextBase w))
             {
-
                 DestroyWindow(w);
-
             }
         }
         mWindowStack.Clear();
@@ -757,10 +767,12 @@ public class WindowManager : MonoBehaviour
         var w = context as WindowContext;
         if (w != null)
         {
-            var it = w.widgets.GetEnumerator();
-            while (it.MoveNext())
+            using (var it = w.widgets.GetEnumerator())
             {
-                DestroyWindow(it.Current.Value);
+                while (it.MoveNext())
+                {
+                    DestroyWindow(it.Current.Value);
+                }
             }
         }
 
@@ -831,55 +843,56 @@ public class WindowDefEditor : UnityEditor.EditorWindow
         float width = 200f;
         int count = (int)(position.width / width);
         int i = 0;
-        var it = WindowManager.Instance.contexts.GetEnumerator();
-
-        bool beginHorizontal = false;
-        while (it.MoveNext())
+        using (var it = WindowManager.Instance.contexts.GetEnumerator())
         {
-            if (i == 0)
+            bool beginHorizontal = false;
+            while (it.MoveNext())
             {
-                GUILayout.BeginHorizontal();
-                beginHorizontal = true;
-            }
-            WindowContextBase val = it.Current.Value;
-            if (val != null)
-            {
-                bool visible = true;
-                if (string.IsNullOrEmpty(mKey) == false)
+                if (i == 0)
                 {
-                    if (val.name.ToLower().Contains(mKey) == false)
+                    GUILayout.BeginHorizontal();
+                    beginHorizontal = true;
+                }
+                WindowContextBase val = it.Current.Value;
+                if (val != null)
+                {
+                    bool visible = true;
+                    if (string.IsNullOrEmpty(mKey) == false)
                     {
-                        visible = false;
+                        if (val.name.ToLower().Contains(mKey) == false)
+                        {
+                            visible = false;
+                        }
+                    }
+                    if (visible)
+                    {
+                        bool open = WindowManager.Instance.GetObject(val);
+                        GUIStyle style = GUI.skin.button;
+                        style.normal.textColor = open ? Color.yellow : Color.white;
+
+                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                        {
+                            OpenWindow(val);
+                        }
                     }
                 }
-                if (visible)
-                {
-                    bool open = WindowManager.Instance.GetObject(val);
-                    GUIStyle style = GUI.skin.button;
-                    style.normal.textColor = open ? Color.yellow : Color.white;
 
-                    if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                i++;
+                if (i == count)
+                {
+                    if (beginHorizontal)
                     {
-                        OpenWindow(val);
+                        GUILayout.EndHorizontal();
+                        beginHorizontal = false;
                     }
+                    i = 0;
                 }
-            }
 
-            i++;
-            if (i == count)
+            }
+            if (beginHorizontal)
             {
-                if (beginHorizontal)
-                {
-                    GUILayout.EndHorizontal();
-                    beginHorizontal = false;
-                }
-                i = 0;
+                GUILayout.EndHorizontal();
             }
-
-        }
-        if (beginHorizontal)
-        {
-            GUILayout.EndHorizontal();
         }
 
         GUILayout.EndScrollView();

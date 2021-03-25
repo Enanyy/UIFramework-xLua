@@ -115,17 +115,19 @@ namespace UnityEngine.UI
 
         private void Trigger(float previous)
         {
-            var it = mTriggers.GetEnumerator();
-            while (it.MoveNext())
+            using (var it = mTriggers.GetEnumerator())
             {
-                float key = it.Current.Key;
-                if ((previous < key && value >= key) || (previous > key && value <= key))
+                while (it.MoveNext())
                 {
-                    for (int i = 0; i < it.Current.Value.Count; ++i)
+                    float key = it.Current.Key;
+                    if ((previous < key && value >= key) || (previous > key && value <= key))
                     {
-                        if (it.Current.Value[i] != null)
+                        for (int i = 0; i < it.Current.Value.Count; ++i)
                         {
-                            it.Current.Value[i].Invoke(this,value);
+                            if (it.Current.Value[i] != null)
+                            {
+                                it.Current.Value[i].Invoke(this, value);
+                            }
                         }
                     }
                 }

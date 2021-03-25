@@ -126,8 +126,8 @@ public sealed class WindowContext : WindowContextBase
     /// <summary>
     /// 固定的子UI
     /// </summary>
-    public List<WidgetContext> fixedWidgets;
-
+    public Dictionary<WidgetContext, bool> fixedWidgets;
+   
 
     public readonly Dictionary<ulong, WidgetContext> widgets = new Dictionary<ulong, WidgetContext>();
 
@@ -147,28 +147,37 @@ public sealed class WindowContext : WindowContextBase
 
             if(windowContext.fixedWidgets!=null)
             {
-                fixedWidgets = new List<WidgetContext>(windowContext.fixedWidgets);
+                fixedWidgets = new Dictionary<WidgetContext, bool>(windowContext.fixedWidgets);
             }
         }
     }
 
-    public void AddFixedWidget(WidgetContext widget)
+    public void AddFixedWidget(WidgetContext widget, bool defualtActive)
     {
         if (fixedWidgets == null)
         {
-            fixedWidgets = new List<WidgetContext>();
+            fixedWidgets = new Dictionary<WidgetContext, bool>();
         }
-        fixedWidgets.Add(widget);
+        if(fixedWidgets.ContainsKey(widget)==false)
+        {
+            fixedWidgets.Add(widget, defualtActive);
+        }
+        else
+        {
+            fixedWidgets[widget] = defualtActive;
+        }
     }
 
     public WidgetContext GetWidget(string name)
     {
-        var it = widgets.GetEnumerator();
-        while (it.MoveNext())
+        using (var it = widgets.GetEnumerator())
         {
-            if (it.Current.Value.name == name)
+            while (it.MoveNext())
             {
-                return it.Current.Value;
+                if (it.Current.Value.name == name)
+                {
+                    return it.Current.Value;
+                }
             }
         }
         return null;
@@ -208,10 +217,11 @@ public sealed class WindowContext : WindowContextBase
                     WidgetContext widget = func(name);
                     if (widget != null)
                     {
+                        bool defaultActive = bool.Parse(child.GetAttribute("defaultActive"));
                         bool clone = bool.Parse(child.GetAttribute("clone"));
                         if (!clone)
                         {
-                            AddFixedWidget(widget);
+                            AddFixedWidget(widget, defaultActive);
                         }
                         else
                         {
@@ -220,9 +230,12 @@ public sealed class WindowContext : WindowContextBase
 
                             WidgetContext cloneWidget = new WidgetContext();
                             cloneWidget.CopyFrom(widget);
+
                             cloneWidget.sortingOrderOffset = sortingOrderOffset;
                             cloneWidget.group = group;
-                            AddFixedWidget(cloneWidget);
+
+
+                            AddFixedWidget(cloneWidget, defaultActive);
                         }
                     }
                 }
@@ -238,6 +251,7 @@ public class WidgetContext : WindowContextBase
     /// </summary>
     public int sortingOrderOffset { get; set; }
     public int group { get; set; }
+
 
     public override WindowType type => WindowType.Widget;
     public WidgetContext()

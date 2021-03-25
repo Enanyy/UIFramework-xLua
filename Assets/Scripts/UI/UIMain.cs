@@ -8,7 +8,8 @@ public class UIMain : WindowComponent
 	private Text mTextNormal;
 	private Button mButtonPop;
 	private Button mButtonWidget;
-	private Text mText;
+    private Button mButtonRight;
+    private Text mText;
 	private ScrollView mVerticalGridScrollView;
 	private Button mButtonAdd;
 	private Button mButtonRemove;
@@ -59,7 +60,8 @@ public class UIMain : WindowComponent
 		mTextNormal = GetComponent<Text>("Tween/SafeArea/@Button.mButtonNormal/@Text.mTextNormal");
 		mButtonPop = GetComponent<Button>("Tween/SafeArea/@Button.mButtonPop");
 		mButtonWidget = GetComponent<Button>("Tween/SafeArea/@Button.mButtonWidget");
-		mText = GetComponent<Text>("Tween/SafeArea/@Text.mText");
+        mButtonRight = GetComponent<Button>("Tween/SafeArea/@Button.mButtonRight");
+        mText = GetComponent<Text>("Tween/SafeArea/@Text.mText");
 		mVerticalGridScrollView = GetComponent<ScrollView>("Tween/SafeArea/@ScrollView.mVerticalGridScrollView");
 		mButtonAdd = GetComponent<Button>("Tween/SafeArea/@Button.mButtonAdd");
 		mButtonRemove = GetComponent<Button>("Tween/SafeArea/@Button.mButtonRemove");

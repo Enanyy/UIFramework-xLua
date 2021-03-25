@@ -15,14 +15,14 @@
   <WindowContexts>
     <WindowContext name ="UIMain" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIMain">
       <Component type="UIMain"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
-      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
-      <WidgetContext name="UIRight" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true" defaultActive="true"></WidgetContext>
+      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false" defaultActive="true"></WidgetContext>
+      <WidgetContext name="UIRight" sortingOrderOffset="1" group ="0" clone="false" defaultActive="false"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
       <Component type="UINormal"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
-      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true" defaultActive="true"></WidgetContext>
+      <WidgetContext name="UIFixed" sortingOrderOffset="1" group ="0" clone="false" defaultActive="true"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UIPop" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIPop">
       <Component type="UIPop"></Component>
@@ -32,7 +32,7 @@
     </WindowContext>
     <WindowContext name ="UISerialized" closeDestroy="true" hideOther="false" fixedOrder="0" path ="UISerialized">
       <Component type="UISerialized"></Component>
-      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true"></WidgetContext>
+      <WidgetContext name="UIBg" sortingOrderOffset="-1" group ="0" clone="true" defaultActive="true"></WidgetContext>
     </WindowContext>
   </WindowContexts>
 
