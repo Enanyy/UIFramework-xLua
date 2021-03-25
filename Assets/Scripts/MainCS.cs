@@ -12,9 +12,14 @@ public class MainCS : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        var asset = Resources.Load<TextAsset>("UIDefine");
+
+
         WindowManager.Instance.SetLoader(LoadUI);
-       // WindowManager.Instance.Open(UIDefine.UIPop, new WidgetContext(UIDefine.UIFixed, 5));
-        WindowManager.Instance.Open(UIDefine.UIMain);
+        WindowManager.Instance.Load(asset.text);
+
+        WindowManager.Instance.Open("UIMain");
+       
     }
 
     // Update is called once per frame

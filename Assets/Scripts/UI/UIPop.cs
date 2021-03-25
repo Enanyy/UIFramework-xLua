@@ -19,9 +19,9 @@ public class UIPop : WindowComponent
 		mButtonWidget = GetComponent<Button>("Tween/Widget/@Button.mButtonWidget");
 		mText = GetComponent<Text>("Tween/Widget/@Text.mText");
 //BINDING_CODE_END
-        mButtonClose.onClick.AddListener(()=>WindowManager.Instance.Close(UIDefine.UIPop));
-        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UINormal));
-        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIWidget));
-        mbuttonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen(UIDefine.UIMain));
+        mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close("UIPop"));
+        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open("UINormal"));
+        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UIWidget"));
+        mbuttonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen("UIMain"));
     }
 }

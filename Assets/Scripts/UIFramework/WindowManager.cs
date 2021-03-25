@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEditor;
+using System.Xml;
 
 public class WindowManager : MonoBehaviour
 {
@@ -34,6 +34,7 @@ public class WindowManager : MonoBehaviour
         public WindowContext window;
         public List<WindowContext> hideWindows;
     }
+    public readonly Dictionary<string, WindowContextBase> contexts = new Dictionary<string, WindowContextBase>();
 
     private Dictionary<ulong, WindowContextBase> mWindowContextDic = new Dictionary<ulong, WindowContextBase>();
     private Dictionary<ulong, GameObject> mWindowObjectDic = new Dictionary<ulong, GameObject>();
@@ -61,7 +62,7 @@ public class WindowManager : MonoBehaviour
 
     public void Initialize()
     {
-        if(mInitialized)
+        if (mInitialized)
         {
             return;
         }
@@ -103,19 +104,130 @@ public class WindowManager : MonoBehaviour
     }
 
 
+    public void Load(string xml)
+    {
+        if (string.IsNullOrEmpty(xml))
+        {
+            return;
+        }
 
-    public void Open(WindowContextBase context, WidgetContext widget = null, Action<GameObject> callback = null)
+        XmlDocument doc = new XmlDocument();
+        doc.LoadXml(xml);
+        var widgetNode = doc.SelectSingleNode("/Root/WidgetContexts");
+
+        var widgetIter = widgetNode.ChildNodes.GetEnumerator();
+        while (widgetIter.MoveNext())
+        {
+            var child = widgetIter.Current as XmlElement;
+
+            if (child.Name == "WidgetContext")
+            {
+                WidgetContext widget = new WidgetContext();
+                widget.ParseXml(child);
+
+                contexts.Add(widget.name, widget);
+            }
+        }
+
+        var windowNode = doc.SelectSingleNode("/Root/WindowContexts");
+
+        var windowIter = windowNode.ChildNodes.GetEnumerator();
+        while (windowIter.MoveNext())
+        {
+            var child = windowIter.Current as XmlElement;
+
+            if (child.Name == "WindowContext")
+            {
+                WindowContext context = new WindowContext();
+                context.ParseXml(child, GetWidgetContext);
+                contexts.Add(context.name, context);
+            }
+        }
+    }
+
+    public WindowContextBase GetWindowContextBase(string name)
+    {
+        WindowContextBase context;
+        contexts.TryGetValue(name, out context);
+        return context;
+    }
+
+    public WidgetContext GetWidgetContext(string name)
+    {
+        return GetWindowContextBase(name) as WidgetContext;
+    }
+    public WindowContext GetWindowContext(string name)
+    {
+        return GetWindowContextBase(name) as WindowContext;
+    }
+
+    public void Open(string name, Action<GameObject> callback = null, params string[] widgets)
+    {
+        WindowContextBase context = GetWindowContextBase(name);
+        if (context == null)
+        {
+            return;
+        }
+
+        WidgetContext[] widgetContexts = null;
+        if (widgets != null)
+        {
+            widgetContexts = new WidgetContext[widgets.Length];
+            for (int i = 0; i < widgets.Length; ++i)
+            {
+                widgetContexts[i] = GetWidgetContext(widgets[i]);
+            }
+        }
+        Open(context, callback, widgetContexts);
+    }
+    public void Close(string name)
+    {
+        WindowContextBase context = GetWindowContextBase(name);
+        if (context == null)
+        {
+            return;
+        }
+        Close(context);
+    }
+    public void CloseAllAndOpen(string name, Action<GameObject> callback = null, params string[] widgets)
+    {
+        WindowContextBase context = GetWindowContextBase(name);
+        if (context == null)
+        {
+            return;
+        }
+
+        WidgetContext[] widgetContexts = null;
+        if (widgets != null)
+        {
+            widgetContexts = new WidgetContext[widgets.Length];
+            for (int i = 0; i < widgets.Length; ++i)
+            {
+                widgetContexts[i] = GetWidgetContext(widgets[i]);
+            }
+        }
+        CloseAllAndOpen(context, callback, widgetContexts);
+    }
+
+    public void Clear()
+    {
+        CloseAll();
+        contexts.Clear();
+    }
+
+
+    public void Open(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
     {
         if (mLoader == null)
         {
-            Debug.Assert(mLoader != null);
+            Debug.Assert(mLoader != null, "Loader is null!!");
             callback?.Invoke(null);
             return;
         }
 
         if (context == null)
         {
-            Debug.Assert(context != null);
+            Debug.Assert(context != null, "Context is null");
             callback?.Invoke(null);
             return;
         }
@@ -128,10 +240,18 @@ public class WindowManager : MonoBehaviour
         }
 
 
-        if (widget != null)
+        if (widgets != null && widgets.Length > 0)
         {
-            Debug.Assert(context.type == WindowType.Normal);
-            widget.parent = context as WindowContext;
+            Debug.Assert(context.type == WindowType.Normal, string.Format("{0} type = {1}", context.name, context.type));
+            var it = widgets.GetEnumerator();
+            while (it.MoveNext())
+            {
+                WidgetContext widget = it.Current as WidgetContext;
+                if (widget != null)
+                {
+                    widget.parent = context as WindowContext;
+                }
+            }
         }
 
         GameObject go = GetObject(context);
@@ -142,7 +262,7 @@ public class WindowManager : MonoBehaviour
                 return;
             }
             context.status = WindowStatus.Loading;
-            mLoader(context.name, (asset) =>
+            mLoader(context.path, (asset) =>
             {
                 if (asset == null || context.status == WindowStatus.None)
                 {
@@ -261,12 +381,21 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
-        if (context.component != null && go.GetComponent(context.component) == null)
+        if (context.components != null)
         {
-            var component = go.AddComponent(context.component) as WindowComponent;
-            if (component != null)
+            for (int i = 0; i < context.components.Count; ++i)
             {
-                component.context = context;
+                var type = context.components[i];
+
+                WindowComponent component = go.GetComponent(type) as WindowComponent;
+                if (component == null)
+                {
+                    component = go.AddComponent(type) as WindowComponent;
+                }
+                if (component != null)
+                {
+                    component.context = context;
+                }
             }
         }
         var components = go.GetComponentsInChildren<WindowComponent>();
@@ -348,10 +477,11 @@ public class WindowManager : MonoBehaviour
         if (context.active != active)
         {
             context.active = active;
-
-
-            SetLayer(go, context.layer);
-
+            var canvas = GetCanvas(context);
+            if (canvas != null)
+            {
+                canvas.enabled = context.active;
+            }
 
             SetComponentActive(go, active);
         }
@@ -384,13 +514,13 @@ public class WindowManager : MonoBehaviour
             }
             else
             {
-                Open(widget, null);
+                Open(widget);
             }
         }
     }
     private Canvas GetCanvas(WindowContextBase context)
     {
-        if (context !=null && mWindowObjectDic.TryGetValue(context.id, out GameObject go))
+        if (context != null && mWindowObjectDic.TryGetValue(context.id, out GameObject go))
         {
             return go.GetComponent<Canvas>();
         }
@@ -498,7 +628,7 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void CloseAllAndOpen(WindowContextBase context, WidgetContext widget = null, Action<GameObject> callback = null)
+    public void CloseAllAndOpen(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
     {
         mCloseList.Clear();
         var it = mWindowContextDic.GetEnumerator();
@@ -532,7 +662,7 @@ public class WindowManager : MonoBehaviour
         }
         mWindowStack.Clear();
 
-        Open(context, widget, callback);
+        Open(context, callback, widgets);
     }
 
     public void Close(WindowContextBase window)
@@ -651,10 +781,134 @@ public class WindowManager : MonoBehaviour
         for (int i = 0; i < transforms.Length; ++i)
         {
             var child = transforms[i].gameObject;
-            if (child.layer != WindowContext.LAYER_MODEL)
-            {
-                child.layer = layer;
-            }
+
+            child.layer = layer;
+
         }
     }
 }
+#region WindowDefEditor
+#if UNITY_EDITOR 
+public class WindowDefEditor : UnityEditor.EditorWindow
+{
+
+    [UnityEditor.MenuItem("GameObject/UI/Open")]
+    private static void OpenDefineWindow()
+    {
+        var asset = Resources.Load<TextAsset>("UIDefine");
+
+        GetWindow<WindowDefEditor>("UI定义列表");
+
+        WindowManager.Instance.Initialize();
+        WindowManager.Instance.SetLoader(LoadInEditor);
+        WindowManager.Instance.Clear();
+        WindowManager.Instance.Load(asset.text);
+    }
+    Vector2 mScroll;
+    string mKey;
+    private void OnGUI()
+    {
+        GUILayout.Space(10);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(UnityEditor.EditorGUIUtility.TrTextContent("搜索"), GUILayout.Width(30), GUILayout.Height(30));
+        mKey = GUILayout.TextField(mKey, GUILayout.Width(200), GUILayout.Height(30));
+        if (string.IsNullOrEmpty(mKey) == false)
+        {
+            mKey = mKey.Trim().ToLower();
+
+            if (GUILayout.Button("Reset", GUILayout.Width(60), GUILayout.Height(30)))
+            {
+                mKey = null;
+            }
+        }
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
+        mScroll = GUILayout.BeginScrollView(mScroll, false, true);
+        float width = 200f;
+        int count = (int)(position.width / width);
+        int i = 0;
+        var it = WindowManager.Instance.contexts.GetEnumerator();
+
+        bool beginHorizontal = false;
+        while (it.MoveNext())
+        {
+            if (i == 0)
+            {
+                GUILayout.BeginHorizontal();
+                beginHorizontal = true;
+            }
+            WindowContextBase val = it.Current.Value;
+            if (val != null)
+            {
+                bool visible = true;
+                if (string.IsNullOrEmpty(mKey) == false)
+                {
+                    if (val.name.ToLower().Contains(mKey) == false)
+                    {
+                        visible = false;
+                    }
+                }
+                if (visible)
+                {
+                    bool open = WindowManager.Instance.GetObject(val);
+                    GUIStyle style = GUI.skin.button;
+                    style.normal.textColor = open ? Color.yellow : Color.white;
+
+                    if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                    {
+                        OpenWindow(val);
+                    }
+                }
+            }
+
+            i++;
+            if (i == count)
+            {
+                if (beginHorizontal)
+                {
+                    GUILayout.EndHorizontal();
+                    beginHorizontal = false;
+                }
+                i = 0;
+            }
+
+        }
+        if (beginHorizontal)
+        {
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndScrollView();
+    }
+
+    private void OpenWindow(WindowContextBase obj)
+    {
+        bool open = WindowManager.Instance.GetObject(obj) != null;
+
+        if (!open)
+        {
+            WindowManager.Instance.Open(obj);
+        }
+        else
+        {
+            WindowManager.Instance.Close(obj);
+        }
+    }
+
+    public static void LoadInEditor(string name, Action<GameObject> callback)
+    {
+        GameObject asset = Resources.Load<GameObject>(string.Format("UI/{0}", name));
+
+        if (asset != null)
+        {
+            callback(asset);
+        }
+    }
+}
+
+#endif
+#endregion

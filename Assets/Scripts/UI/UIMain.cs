@@ -70,9 +70,9 @@ public class UIMain : WindowComponent
 		mTimer = GetComponent<Timer>("Tween/SafeArea/@Timer.mTimer");
 //BINDING_CODE_END
 
-        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UINormal));
-        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIPop));
-        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIWidget));
+        mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open("UINormal"));
+        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open("UIPop"));
+        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UIWidget"));
 
         mButtonAdd.onClick.AddListener(OnButtonAddClick);
         mButtonRemove.onClick.AddListener(OnButtonRemoveClick);

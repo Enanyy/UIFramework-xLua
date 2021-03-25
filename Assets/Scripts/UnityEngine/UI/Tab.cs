@@ -19,12 +19,24 @@ namespace UnityEngine.UI
 
         private void Awake()
         {
-            mGroup = GetComponent<ToggleGroup>();
-
-            if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
-
+          
         }
-      
+
+        public ToggleGroup group
+        {
+            get
+            {
+                if (mGroup == null)
+                {
+                    mGroup = GetComponent<ToggleGroup>();
+
+                    if (mGroup == null) mGroup = gameObject.AddComponent<ToggleGroup>();
+
+                }
+                return mGroup;
+            }
+        }
+
         public void RegisterToggle()
         {
             mToggles.Clear();
@@ -48,9 +60,9 @@ namespace UnityEngine.UI
                 return;
             }
             
-            if (toggle.group != mGroup)
+            if (toggle.group != group)
             {
-                mGroup.RegisterToggle(toggle);
+                group.RegisterToggle(toggle);
             }
 
             if(mToggles.Contains(toggle)==false)

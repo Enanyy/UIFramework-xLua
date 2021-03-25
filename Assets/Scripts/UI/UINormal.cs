@@ -17,8 +17,8 @@ public class UINormal : WindowComponent
 		mButtonWidget = GetComponent<Button>("Tween/SafeArea/@Button.mButtonWidget");
 //BINDING_CODE_END
 
-        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UIPop));
-        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open(UIDefine.UISerialized));
-        mButtonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen(UIDefine.UIMain));
+        mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open("UIPop"));
+        mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UISerialized"));
+        mButtonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen("UIMain"));
     } 
 }

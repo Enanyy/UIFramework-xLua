@@ -12,8 +12,8 @@ public class UISerialized : WindowComponent
         //BINDING_CODE_END
 
         SerializedView component = GetComponent<SerializedView>();
-        component.AddClick("ButtonMain", () => WindowManager.Instance.Open(UIDefine.UIMain));
-        component.AddClick("ButtonPop", () => WindowManager.Instance.Open(UIDefine.UIPop));
-        component.AddClick("ButtonWidget", () => WindowManager.Instance.Open(UIDefine.UIWidget));
+        component.AddClick("ButtonMain", () => WindowManager.Instance.Open("UIMain"));
+        component.AddClick("ButtonPop", () => WindowManager.Instance.Open("UIPop"));
+        component.AddClick("ButtonWidget", () => WindowManager.Instance.Open("UIWidget"));
     } 
 }
