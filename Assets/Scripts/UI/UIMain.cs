@@ -75,6 +75,7 @@ public class UIMain : WindowComponent
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open("UINormal"));
         mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open("UIPop"));
         mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UIWidget"));
+        mButtonRight.onClick.AddListener(() => SetWidgetActive("UIRight", !GetWidgetActive("UIRight")));
 
         mButtonAdd.onClick.AddListener(OnButtonAddClick);
         mButtonRemove.onClick.AddListener(OnButtonRemoveClick);

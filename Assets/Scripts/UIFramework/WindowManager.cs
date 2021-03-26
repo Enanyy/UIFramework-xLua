@@ -395,14 +395,14 @@ public class WindowManager : MonoBehaviour
                 }
                 if (component != null)
                 {
-                    component.context = context;
+                    component.contextbase = context;
                 }
             }
         }
         var components = go.GetComponentsInChildren<WindowComponent>();
         for (int i = 0; i < components.Length; ++i)
         {
-            components[i].context = context;
+            components[i].contextbase = context;
         }
     }
     private void SetComponentActive(GameObject go, bool active)
@@ -486,9 +486,12 @@ public class WindowManager : MonoBehaviour
 
             SetComponentActive(go, active);
         }
-        SetWidgetActive(context as WindowContext, active);
+        if (context.type == WindowType.Normal)
+        {
+            SetWidgetsActive(context as WindowContext, active);
+        }
     }
-    private void SetWidgetActive(WindowContext context, bool active)
+    public void SetWidgetsActive(WindowContext context, bool active)
     {
         if (context == null)
         {
@@ -514,18 +517,25 @@ public class WindowManager : MonoBehaviour
             {
                 var widget = it.Current.Value;
 
-                var go = GetObject(widget);
-                if (go != null)
-                {
-                    SetActive(widget, active);
-                }
-                else
-                {
-                    Open(widget);
-                }
+                SetWidgetActive(context, widget, active);
             }
         }
     }
+    public void SetWidgetActive(WindowContext context, WidgetContext widget, bool active)
+    {
+        widget.parent = context;
+
+        var go = GetObject(widget);
+        if (go != null)
+        {
+            SetActive(widget, active);
+        }
+        else
+        {
+            Open(widget);
+        }
+    }
+
     private Canvas GetCanvas(WindowContextBase context)
     {
         if (context != null && mWindowObjectDic.TryGetValue(context.id, out GameObject go))

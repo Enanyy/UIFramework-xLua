@@ -7,7 +7,43 @@ using UnityEngine.UI;
 public class WindowComponent : MonoBehaviour
 {
    
-    public WindowContextBase context;
+    public WindowContextBase contextbase;
+    public WidgetContext widget
+    {
+        get { return contextbase as WidgetContext; }
+    }
+    public WindowContext context
+    {
+        get
+        {
+            if(contextbase.type == WindowType.Normal)
+            {
+                return contextbase as WindowContext;
+            }
+            else
+            {
+                return widget.parent;
+            }
+        }
+    }
+
+    public void SetWidgetActive(string name,bool active)
+    {
+        WidgetContext widget = context.GetWidget(name);
+        if(widget!=null)
+        {
+            WindowManager.Instance.SetWidgetActive(context, widget, active);
+        }
+    }
+    public bool GetWidgetActive(string name)
+    {
+        WidgetContext widget = context.GetWidget(name);
+        if (widget != null)
+        {
+            return widget.active;
+        }
+        return false;
+    }
 
    
 

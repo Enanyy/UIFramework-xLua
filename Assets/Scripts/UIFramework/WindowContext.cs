@@ -168,6 +168,25 @@ public sealed class WindowContext : WindowContextBase
         }
     }
 
+    public WidgetContext GetFixedWidget(string name)
+    {
+        if(fixedWidgets == null)
+        {
+            return null;
+        }
+        using (var it = fixedWidgets.GetEnumerator())
+        {
+            while (it.MoveNext())
+            {
+                if (it.Current.Key.name == name)
+                {
+                    return it.Current.Key;
+                }
+            }
+        }
+        return null;
+    }
+
     public WidgetContext GetWidget(string name)
     {
         using (var it = widgets.GetEnumerator())
@@ -180,7 +199,74 @@ public sealed class WindowContext : WindowContextBase
                 }
             }
         }
-        return null;
+        return GetFixedWidget(name);
+    }
+    public List<WidgetContext> GetWidgets(int group)
+    {
+        List<WidgetContext> list = new List<WidgetContext>();
+        using (var it = widgets.GetEnumerator())
+        {
+            while (it.MoveNext())
+            {
+                if (it.Current.Value.group == group)
+                {
+                    list.Add(it.Current.Value);
+                }
+            }
+        }
+        if (fixedWidgets != null)
+        {
+            using (var it = fixedWidgets.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    if (it.Current.Key.name == name && list.Contains(it.Current.Key)==false)
+                    {
+                        list.Add(it.Current.Key);
+                    }
+                }
+            }
+        }
+       
+
+        return list;
+    }
+
+    public void Foreach(Func<WidgetContext, bool> func)
+    {
+        if (func == null)
+        {
+            return;
+        }
+        bool result = false;
+        using (var it = widgets.GetEnumerator())
+        {
+            while (it.MoveNext())
+            {
+                if (func(it.Current.Value))
+                {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        if (result == false)
+        {
+            if (fixedWidgets != null)
+            {
+                using (var it = fixedWidgets.GetEnumerator())
+                {
+                    while (it.MoveNext())
+                    {
+                        if (func(it.Current.Key))
+                        {
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
