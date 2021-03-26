@@ -28,11 +28,16 @@ public class WindowManager : MonoBehaviour
             return mInstance;
         }
     }
+    private class HideWindowContext
+    {
+        public WindowContext content;
+        public Dictionary<ulong, bool> widgets;
+    }
 
     private class WindowNav
     {
-        public WindowContext window;
-        public List<WindowContext> hideWindows;
+        public WindowContext context;
+        public List<HideWindowContext> hideContexts;
     }
     public readonly Dictionary<string, WindowContextBase> contexts = new Dictionary<string, WindowContextBase>();
 
@@ -40,7 +45,7 @@ public class WindowManager : MonoBehaviour
     private Dictionary<ulong, GameObject> mWindowObjectDic = new Dictionary<ulong, GameObject>();
 
     private List<WindowNav> mWindowStack = new List<WindowNav>();
-    private List<ulong> mCloseList = new List<ulong>();
+    private List<ulong> mTempList = new List<ulong>();
 
 
     private Camera mCamera;
@@ -209,6 +214,32 @@ public class WindowManager : MonoBehaviour
         CloseAllAndOpen(context, callback, widgetContexts);
     }
 
+    public void SetWidgetsActive(string context, bool active)
+    {
+        WindowContext windowContext = GetWindowContext(context);
+        if (windowContext == null || mWindowContextDic.ContainsKey(windowContext.id) == false)
+        {
+            return;
+        }
+        SetWidgetsActive(windowContext, active);
+    }
+
+    public void SetWidgetActive(string context, string widget, bool active)
+    {
+        WindowContext windowContext = GetWindowContext(context);
+        if(windowContext== null || mWindowContextDic.ContainsKey(windowContext.id) == false)
+        {
+            return;
+        }
+        WidgetContext widgetContext = windowContext.GetWidget(widget);
+        if(widgetContext == null)
+        {
+            return;
+        }
+
+        SetWidgetActive(windowContext, widgetContext, active);
+    }
+
     public void Clear()
     {
         CloseAll();
@@ -347,7 +378,7 @@ public class WindowManager : MonoBehaviour
         if (context.fixedOrder == 0)
         {
             WindowNav nav = new WindowNav();
-            nav.window = context;
+            nav.context = context;
 
             if (context.hideOther)
             {
@@ -358,18 +389,33 @@ public class WindowManager : MonoBehaviour
                         var w = it.Current.Value as WindowContext;
                         if (w != null && w != context && w.active)
                         {
-                            if (nav.hideWindows == null)
+                            if (nav.hideContexts == null)
                             {
-                                nav.hideWindows = new List<WindowContext>();
+                                nav.hideContexts = new List<HideWindowContext>();
                             }
-                            nav.hideWindows.Add(w);
+                            HideWindowContext hideWindowContext = new HideWindowContext();
+                            hideWindowContext.content = w;
+                            if(w.widgets!=null && w.widgets.Count > 0)
+                            {
+                                hideWindowContext.widgets = new Dictionary<ulong, bool>();
+                                using (var iter = w.widgets.GetEnumerator())
+                                {
+                                    while (iter.MoveNext())
+                                    {
+                                        var widget = iter.Current.Value;
+                                        hideWindowContext.widgets.Add(widget.id, widget.active);
+                                    }
+                                }
+                            }
+
+                            nav.hideContexts.Add(hideWindowContext);
                             SetActive(w, false);
                         }
                     }
                 }
-                if (nav.hideWindows != null)
+                if (nav.hideContexts != null)
                 {
-                    nav.hideWindows.Sort(SortWindow);
+                    nav.hideContexts.Sort(SortWindow);
                 }
             }
             mWindowStack.Insert(0, nav);
@@ -425,10 +471,10 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    private int SortWindow(WindowContext a, WindowContext b)
+    private int SortWindow(HideWindowContext a, HideWindowContext b)
     {
-        var canvasA = GetCanvas(a);
-        var canvasB = GetCanvas(b);
+        var canvasA = GetCanvas(a.content);
+        var canvasB = GetCanvas(b.content);
         if (canvasA == null && canvasB == null)
         {
             return 0;
@@ -491,6 +537,73 @@ public class WindowManager : MonoBehaviour
             SetWidgetsActive(context as WindowContext, active);
         }
     }
+
+    private void SetActive(HideWindowContext hideWindowContext, bool active)
+    {
+        if (hideWindowContext == null || hideWindowContext.content == null)
+        {
+            return;
+        }
+        var context = hideWindowContext.content;
+        if (active)
+        {
+            SetOrder(context);
+        }
+        else
+        {
+            var canvas = GetCanvas(context);
+            if (canvas != null)
+            {
+                canvas.sortingOrder = 0;
+            }
+        }
+        GameObject go = GetObject(context);
+
+        if (context.active != active)
+        {
+            context.active = active;
+            var canvas = GetCanvas(context);
+            if (canvas != null)
+            {
+                canvas.enabled = context.active;
+            }
+
+            SetComponentActive(go, active);
+        }
+        if (context.type == WindowType.Normal)
+        {
+            if (hideWindowContext.widgets != null)
+            {
+                using (var it = context.widgets.GetEnumerator())
+                {
+                    while (it.MoveNext())
+                    {
+                        var widget = it.Current.Value;
+                        if (hideWindowContext.widgets.TryGetValue(widget.id, out bool val))
+                        {
+                            if (val == active)
+                            {
+                                SetWidgetActive(context, widget, active);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                SetWidgetsActive(context as WindowContext, active);
+            }
+        }
+    }
+    public bool IsActive(WindowContextBase context)
+    {
+        if(context==null)
+        {
+            return false;
+        }
+        return context.active && mWindowContextDic.ContainsKey(context.id);
+    }
+
     public void SetWidgetsActive(WindowContext context, bool active)
     {
         if (context == null)
@@ -535,6 +648,7 @@ public class WindowManager : MonoBehaviour
             Open(widget);
         }
     }
+    
 
     private Canvas GetCanvas(WindowContextBase context)
     {
@@ -629,11 +743,11 @@ public class WindowManager : MonoBehaviour
 
     public void CloseAll(bool destroy = true)
     {
-        mCloseList.Clear();
-        mCloseList.AddRange(mWindowContextDic.Keys);
-        for (int i = 0; i < mCloseList.Count; ++i)
+        mTempList.Clear();
+        mTempList.AddRange(mWindowContextDic.Keys);
+        for (int i = 0; i < mTempList.Count; ++i)
         {
-            var context = Get(mCloseList[i]);
+            var context = Get(mTempList[i]);
             if (destroy)
             {
                 DestroyWindow(context);
@@ -643,14 +757,14 @@ public class WindowManager : MonoBehaviour
                 SetActive(context, false);
             }
         }
-        mCloseList.Clear();
+        mTempList.Clear();
         mWindowStack.Clear();
     }
 
 
     public void CloseAllAndOpen(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
     {
-        mCloseList.Clear();
+        mTempList.Clear();
         using (var it = mWindowContextDic.GetEnumerator())
         {
             while (it.MoveNext())
@@ -659,22 +773,22 @@ public class WindowManager : MonoBehaviour
                 {
                     if (context == null)
                     {
-                        mCloseList.Add(it.Current.Key);
+                        mTempList.Add(it.Current.Key);
                     }
                     else
                     {
                         var window = context as WindowContext;
                         if (window == null || window.widgets.ContainsKey(it.Current.Key) == false)
                         {
-                            mCloseList.Add(it.Current.Key);
+                            mTempList.Add(it.Current.Key);
                         }
                     }
                 }
             }
         }
-        for (int i = 0; i < mCloseList.Count; ++i)
+        for (int i = 0; i < mTempList.Count; ++i)
         {
-            ulong key = mCloseList[i];
+            ulong key = mTempList[i];
             if (mWindowContextDic.TryGetValue(key, out WindowContextBase w))
             {
                 DestroyWindow(w);
@@ -685,15 +799,15 @@ public class WindowManager : MonoBehaviour
         Open(context, callback, widgets);
     }
 
-    public void Close(WindowContextBase window)
+    public void Close(WindowContextBase context)
     {
-        if (window == null)
+        if (context == null)
         {
             return;
         }
-        if (window.type == WindowType.Normal)
+        if (context.type == WindowType.Normal)
         {
-            int index = mWindowStack.FindIndex((nav) => { return nav.window == window; });
+            int index = mWindowStack.FindIndex((nav) => { return nav.context == context; });
             if (index >= 0 && index < mWindowStack.Count)
             {
                 WindowNav current = mWindowStack[index];
@@ -706,41 +820,50 @@ public class WindowManager : MonoBehaviour
                 }
 
                 mWindowStack.RemoveAt(index);
-                if (mWindowStack.FindIndex((nav) => { return nav.window == window; }) < 0)
+                if (mWindowStack.FindIndex((nav) => { return nav.context == context; }) < 0)
                 {
-                    DestroyWindow(window);
+                    DestroyWindow(context);
                 }
                 else
                 {
-                    SetActive(window, false);
+                    SetActive(context, false);
                 }
-                if (current != null && current.hideWindows != null)
+                mTempList.Clear();
+                if (current != null && current.hideContexts != null)
                 {
-                    for (int i = 0; i < current.hideWindows.Count; ++i)
+                    for (int i = 0; i < current.hideContexts.Count; ++i)
                     {
-                        SetActive(current.hideWindows[i], true);
+                        SetActive(current.hideContexts[i], true);
+                        mTempList.Add(current.hideContexts[i].content.id);
                     }
                 }
 
                 if (previous != null)
                 {
-                    if (previous.window.hideOther == false && previousIndex < mWindowStack.Count)
+                    if (previous.context.hideOther == false && previousIndex < mWindowStack.Count)
                     {
                         var previousPrevious = mWindowStack[previousIndex];
 
-                        SetActive(previousPrevious.window, true);
+                        if (mTempList.Contains(previousPrevious.context.id))
+                        {
+                            SetActive(previousPrevious.context, true);
+                        }
                     }
-                    SetActive(previous.window, true);
+                    if (mTempList.Contains(previous.context.id)==false)
+                    {
+                        SetActive(previous.context, true);
+                    }
                 }
+                mTempList.Clear();
             }
             else
             {
-                DestroyWindow(window);
+                DestroyWindow(context);
             }
         }
         else
         {
-            DestroyWindow(window);
+            DestroyWindow(context);
         }
     }
 

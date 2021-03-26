@@ -29,11 +29,7 @@ public class WindowComponent : MonoBehaviour
 
     public void SetWidgetActive(string name,bool active)
     {
-        WidgetContext widget = context.GetWidget(name);
-        if(widget!=null)
-        {
-            WindowManager.Instance.SetWidgetActive(context, widget, active);
-        }
+        WindowManager.Instance.SetWidgetActive(context.name, name, active);
     }
     public bool IsWidgetActive(string name)
     {
