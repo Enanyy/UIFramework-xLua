@@ -303,11 +303,11 @@ public sealed class WindowContext : WindowContextBase
                     WidgetContext widget = func(name);
                     if (widget != null)
                     {
-                        bool defaultActive = bool.Parse(child.GetAttribute("defaultActive"));
+                        bool active = bool.Parse(child.GetAttribute("active"));
                         bool clone = bool.Parse(child.GetAttribute("clone"));
                         if (!clone)
                         {
-                            AddFixedWidget(widget, defaultActive);
+                            AddFixedWidget(widget, active);
                         }
                         else
                         {
@@ -321,7 +321,7 @@ public sealed class WindowContext : WindowContextBase
                             cloneWidget.group = group;
 
 
-                            AddFixedWidget(cloneWidget, defaultActive);
+                            AddFixedWidget(cloneWidget, active);
                         }
                     }
                 }

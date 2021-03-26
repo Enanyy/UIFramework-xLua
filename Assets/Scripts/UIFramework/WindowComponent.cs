@@ -35,7 +35,7 @@ public class WindowComponent : MonoBehaviour
             WindowManager.Instance.SetWidgetActive(context, widget, active);
         }
     }
-    public bool GetWidgetActive(string name)
+    public bool IsWidgetActive(string name)
     {
         WidgetContext widget = context.GetWidget(name);
         if (widget != null)
