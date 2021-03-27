@@ -37,7 +37,7 @@ public class WindowManager : MonoBehaviour
     private class WindowNav
     {
         public WindowState windowState;
-        public List<WindowState> hideWindowsState;
+        public List<WindowState> hideWindowStates;
     }
     public readonly Dictionary<string, WindowContextBase> contexts = new Dictionary<string, WindowContextBase>();
 
@@ -389,20 +389,20 @@ public class WindowManager : MonoBehaviour
                         var w = it.Current.Value as WindowContext;
                         if (w != null && w != context && w.active)
                         {
-                            if (nav.hideWindowsState == null)
+                            if (nav.hideWindowStates == null)
                             {
-                                nav.hideWindowsState = new List<WindowState>();
+                                nav.hideWindowStates = new List<WindowState>();
                             }
                             WindowState windowState = GetWindowState(w);
 
-                            nav.hideWindowsState.Add(windowState);
+                            nav.hideWindowStates.Add(windowState);
                             SetActive(w, false);
                         }
                     }
                 }
-                if (nav.hideWindowsState != null)
+                if (nav.hideWindowStates != null)
                 {
-                    nav.hideWindowsState.Sort(SortWindow);
+                    nav.hideWindowStates.Sort(SortWindow);
                 }
             }
             mWindowStack.Insert(0, nav);
@@ -795,12 +795,12 @@ public class WindowManager : MonoBehaviour
                     SetActive(context, false);
                 }
                 mTempList.Clear();
-                if (current != null && current.hideWindowsState != null)
+                if (current != null && current.hideWindowStates != null)
                 {
-                    for (int i = 0; i < current.hideWindowsState.Count; ++i)
+                    for (int i = 0; i < current.hideWindowStates.Count; ++i)
                     {
-                        SetActive(current.hideWindowsState[i].context, true, current.hideWindowsState[i].widgetsActive);
-                        mTempList.Add(current.hideWindowsState[i].context.id);
+                        SetActive(current.hideWindowStates[i].context, true, current.hideWindowStates[i].widgetsActive);
+                        mTempList.Add(current.hideWindowStates[i].context.id);
                     }
                 }
 
