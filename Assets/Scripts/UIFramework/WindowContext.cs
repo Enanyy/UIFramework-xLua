@@ -107,7 +107,6 @@ public abstract class WindowContextBase
                 AddComponent(type);
             }
         }
-
     }
 }
 
