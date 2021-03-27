@@ -297,6 +297,7 @@ public class WindowManager : MonoBehaviour
             {
                 if (asset == null || context.status == WindowStatus.None)
                 {
+                    Debug.LogError("Can't find " + context.path);
                     mWindowContextDic.Remove(context.id);
                     context.Clear();
                     return;
@@ -454,6 +455,10 @@ public class WindowManager : MonoBehaviour
         for (int i = 0; i < components.Length; ++i)
         {
             components[i].contextbase = context;
+        }
+        for (int i = 0; i < components.Length; ++i)
+        {
+            components[i].OnInit();
         }
     }
     private void SetComponentActive(GameObject go, bool active)

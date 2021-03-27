@@ -78,6 +78,7 @@ public class WindowComponent : MonoBehaviour
 
         }
     }
+    public virtual void OnInit() { }
 
     public virtual void OnShow() { }
     public virtual void OnHide() { }
