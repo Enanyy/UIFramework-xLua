@@ -298,7 +298,7 @@ public sealed class WindowContext : WindowContextBase
                 var child = it.Current as XmlElement;
                 if (child.Name == "WidgetContext")
                 {
-                    string name = child.GetAttribute("name");
+                    string name = child.GetAttribute("ref");
                     WidgetContext widget = func(name);
                     if (widget != null)
                     {
