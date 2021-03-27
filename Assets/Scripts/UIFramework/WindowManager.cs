@@ -28,16 +28,16 @@ public class WindowManager : MonoBehaviour
             return mInstance;
         }
     }
-    private class WindowHide
+    private class WindowNavStatus
     {
         public WindowContext context;
-        public Dictionary<ulong, bool> widgetsActive;
+        public Dictionary<ulong, bool> widgetsActive;//context的激活状态
     }
 
     private class WindowNav
     {
-        public WindowContext context;
-        public List<WindowHide> hideContexts;
+        public WindowNavStatus windowStatus;
+        public List<WindowNavStatus> hideWindowsStatus;
     }
     public readonly Dictionary<string, WindowContextBase> contexts = new Dictionary<string, WindowContextBase>();
 
@@ -378,7 +378,7 @@ public class WindowManager : MonoBehaviour
         if (context.fixedOrder == 0)
         {
             WindowNav nav = new WindowNav();
-            nav.context = context;
+            nav.windowStatus = GetWindowActive(context);
 
             if (context.hideOther)
             {
@@ -389,37 +389,42 @@ public class WindowManager : MonoBehaviour
                         var w = it.Current.Value as WindowContext;
                         if (w != null && w != context && w.active)
                         {
-                            if (nav.hideContexts == null)
+                            if (nav.hideWindowsStatus == null)
                             {
-                                nav.hideContexts = new List<WindowHide>();
+                                nav.hideWindowsStatus = new List<WindowNavStatus>();
                             }
-                            WindowHide hideWindowContext = new WindowHide();
-                            hideWindowContext.context = w;
-                            if(w.widgets!=null && w.widgets.Count > 0)
-                            {
-                                hideWindowContext.widgetsActive = new Dictionary<ulong, bool>();
-                                using (var iter = w.widgets.GetEnumerator())
-                                {
-                                    while (iter.MoveNext())
-                                    {
-                                        var widget = iter.Current.Value;
-                                        hideWindowContext.widgetsActive.Add(widget.id, widget.active);
-                                    }
-                                }
-                            }
+                            WindowNavStatus windowActive = GetWindowActive(w);
 
-                            nav.hideContexts.Add(hideWindowContext);
+                            nav.hideWindowsStatus.Add(windowActive);
                             SetActive(w, false);
                         }
                     }
                 }
-                if (nav.hideContexts != null)
+                if (nav.hideWindowsStatus != null)
                 {
-                    nav.hideContexts.Sort(SortWindow);
+                    nav.hideWindowsStatus.Sort(SortWindow);
                 }
             }
             mWindowStack.Insert(0, nav);
         }
+    }
+    private WindowNavStatus GetWindowActive(WindowContext context)
+    {
+        WindowNavStatus windowActive = new WindowNavStatus();
+        windowActive.context = context;
+        if (context.widgets != null && context.widgets.Count > 0)
+        {
+            windowActive.widgetsActive = new Dictionary<ulong, bool>();
+            using (var iter = context.widgets.GetEnumerator())
+            {
+                while (iter.MoveNext())
+                {
+                    var widget = iter.Current.Value;
+                    windowActive.widgetsActive.Add(widget.id, widget.active);
+                }
+            }
+        }
+        return windowActive;
     }
 
     private void AddComponent(GameObject go, WindowContextBase context)
@@ -471,7 +476,7 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-    private int SortWindow(WindowHide a, WindowHide b)
+    private int SortWindow(WindowNavStatus a, WindowNavStatus b)
     {
         var canvasA = GetCanvas(a.context);
         var canvasB = GetCanvas(b.context);
@@ -768,7 +773,7 @@ public class WindowManager : MonoBehaviour
         }
         if (context.type == WindowType.Normal)
         {
-            int index = mWindowStack.FindIndex((nav) => { return nav.context == context; });
+            int index = mWindowStack.FindIndex((nav) => { return nav.windowStatus.context == context; });
             if (index >= 0 && index < mWindowStack.Count)
             {
                 WindowNav current = mWindowStack[index];
@@ -781,7 +786,7 @@ public class WindowManager : MonoBehaviour
                 }
 
                 mWindowStack.RemoveAt(index);
-                if (mWindowStack.FindIndex((nav) => { return nav.context == context; }) < 0)
+                if (mWindowStack.FindIndex((nav) => { return nav.windowStatus.context == context; }) < 0)
                 {
                     DestroyWindow(context);
                 }
@@ -790,29 +795,29 @@ public class WindowManager : MonoBehaviour
                     SetActive(context, false);
                 }
                 mTempList.Clear();
-                if (current != null && current.hideContexts != null)
+                if (current != null && current.hideWindowsStatus != null)
                 {
-                    for (int i = 0; i < current.hideContexts.Count; ++i)
+                    for (int i = 0; i < current.hideWindowsStatus.Count; ++i)
                     {
-                        SetActive(current.hideContexts[i].context, true, current.hideContexts[i].widgetsActive);
-                        mTempList.Add(current.hideContexts[i].context.id);
+                        SetActive(current.hideWindowsStatus[i].context, true, current.hideWindowsStatus[i].widgetsActive);
+                        mTempList.Add(current.hideWindowsStatus[i].context.id);
                     }
                 }
 
                 if (previous != null)
                 {
-                    if (previous.context.hideOther == false && previousIndex < mWindowStack.Count)
+                    if (previous.windowStatus.context.hideOther == false && previousIndex < mWindowStack.Count)
                     {
                         var previousPrevious = mWindowStack[previousIndex];
 
-                        if (mTempList.Contains(previousPrevious.context.id))
+                        if (mTempList.Contains(previousPrevious.windowStatus.context.id))
                         {
-                            SetActive(previousPrevious.context, true);
+                            SetActive(previousPrevious.windowStatus.context, true, previousPrevious.windowStatus.widgetsActive);
                         }
                     }
-                    if (mTempList.Contains(previous.context.id)==false)
+                    if (mTempList.Contains(previous.windowStatus.context.id)==false)
                     {
-                        SetActive(previous.context, true);
+                        SetActive(previous.windowStatus.context, true, previous.windowStatus.widgetsActive);
                     }
                 }
                 mTempList.Clear();
