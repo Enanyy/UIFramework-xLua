@@ -393,9 +393,9 @@ public class WindowManager : MonoBehaviour
                             {
                                 nav.hideWindowsStatus = new List<WindowNavStatus>();
                             }
-                            WindowNavStatus windowActive = GetWindowNavStatus(w);
+                            WindowNavStatus windowNavStatus = GetWindowNavStatus(w);
 
-                            nav.hideWindowsStatus.Add(windowActive);
+                            nav.hideWindowsStatus.Add(windowNavStatus);
                             SetActive(w, false);
                         }
                     }
