@@ -378,7 +378,7 @@ public class WindowManager : MonoBehaviour
         if (context.fixedOrder == 0)
         {
             WindowNav nav = new WindowNav();
-            nav.windowStatus = GetWindowActive(context);
+            nav.windowStatus = GetWindowNavStatus(context);
 
             if (context.hideOther)
             {
@@ -393,7 +393,7 @@ public class WindowManager : MonoBehaviour
                             {
                                 nav.hideWindowsStatus = new List<WindowNavStatus>();
                             }
-                            WindowNavStatus windowActive = GetWindowActive(w);
+                            WindowNavStatus windowActive = GetWindowNavStatus(w);
 
                             nav.hideWindowsStatus.Add(windowActive);
                             SetActive(w, false);
@@ -408,7 +408,7 @@ public class WindowManager : MonoBehaviour
             mWindowStack.Insert(0, nav);
         }
     }
-    private WindowNavStatus GetWindowActive(WindowContext context)
+    private WindowNavStatus GetWindowNavStatus(WindowContext context)
     {
         WindowNavStatus windowActive = new WindowNavStatus();
         windowActive.context = context;
