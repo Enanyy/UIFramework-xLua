@@ -61,6 +61,23 @@ public class WindowComponent : MonoBehaviour
         }
         return null;
     }
+    public static void SetLayer(GameObject go, int layer)
+    {
+        if (go == null || go.layer == layer)
+        {
+            return;
+        }
+        go.layer = layer;
+
+        var transforms = go.GetComponentsInChildren<Transform>();
+        for (int i = 0; i < transforms.Length; ++i)
+        {
+            var child = transforms[i].gameObject;
+
+            child.layer = layer;
+
+        }
+    }
 
     public virtual void OnShow() { }
     public virtual void OnHide() { }
@@ -69,6 +86,8 @@ public class WindowComponent : MonoBehaviour
     {
 
     }
+
+
 }
 
 #region Test Enum
