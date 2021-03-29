@@ -566,7 +566,7 @@ public class WindowManager : MonoBehaviour
             if(widget!=null)
             {
                 var parent = GetObject(widget.parent);
-                if (parent != null)
+                if (parent != null && parent.transform != go.transform.parent)
                 {
                     go.transform.SetParent(parent.transform);
                     go.transform.localScale = Vector3.one;
