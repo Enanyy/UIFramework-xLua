@@ -531,13 +531,14 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
+        var canvas = GetCanvas(context);
+
         if (active)
         {
             SetOrder(context);
         }
         else
         {
-            var canvas = GetCanvas(context);
             if (canvas != null)
             {
                 canvas.sortingOrder = 0;
@@ -548,7 +549,6 @@ public class WindowManager : MonoBehaviour
         if (context.active != active)
         {
             context.active = active;
-            var canvas = GetCanvas(context);
             if (canvas != null)
             {
                 canvas.enabled = context.active;
@@ -579,7 +579,6 @@ public class WindowManager : MonoBehaviour
                     rect.offsetMin = Vector2.zero;
                     rect.offsetMax = Vector2.zero;
 
-                    var canvas = GetCanvas(widget);
                     if (canvas != null)
                     {
                         canvas.overrideSorting = true;
