@@ -15,4 +15,14 @@ public class UIBg : WindowComponent
         mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close(contextbase.type == WindowType.Widget? (contextbase as WidgetContext).parent:contextbase));
 
     }
+
+    void OnEnable()
+    {
+        RectTransform rect = transform as RectTransform;
+
+        Debug.Log(rect.anchorMin);
+        Debug.Log(rect.anchorMax);
+        Debug.Log(rect.offsetMin);
+        Debug.Log(rect.offsetMax);
+    }
 }

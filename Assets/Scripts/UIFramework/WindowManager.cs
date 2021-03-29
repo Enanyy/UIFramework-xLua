@@ -317,6 +317,7 @@ public class WindowManager : MonoBehaviour
                     return;
 #endif
                 }
+                go.name = System.IO.Path.GetFileNameWithoutExtension(context.path);
                 if (mWindowObjectDic.ContainsKey(context.id))
                 {
                     Destroy(mWindowObjectDic[context.id]);
@@ -327,25 +328,38 @@ public class WindowManager : MonoBehaviour
                     mWindowObjectDic.Add(context.id, go);
                 }
                 AddComponent(go, context);
-                go.transform.SetParent(transform);
-                go.SetActive(true);
 
                 go.TryGetComponent(out Canvas canvas);
                 if (canvas == null) canvas = go.AddComponent<Canvas>();
-
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = mCamera;
-                canvas.sortingLayerName = "UI";
-
                 go.TryGetComponent(out CanvasScaler scaler);
-                if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
+              
 
-                scaler.scaleFactor = 1;
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.referenceResolution = new Vector2(1920, 1080);
-                scaler.referencePixelsPerUnit = 100;
+                if (context.type == WindowType.Normal)
+                {
+                    go.transform.SetParent(transform);
+                    if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
 
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = mCamera;
+                    canvas.sortingLayerName = "UI";
+                    canvas.overrideSorting = false;
+
+                    scaler.scaleFactor = 1;
+                    scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                    scaler.referenceResolution = new Vector2(1920, 1080);
+                    scaler.referencePixelsPerUnit = 100;
+                }
+                else
+                {
+
+                    if(scaler!=null)
+                    {
+                        DestroyImmediate(scaler);
+                    }
+                }
+                go.SetActive(true);
+            
                 Push(context as WindowContext);
 
                 SetActive(context, true);
@@ -545,6 +559,32 @@ public class WindowManager : MonoBehaviour
         if (context.type == WindowType.Normal)
         {
             SetWidgetsActive(context as WindowContext, active, widgetsActive);
+        }
+        else
+        {
+            var widget = context as WidgetContext;
+            if(widget!=null)
+            {
+                var parent = GetObject(widget.parent);
+                if (parent != null)
+                {
+                    go.transform.SetParent(parent.transform);
+                    go.transform.localScale = Vector3.one;
+                    go.transform.localPosition = Vector3.zero;
+                }
+                RectTransform rect = go.transform as RectTransform;
+
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+
+                var canvas = GetCanvas(widget);
+                if (canvas != null)
+                {
+                    canvas.overrideSorting = true;
+                }
+            }
         }
     }
     public bool IsActive(WindowContextBase context)
