@@ -571,19 +571,20 @@ public class WindowManager : MonoBehaviour
                     go.transform.SetParent(parent.transform);
                     go.transform.localScale = Vector3.one;
                     go.transform.localPosition = Vector3.zero;
-                }
-                RectTransform rect = go.transform as RectTransform;
 
-                rect.anchorMin = Vector2.zero;
-                rect.anchorMax = Vector2.one;
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
+                    RectTransform rect = go.transform as RectTransform;
 
-                var canvas = GetCanvas(widget);
-                if (canvas != null)
-                {
-                    canvas.overrideSorting = true;
-                }
+                    rect.anchorMin = Vector2.zero;
+                    rect.anchorMax = Vector2.one;
+                    rect.offsetMin = Vector2.zero;
+                    rect.offsetMax = Vector2.zero;
+
+                    var canvas = GetCanvas(widget);
+                    if (canvas != null)
+                    {
+                        canvas.overrideSorting = true;
+                    }
+                }       
             }
         }
     }
