@@ -41,6 +41,21 @@ public class WindowComponent : MonoBehaviour
         return false;
     }
 
+    public virtual void Close(bool self = false)
+    {
+        WindowContextBase windowContext = contextbase;
+
+        if (self == false)
+        {
+            if (widget != null)
+            {
+                windowContext = widget.parent;
+            }
+        }
+
+        WindowManager.Instance.Close(windowContext);
+    }
+
    
 
     public T GetComponent<T>(string path) where T :Component
@@ -83,11 +98,17 @@ public class WindowComponent : MonoBehaviour
     public virtual void OnShow() { }
     public virtual void OnHide() { }
 
-    public virtual void OnAnimationEvent(string param)
+    public virtual void OnAnimationEvent(string param) { }
+   
+    public virtual void OnWidgetShow(WidgetContext widget) 
     {
-
+        Debug.LogError(GetType().Name + " OnWidgetShow:" + widget.name);
     }
-
+   
+    public virtual void OnWidgetHide(WidgetContext widget) 
+    {
+        Debug.LogError(GetType().Name + " OnWidgetHide:" + widget.name);
+    }
 
 }
 

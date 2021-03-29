@@ -295,6 +295,8 @@ public class WindowManager : MonoBehaviour
             context.status = WindowStatus.Loading;
             mLoader(context.path, (asset) =>
             {
+                SetTouch(true);
+
                 if (asset == null || context.status == WindowStatus.None)
                 {
                     Debug.LogError("Can't find " + context.path);
@@ -363,7 +365,6 @@ public class WindowManager : MonoBehaviour
                 Push(context as WindowContext);
 
                 SetActive(context, true);
-                SetTouch(true);
 
                 callback?.Invoke(go);
 
@@ -566,22 +567,43 @@ public class WindowManager : MonoBehaviour
             if(widget!=null)
             {
                 var parent = GetObject(widget.parent);
-                if (parent != null && parent.transform != go.transform.parent)
+                if (parent != null )
                 {
-                    go.transform.SetParent(parent.transform);
-                    go.transform.localScale = Vector3.one;
-                    go.transform.localPosition = Vector3.zero;
-
-                    RectTransform rect = go.transform as RectTransform;
-
-                    rect.anchorMin = Vector2.zero;
-                    rect.anchorMax = Vector2.one;
-                    rect.offsetMin = Vector2.zero;
-                    rect.offsetMax = Vector2.zero;
-
-                    if (canvas != null)
+                    if (parent.transform != go.transform.parent)
                     {
-                        canvas.overrideSorting = true;
+                        go.transform.SetParent(parent.transform);
+                        go.transform.localScale = Vector3.one;
+                        go.transform.localPosition = Vector3.zero;
+
+                        RectTransform rect = go.transform as RectTransform;
+
+                        rect.anchorMin = Vector2.zero;
+                        rect.anchorMax = Vector2.one;
+                        rect.offsetMin = Vector2.zero;
+                        rect.offsetMax = Vector2.zero;
+
+                        if (canvas != null)
+                        {
+                            canvas.overrideSorting = true;
+                        }
+                    }
+
+                    var components = parent.GetComponentsInChildren<WindowComponent>();
+                    for (int i = 0; i < components.Length; ++i)
+                    {
+                        var com = components[i];
+                        if (com.contextbase.id == widget.id)
+                        {
+                            continue;
+                        }
+                        if (active)
+                        {
+                            com.OnWidgetShow(widget);
+                        }
+                        else
+                        {
+                            com.OnWidgetHide(widget);
+                        }
                     }
                 }       
             }
