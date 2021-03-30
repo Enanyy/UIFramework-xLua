@@ -98,11 +98,11 @@ public class WindowComponent : MonoBehaviour
         }
         return defaultValue;
     }
-    public bool GetParamBool(string paramKey, bool defaultValue = false) { return GetParam(paramKey, (paramValue) => bool.Parse(paramValue), defaultValue); }
-    public int GetParamInt(string paramKey, int defaultValue = 0) { return GetParam(paramKey, (paramValue) => int.Parse(paramValue), defaultValue); }
-    public float GetParamFloat(string paramKey, float defaultValue = 0) { return GetParam(paramKey, (paramValue) => float.Parse(paramValue), defaultValue); }
-    public uint GetParamUInt32(string paramKey, uint defaultValue = 0) { return GetParam(paramKey, (paramValue) => uint.Parse(paramValue), defaultValue); }
-    public ulong GetParamUInt64(string paramKey, ulong defaultValue = 0) { return GetParam(paramKey, (paramValue) => ulong.Parse(paramValue), defaultValue); }
+    public bool GetParamBool(string paramKey, bool defaultValue = false) { return GetParam(paramKey, paramValue => bool.Parse(paramValue), defaultValue); }
+    public int GetParamInt(string paramKey, int defaultValue = 0) { return GetParam(paramKey, paramValue => int.Parse(paramValue), defaultValue); }
+    public float GetParamFloat(string paramKey, float defaultValue = 0) { return GetParam(paramKey, paramValue => float.Parse(paramValue), defaultValue); }
+    public uint GetParamUInt32(string paramKey, uint defaultValue = 0) { return GetParam(paramKey, paramValue => uint.Parse(paramValue), defaultValue); }
+    public ulong GetParamUInt64(string paramKey, ulong defaultValue = 0) { return GetParam(paramKey, paramValue => ulong.Parse(paramValue), defaultValue); }
     #endregion
     public static void SetLayer(GameObject go, int layer)
     {
