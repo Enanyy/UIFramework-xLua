@@ -333,7 +333,7 @@ public class WindowManager : MonoBehaviour
                 go.name = System.IO.Path.GetFileNameWithoutExtension(context.path);
                 if (mWindowObjectDic.ContainsKey(context.id))
                 {
-                    Destroy(mWindowObjectDic[context.id]);
+                    DestroyGameObject(mWindowObjectDic[context.id]);
                     mWindowObjectDic[context.id] = go;
                 }
                 else
@@ -956,14 +956,8 @@ public class WindowManager : MonoBehaviour
         mWindowContextDic.Remove(context.id);
 
         GameObject go = GetObject(context);
-        if (Application.isPlaying)
-        {
-            Destroy(go);
-        }
-        else
-        {
-            DestroyImmediate(go);
-        }
+
+        DestroyGameObject(go);
 
         mWindowObjectDic.Remove(context.id);
 
@@ -980,6 +974,14 @@ public class WindowManager : MonoBehaviour
         }
 
         context.Clear();
+    }
+    public static void DestroyGameObject(GameObject go)
+    {
+        if (go == null)
+        {
+            return;
+        }
+        DestroyImmediate(go);
     }
 }
 #region WindowDefEditor
