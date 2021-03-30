@@ -42,7 +42,7 @@ public abstract class WindowContextBase
     /// 关闭是是否Destroy
     /// </summary>
     public bool closeDestroy { get; protected set; } = true;
-    public List<Type> components;
+    public Dictionary<Type,Dictionary<string, string>> components;
 
     public WindowStatus status = WindowStatus.None;
 
@@ -72,7 +72,7 @@ public abstract class WindowContextBase
         closeDestroy = context.closeDestroy;
         if(context.components!=null)
         {
-            components = new List<Type>(context.components);
+            components = new Dictionary<Type, Dictionary<string, string>>(context.components);
         }
     }
 
@@ -82,14 +82,22 @@ public abstract class WindowContextBase
         status = WindowStatus.None;
     }
 
-    public void AddComponent(Type component)
+    public void AddComponent(Type component, Dictionary<string, string> parameters)
     {
         if (components == null)
         {
-            components = new List<Type>();
+            components = new Dictionary<Type, Dictionary<string, string>>();
         }
-        components.Add(component);
+        if(components.ContainsKey(component))
+        {
+            components[component] = parameters;
+        }
+        else
+        {
+            components.Add(component, parameters);
+        }
     }
+
 
     public virtual void ParseXml(XmlElement node)
     {
@@ -104,7 +112,26 @@ public abstract class WindowContextBase
             if (componentChild.Name == "Component")
             {
                 Type type = Type.GetType(componentChild.GetAttribute("type"));
-                AddComponent(type);
+                Dictionary<string, string> parameters = null; 
+                var paramIter = componentChild.ChildNodes.GetEnumerator();
+                while(paramIter.MoveNext())
+                {
+                    var paramChild = paramIter.Current as XmlElement;
+                    if(paramChild.Name == "Param")
+                    {
+                        var attributeIter = paramChild.Attributes.GetEnumerator();
+                        while (attributeIter.MoveNext())
+                        {
+                            var attribute = attributeIter.Current as XmlAttribute;
+                            if (parameters == null)
+                            {
+                                parameters = new Dictionary<string, string>();
+                            }
+                            parameters.Add(attribute.Name, attribute.Value);
+                        }
+                    }
+                }
+                AddComponent(type, parameters);
             }
         }
     }

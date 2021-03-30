@@ -16,13 +16,17 @@ public class UIBg : WindowComponent
 
     }
 
-    void OnEnable()
+    public override void OnInit()
     {
-        RectTransform rect = transform as RectTransform;
-
-        Debug.Log(rect.anchorMin);
-        Debug.Log(rect.anchorMax);
-        Debug.Log(rect.offsetMin);
-        Debug.Log(rect.offsetMax);
+        if(parameters!=null)
+        {
+            using(var it = parameters.GetEnumerator())
+            {
+                while(it.MoveNext())
+                {
+                    Debug.LogError("param:" + it.Current.Key + "," + it.Current.Value);
+                }
+            }
+        }
     }
 }

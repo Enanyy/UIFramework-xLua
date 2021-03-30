@@ -26,6 +26,7 @@ public class WindowComponent : MonoBehaviour
             }
         }
     }
+    public Dictionary<string, string> parameters;
 
     public void SetWidgetActive(string name,bool active)
     {
@@ -76,6 +77,17 @@ public class WindowComponent : MonoBehaviour
         }
         return null;
     }
+
+    public string GetParam(string name)
+    {
+        string value = null;
+        if(parameters!=null && !string.IsNullOrEmpty(name))
+        {
+            parameters.TryGetValue(name, out value);
+        }
+        return value;
+    }
+
     public static void SetLayer(GameObject go, int layer)
     {
         if (go == null || go.layer == layer)

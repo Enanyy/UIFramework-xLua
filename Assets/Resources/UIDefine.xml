@@ -2,7 +2,9 @@
 <Root>
   <WidgetContexts>
     <WidgetContext name ="UIBg" closeDestroy="true" sortingOrderOffset="-1" group ="0" path ="UIBg">
-      <Component type="UIBg"></Component>
+      <Component type="UIBg">
+        <Param path="path" name ="name" />
+      </Component>
     </WidgetContext>
     <WidgetContext name ="UIFixed" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIFixed">
       <Component type="UIFixed"></Component>

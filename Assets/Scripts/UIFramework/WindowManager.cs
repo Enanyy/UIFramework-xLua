@@ -451,20 +451,25 @@ public class WindowManager : MonoBehaviour
         }
         if (context.components != null)
         {
-            for (int i = 0; i < context.components.Count; ++i)
+            using(var it = context.components.GetEnumerator())
             {
-                var type = context.components[i];
+                while(it.MoveNext())
+                {
+                    var type = it.Current.Key;
 
-                WindowComponent component = go.GetComponent(type) as WindowComponent;
-                if (component == null)
-                {
-                    component = go.AddComponent(type) as WindowComponent;
-                }
-                if (component != null)
-                {
-                    component.contextbase = context;
+                    WindowComponent component = go.GetComponent(type) as WindowComponent;
+                    if (component == null)
+                    {
+                        component = go.AddComponent(type) as WindowComponent;
+                    }
+                    if (component != null)
+                    {
+                        component.contextbase = context;
+                        component.parameters = it.Current.Value;
+                    }
                 }
             }
+           
         }
         var components = go.GetComponentsInChildren<WindowComponent>();
         for (int i = 0; i < components.Length; ++i)
