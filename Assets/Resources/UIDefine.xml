@@ -3,7 +3,7 @@
   <WidgetContexts>
     <WidgetContext name ="UIBg" closeDestroy="true" sortingOrderOffset="-1" group ="0" path ="UIBg">
       <Component type="UIBg">
-        <Param path="path" name ="name" />
+        <Param path="path1" name ="name1" />
       </Component>
     </WidgetContext>
     <WidgetContext name ="UIFixed" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIFixed">
@@ -23,7 +23,11 @@
     </WindowContext>
     <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
       <Component type="UINormal"></Component>
-      <WidgetContext ref="UIBg" sortingOrderOffset="-1" group ="0" clone="true" active="true"></WidgetContext>
+      <WidgetContext ref="UIBg" sortingOrderOffset="-1" group ="0" clone="true" active="true">
+        <Component type="UIBg">
+          <Param path="path2" name ="name2" />
+        </Component>
+      </WidgetContext>
       <WidgetContext ref="UIFixed" sortingOrderOffset="1" group ="0" clone="false" active="true"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UIPop" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIPop">

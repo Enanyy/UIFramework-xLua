@@ -72,7 +72,17 @@ public abstract class WindowContextBase
         closeDestroy = context.closeDestroy;
         if(context.components!=null)
         {
-            components = new Dictionary<Type, Dictionary<string, string>>(context.components);
+            components = new Dictionary<Type, Dictionary<string, string>>();
+
+            using (var it = context.components.GetEnumerator())
+            {
+                while(it.MoveNext())
+                {
+                    Dictionary<string, string> parameters = new Dictionary<string, string>(it.Current.Value);
+                    components.Add(it.Current.Key, parameters);
+                }
+            }
+
         }
     }
 
@@ -97,6 +107,15 @@ public abstract class WindowContextBase
             components.Add(component, parameters);
         }
     }
+    public Dictionary<string, string> GetParameters(Type component)
+    {
+        if(components!=null)
+        {
+            components.TryGetValue(component, out Dictionary<string, string> parameters);
+            return parameters;
+        }
+        return null;
+    }
 
 
     public virtual void ParseXml(XmlElement node)
@@ -105,6 +124,15 @@ public abstract class WindowContextBase
         path = node.GetAttribute("path");
         closeDestroy = bool.Parse(node.GetAttribute("closeDestroy"));
 
+        AddComponent(node);
+    }
+
+    public virtual void AddComponent(XmlElement node)
+    {
+        if(node== null)
+        {
+            return;
+        }
         var it = node.ChildNodes.GetEnumerator();
         while (it.MoveNext())
         {
@@ -112,12 +140,12 @@ public abstract class WindowContextBase
             if (componentChild.Name == "Component")
             {
                 Type type = Type.GetType(componentChild.GetAttribute("type"));
-                Dictionary<string, string> parameters = null; 
+                Dictionary<string, string> parameters = GetParameters(type);
                 var paramIter = componentChild.ChildNodes.GetEnumerator();
-                while(paramIter.MoveNext())
+                while (paramIter.MoveNext())
                 {
                     var paramChild = paramIter.Current as XmlElement;
-                    if(paramChild.Name == "Param")
+                    if (paramChild.Name == "Param")
                     {
                         var attributeIter = paramChild.Attributes.GetEnumerator();
                         while (attributeIter.MoveNext())
@@ -127,7 +155,13 @@ public abstract class WindowContextBase
                             {
                                 parameters = new Dictionary<string, string>();
                             }
-                            parameters.Add(attribute.Name, attribute.Value);
+                            if (parameters.ContainsKey(attribute.Name) == false)
+                            {
+                                parameters.Add(attribute.Name, attribute.Value);
+                            }else
+                            {
+                                parameters[attribute.Name]= attribute.Value;
+                            }
                         }
                     }
                 }
@@ -345,7 +379,7 @@ public sealed class WindowContext : WindowContextBase
 
                             cloneWidget.sortingOrderOffset = sortingOrderOffset;
                             cloneWidget.group = group;
-
+                            cloneWidget.AddComponent(child);
 
                             AddFixedWidget(cloneWidget, active);
                         }

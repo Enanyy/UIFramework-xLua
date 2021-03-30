@@ -114,12 +114,12 @@ public class WindowComponent : MonoBehaviour
    
     public virtual void OnWidgetShow(WidgetContext widget) 
     {
-        Debug.LogError(GetType().Name + " OnWidgetShow:" + widget.name);
+        //Debug.LogError(GetType().Name + " OnWidgetShow:" + widget.name);
     }
    
     public virtual void OnWidgetHide(WidgetContext widget) 
     {
-        Debug.LogError(GetType().Name + " OnWidgetHide:" + widget.name);
+        //Debug.LogError(GetType().Name + " OnWidgetHide:" + widget.name);
     }
 
 }
