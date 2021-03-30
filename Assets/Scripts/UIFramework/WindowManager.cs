@@ -445,6 +445,10 @@ public class WindowManager : MonoBehaviour
 
     private void AddComponent(GameObject go, WindowContextBase context)
     {
+        if (Application.isPlaying == false)
+        {
+            return;
+        }
         if (go == null)
         {
             return;
@@ -483,6 +487,11 @@ public class WindowManager : MonoBehaviour
     }
     private void SetComponentActive(GameObject go, bool active)
     {
+        if (Application.isPlaying == false)
+        {
+            return;
+        }
+
         if (go == null)
         {
             return;
@@ -597,7 +606,8 @@ public class WindowManager : MonoBehaviour
                     for (int i = 0; i < components.Length; ++i)
                     {
                         var com = components[i];
-                        if (com.contextbase.id == widget.id)
+            
+                        if (com.contextbase!=null && com.contextbase.id == widget.id)
                         {
                             continue;
                         }
@@ -690,7 +700,9 @@ public class WindowManager : MonoBehaviour
 
     private Canvas GetCanvas(WindowContextBase context)
     {
-        if (context != null && mWindowObjectDic.TryGetValue(context.id, out GameObject go))
+        GameObject go = GetObject(context);
+
+        if (go != null)
         {
             return go.GetComponent<Canvas>();
         }
