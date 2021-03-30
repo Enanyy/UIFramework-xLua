@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class WindowComponent : MonoBehaviour
 {
-   
+
     public WindowContextBase contextbase;
     public WidgetContext widget
     {
@@ -16,7 +16,7 @@ public class WindowComponent : MonoBehaviour
     {
         get
         {
-            if(contextbase.type == WindowType.Normal)
+            if (contextbase.type == WindowType.Normal)
             {
                 return contextbase as WindowContext;
             }
@@ -26,9 +26,8 @@ public class WindowComponent : MonoBehaviour
             }
         }
     }
-    public Dictionary<string, string> parameters;
 
-    public void SetWidgetActive(string name,bool active)
+    public void SetWidgetActive(string name, bool active)
     {
         WindowManager.Instance.SetWidgetActive(context.name, name, active);
     }
@@ -57,11 +56,11 @@ public class WindowComponent : MonoBehaviour
         WindowManager.Instance.Close(windowContext);
     }
 
-   
 
-    public T GetComponent<T>(string path) where T :Component
+
+    public T GetComponent<T>(string path) where T : Component
     {
-        if(string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path))
         {
             TryGetComponent(out T component);
             return component;
@@ -69,7 +68,7 @@ public class WindowComponent : MonoBehaviour
         else
         {
             Transform child = transform.Find(path);
-            if(child)
+            if (child)
             {
                 child.TryGetComponent(out T component);
                 return component;
@@ -77,17 +76,34 @@ public class WindowComponent : MonoBehaviour
         }
         return null;
     }
+    #region Parameters
+    public Dictionary<string, string> parameters;
 
-    public string GetParam(string name)
+    public string GetParam(string paramKey)
     {
-        string value = null;
-        if(parameters!=null && !string.IsNullOrEmpty(name))
+        string paramValue = null;
+        if (parameters != null && !string.IsNullOrEmpty(paramKey))
         {
-            parameters.TryGetValue(name, out value);
+            parameters.TryGetValue(paramKey, out paramValue);
         }
-        return value;
+        return paramValue;
     }
 
+    public T GetParam<T>(string paramKey, Func<string, T> converter, T defaultValue)
+    {
+        string paramValue = GetParam(paramKey);
+        if (converter != null)
+        {
+            return converter(paramValue);
+        }
+        return defaultValue;
+    }
+    public bool GetParamBool(string paramKey, bool defaultValue = false) { return GetParam(paramKey, (paramValue) => bool.Parse(paramValue), defaultValue); }
+    public int GetParamInt(string paramKey, int defaultValue = 0) { return GetParam(paramKey, (paramValue) => int.Parse(paramValue), defaultValue); }
+    public float GetParamFloat(string paramKey, float defaultValue = 0) { return GetParam(paramKey, (paramValue) => float.Parse(paramValue), defaultValue); }
+    public uint GetParamUInt32(string paramKey, uint defaultValue = 0) { return GetParam(paramKey, (paramValue) => uint.Parse(paramValue), defaultValue); }
+    public ulong GetParamUInt64(string paramKey, ulong defaultValue = 0) { return GetParam(paramKey, (paramValue) => ulong.Parse(paramValue), defaultValue); }
+    #endregion
     public static void SetLayer(GameObject go, int layer)
     {
         if (go == null || go.layer == layer)
@@ -111,13 +127,13 @@ public class WindowComponent : MonoBehaviour
     public virtual void OnHide() { }
 
     public virtual void OnAnimationEvent(string param) { }
-   
-    public virtual void OnWidgetShow(WidgetContext widget) 
+
+    public virtual void OnWidgetShow(WidgetContext widget)
     {
         //Debug.LogError(GetType().Name + " OnWidgetShow:" + widget.name);
     }
-   
-    public virtual void OnWidgetHide(WidgetContext widget) 
+
+    public virtual void OnWidgetHide(WidgetContext widget)
     {
         //Debug.LogError(GetType().Name + " OnWidgetHide:" + widget.name);
     }
