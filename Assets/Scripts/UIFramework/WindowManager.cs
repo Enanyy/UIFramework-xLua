@@ -19,10 +19,10 @@ public class WindowManager : MonoBehaviour
                 {
                     GameObject go = new GameObject(typeof(WindowManager).Name);
                     mInstance = go.AddComponent<WindowManager>();
-                    if (Application.isPlaying)
-                    {
-                        DontDestroyOnLoad(go);
-                    }
+                }
+                if (Application.isPlaying)
+                {
+                    DontDestroyOnLoad(mInstance.gameObject);
                 }
             }
             return mInstance;
@@ -59,6 +59,9 @@ public class WindowManager : MonoBehaviour
     private Action<string, Action<UnityEngine.Object>> mLoader;
 
     private bool mInitialized = false;
+    public bool initialized { get { return mInitialized; } }
+
+    public Vector2 DesignResolution = new Vector2(1920, 1080); 
 
     void Awake()
     {
@@ -72,6 +75,14 @@ public class WindowManager : MonoBehaviour
             return;
         }
         mInitialized = true;
+        if(mCamera!=null)
+        {
+            DestroyImmediate(mCamera.gameObject);
+        }
+        if(mEventSystem!=null)
+        {
+            DestroyImmediate(mEventSystem.gameObject);
+        }
 
         GameObject camera = new GameObject("Camera");
         camera.transform.SetParent(transform);
@@ -79,9 +90,8 @@ public class WindowManager : MonoBehaviour
         mCamera = camera.AddComponent<Camera>();
         mCamera.clearFlags = CameraClearFlags.Depth;
         mCamera.depth = 10;
-        mCamera.orthographic = false; //--使用透视投影，这样UI模型的3D立体感更强
+        mCamera.orthographic = true; 
         mCamera.orthographicSize = 10;
-        mCamera.fieldOfView = 60;
         mCamera.cullingMask = 1 << WindowContextBase.LAYER;
 
         GameObject eventsystem = new GameObject("EventSystem");
@@ -227,12 +237,12 @@ public class WindowManager : MonoBehaviour
     public void SetWidgetActive(string context, string widget, bool active)
     {
         WindowContext windowContext = GetWindowContext(context);
-        if(windowContext== null || mWindowContextDic.ContainsKey(windowContext.id) == false)
+        if (windowContext == null || mWindowContextDic.ContainsKey(windowContext.id) == false)
         {
             return;
         }
         WidgetContext widgetContext = windowContext.GetWidget(widget);
-        if(widgetContext == null)
+        if (widgetContext == null)
         {
             return;
         }
@@ -244,6 +254,7 @@ public class WindowManager : MonoBehaviour
     {
         CloseAll();
         contexts.Clear();
+        mInitialized = false;
     }
 
 
@@ -334,11 +345,20 @@ public class WindowManager : MonoBehaviour
                 go.TryGetComponent(out Canvas canvas);
                 if (canvas == null) canvas = go.AddComponent<Canvas>();
                 go.TryGetComponent(out CanvasScaler scaler);
-              
 
-                if (context.type == WindowType.Normal)
+                go.transform.SetParent(transform);
+                bool isScale = context.type == WindowType.Normal;
+                if (isScale == false)
                 {
-                    go.transform.SetParent(transform);
+                    var widget = context as WidgetContext;
+                    if (widget.parent == null)
+                    {
+                        isScale = true;
+                    }
+                }
+
+                if (isScale)
+                {
                     if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
 
                     canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -349,19 +369,19 @@ public class WindowManager : MonoBehaviour
                     scaler.scaleFactor = 1;
                     scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                     scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                    scaler.referenceResolution = new Vector2(1920, 1080);
+                    scaler.referenceResolution = DesignResolution;
                     scaler.referencePixelsPerUnit = 100;
                 }
                 else
                 {
 
-                    if(scaler!=null)
+                    if (scaler != null)
                     {
                         DestroyImmediate(scaler);
                     }
                 }
                 go.SetActive(true);
-            
+
                 Push(context as WindowContext);
 
                 SetActive(context, true);
@@ -455,9 +475,9 @@ public class WindowManager : MonoBehaviour
         }
         if (context.components != null)
         {
-            using(var it = context.components.GetEnumerator())
+            using (var it = context.components.GetEnumerator())
             {
-                while(it.MoveNext())
+                while (it.MoveNext())
                 {
                     var type = it.Current.Key;
 
@@ -473,7 +493,7 @@ public class WindowManager : MonoBehaviour
                     }
                 }
             }
-           
+
         }
         var components = go.GetComponentsInChildren<WindowComponent>();
         for (int i = 0; i < components.Length; ++i)
@@ -540,7 +560,7 @@ public class WindowManager : MonoBehaviour
         return 0;
     }
 
-    public void SetActive(WindowContextBase context, bool active,Dictionary<ulong,bool> widgetsActive = null)
+    public void SetActive(WindowContextBase context, bool active, Dictionary<ulong, bool> widgetsActive = null)
     {
         if (context == null)
         {
@@ -578,10 +598,10 @@ public class WindowManager : MonoBehaviour
         else
         {
             var widget = context as WidgetContext;
-            if(widget!=null)
+            if (widget != null)
             {
                 var parent = GetObject(widget.parent);
-                if (parent != null )
+                if (parent != null)
                 {
                     if (parent.transform != go.transform.parent)
                     {
@@ -606,8 +626,8 @@ public class WindowManager : MonoBehaviour
                     for (int i = 0; i < components.Length; ++i)
                     {
                         var com = components[i];
-            
-                        if (com.contextbase!=null && com.contextbase.id == widget.id)
+
+                        if (com.contextbase != null && com.contextbase.id == widget.id)
                         {
                             continue;
                         }
@@ -620,13 +640,13 @@ public class WindowManager : MonoBehaviour
                             com.OnWidgetHide(widget);
                         }
                     }
-                }       
+                }
             }
         }
     }
     public bool IsActive(WindowContextBase context)
     {
-        if(context==null)
+        if (context == null)
         {
             return false;
         }
@@ -645,11 +665,11 @@ public class WindowManager : MonoBehaviour
             {
                 while (it.MoveNext())
                 {
-                    if (it.Current.Value)
+                    if (it.Current.Value || !Application.isPlaying)
                     {
-                        if (widgetsActive != null && widgetsActive.TryGetValue(it.Current.Key.id, out bool val))
+                        if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(it.Current.Key.id, out bool val))
                         {
-                            if(val == active)
+                            if (val == active)
                             {
                                 it.Current.Key.parent = context;
                             }
@@ -668,9 +688,9 @@ public class WindowManager : MonoBehaviour
             while (it.MoveNext())
             {
                 var widget = it.Current.Value;
-                if (widgetsActive != null && widgetsActive.TryGetValue(widget.id, out bool val))
+                if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(widget.id, out bool val))
                 {
-                    if(val==active)
+                    if (val == active)
                     {
                         SetWidgetActive(context, widget, active);
                     }
@@ -696,7 +716,7 @@ public class WindowManager : MonoBehaviour
             Open(widget);
         }
     }
-    
+
 
     private Canvas GetCanvas(WindowContextBase context)
     {
@@ -899,7 +919,7 @@ public class WindowManager : MonoBehaviour
                             SetActive(previousPrevious.windowState.context, true, previousPrevious.windowState.widgetsActive);
                         }
                     }
-                    if (mTempList.Contains(previous.windowState.context.id)==false)
+                    if (mTempList.Contains(previous.windowState.context.id) == false)
                     {
                         SetActive(previous.windowState.context, true, previous.windowState.widgetsActive);
                     }
@@ -970,15 +990,23 @@ public class WindowDefEditor : UnityEditor.EditorWindow
     [UnityEditor.MenuItem("GameObject/UI/Open")]
     private static void OpenDefineWindow()
     {
-        var asset = Resources.Load<TextAsset>("UIDefine");
-
-        GetWindow<WindowDefEditor>("UI定义列表");
-
-        WindowManager.Instance.Initialize();
-        WindowManager.Instance.SetLoader(LoadInEditor);
-        WindowManager.Instance.Clear();
-        WindowManager.Instance.Load(asset.text);
+        var editor = GetWindow<WindowDefEditor>("UI定义列表");
+        editor.Initialize();
     }
+
+    private void Initialize()
+    {
+        if (WindowManager.Instance.initialized == false || WindowManager.Instance.contexts.Count == 0)
+        {
+            var asset = Resources.Load<TextAsset>("UIDefine");
+
+            WindowManager.Instance.Initialize();
+            WindowManager.Instance.SetLoader(LoadInEditor);
+            WindowManager.Instance.Clear();
+            WindowManager.Instance.Load(asset.text);
+        }
+    }
+
     Vector2 mScroll;
     string mKey;
     private void OnGUI()
@@ -1083,6 +1111,15 @@ public class WindowDefEditor : UnityEditor.EditorWindow
         {
             callback(asset);
         }
+    }
+   
+    private void OnFocus()
+    {
+        Initialize();
+    }
+    private void OnDestroy()
+    {
+        WindowManager.Instance.Clear();
     }
 }
 
