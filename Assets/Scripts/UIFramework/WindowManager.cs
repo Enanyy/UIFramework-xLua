@@ -75,33 +75,31 @@ public class WindowManager : MonoBehaviour
             return;
         }
         mInitialized = true;
-        if(mCamera!=null)
+        mCamera = GetComponentInChildren<Camera>();
+        if (mCamera == null)
         {
-            DestroyImmediate(mCamera.gameObject);
+            GameObject camera = new GameObject("Camera");
+            camera.transform.SetParent(transform);
+            camera.layer = WindowContextBase.LAYER;
+            mCamera = camera.AddComponent<Camera>();
+            mCamera.clearFlags = CameraClearFlags.Depth;
+            mCamera.depth = 10;
+            mCamera.orthographic = true;
+            mCamera.orthographicSize = 10;
+            mCamera.cullingMask = 1 << WindowContextBase.LAYER;
         }
-        if(mEventSystem!=null)
+        mEventSystem = GetComponentInChildren<EventSystem>();
+        if (mEventSystem == null)
         {
-            DestroyImmediate(mEventSystem.gameObject);
+            GameObject eventsystem = new GameObject("EventSystem");
+            eventsystem.transform.SetParent(transform);
+            eventsystem.layer = WindowContextBase.LAYER;
+            mEventSystem = eventsystem.AddComponent<EventSystem>();
+            mEventSystem.sendNavigationEvents = true;
+            mEventSystem.pixelDragThreshold = 5;
+
+            eventsystem.AddComponent<StandaloneInputModule>();
         }
-
-        GameObject camera = new GameObject("Camera");
-        camera.transform.SetParent(transform);
-        camera.layer = WindowContextBase.LAYER;
-        mCamera = camera.AddComponent<Camera>();
-        mCamera.clearFlags = CameraClearFlags.Depth;
-        mCamera.depth = 10;
-        mCamera.orthographic = true; 
-        mCamera.orthographicSize = 10;
-        mCamera.cullingMask = 1 << WindowContextBase.LAYER;
-
-        GameObject eventsystem = new GameObject("EventSystem");
-        eventsystem.transform.SetParent(transform);
-        eventsystem.layer = WindowContextBase.LAYER;
-        mEventSystem = eventsystem.AddComponent<EventSystem>();
-        mEventSystem.sendNavigationEvents = true;
-        mEventSystem.pixelDragThreshold = 5;
-
-        eventsystem.AddComponent<StandaloneInputModule>();
     }
 
     public void SetTouch(bool touchable)
