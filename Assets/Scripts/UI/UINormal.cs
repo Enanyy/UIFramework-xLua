@@ -19,6 +19,6 @@ public class UINormal : WindowComponent
 
         mButtonPop.onClick.AddListener(() => WindowManager.Instance.Open("UIPop"));
         mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UISerialized"));
-        mButtonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen("UIMain"));
+        mButtonMain.onClick.AddListener(() => WindowManager.Instance.CloseAll("UIMain"));
     } 
 }

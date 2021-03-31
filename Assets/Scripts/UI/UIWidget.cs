@@ -23,6 +23,6 @@ public class UIWidget : WindowComponent
         mClose.onClick.AddListener(() => WindowManager.Instance.Close("UIWidget"));
         mNormal.onClick.AddListener(() => WindowManager.Instance.Open("UINormal"));
         mPop.onClick.AddListener(() => WindowManager.Instance.Open("UIPop"));
-        mMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen("UIMain"));
+        mMain.onClick.AddListener(() => WindowManager.Instance.CloseAll("UIMain"));
     } 
 }

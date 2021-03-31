@@ -22,6 +22,6 @@ public class UIPop : WindowComponent
         mButtonClose.onClick.AddListener(() => WindowManager.Instance.Close("UIPop"));
         mButtonNormal.onClick.AddListener(() => WindowManager.Instance.Open("UINormal"));
         mButtonWidget.onClick.AddListener(() => WindowManager.Instance.Open("UIWidget"));
-        mbuttonMain.onClick.AddListener(() => WindowManager.Instance.CloseAllAndOpen("UIMain"));
+        mbuttonMain.onClick.AddListener(() => WindowManager.Instance.CloseAll("UIMain"));
     }
 }

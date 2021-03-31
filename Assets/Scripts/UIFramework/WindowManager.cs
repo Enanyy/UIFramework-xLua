@@ -202,24 +202,18 @@ public class WindowManager : MonoBehaviour
         }
         Close(context);
     }
-    public void CloseAllAndOpen(string name, Action<GameObject> callback = null, params string[] widgets)
+    public void CloseAll(params string[] excepts)
     {
-        WindowContextBase context = GetWindowContextBase(name);
-        if (context == null)
+        WindowContext[] contexts = null;
+        if (excepts != null)
         {
-            return;
-        }
-
-        WidgetContext[] widgetContexts = null;
-        if (widgets != null)
-        {
-            widgetContexts = new WidgetContext[widgets.Length];
-            for (int i = 0; i < widgets.Length; ++i)
+            contexts = new WindowContext[excepts.Length];
+            for (int i = 0; i < excepts.Length; ++i)
             {
-                widgetContexts[i] = GetWidgetContext(widgets[i]);
+                contexts[i] = GetWindowContext(excepts[i]);
             }
         }
-        CloseAllAndOpen(context, callback, widgetContexts);
+        CloseAll(contexts);
     }
 
     public void SetWidgetsActive(string context, bool active)
@@ -308,7 +302,14 @@ public class WindowManager : MonoBehaviour
 
                 if (asset == null || context.status == WindowStatus.None)
                 {
-                    Debug.LogError("Can't find " + context.path);
+                    if(asset == null)
+                    {
+                        Debug.LogError("Can't load ui with path= " + context.path);
+                    }
+                    if(context.status == WindowStatus.None)
+                    {
+                        Debug.LogError("context.name="+context.name+ " status=" + context.path);
+                    }
                     mWindowContextDic.Remove(context.id);
                     context.Clear();
                     return;
@@ -830,26 +831,37 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void CloseAllAndOpen(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
+    public void CloseAll(params WindowContext[] excepts)
     {
         mTempList.Clear();
         using (var it = mWindowContextDic.GetEnumerator())
         {
             while (it.MoveNext())
             {
-                if (context == null || it.Current.Key != context.id)
+                if (excepts == null)
                 {
-                    if (context == null)
+                    mTempList.Add(it.Current.Key);
+                }
+                else
+                {
+                    bool close = true;
+                    for (int i = 0; i < excepts.Length; ++i)
+                    {
+                        var w = excepts[i];
+                        if (w.id == it.Current.Key)
+                        {
+                            close = false;
+                            break;
+                        }
+                        if (w.widgets.ContainsKey(it.Current.Key))
+                        {
+                            close = false;
+                            break;
+                        }
+                    }
+                    if (close)
                     {
                         mTempList.Add(it.Current.Key);
-                    }
-                    else
-                    {
-                        var window = context as WindowContext;
-                        if (window == null || window.widgets.ContainsKey(it.Current.Key) == false)
-                        {
-                            mTempList.Add(it.Current.Key);
-                        }
                     }
                 }
             }
@@ -857,14 +869,45 @@ public class WindowManager : MonoBehaviour
         for (int i = 0; i < mTempList.Count; ++i)
         {
             ulong key = mTempList[i];
+            for (int j = 0; j < mWindowStack.Count;)
+            {
+                var nav = mWindowStack[j];
+                if (nav.windowState.context.id == key)
+                {
+                    mWindowStack.RemoveAt(j);
+                    continue;
+                }
+                else
+                {
+                    if (nav.hideWindowStates != null)
+                    {
+                        for (int k = 0; k < nav.hideWindowStates.Count;)
+                        {
+                            if (nav.hideWindowStates[k].context.id == key)
+                            {
+                                nav.hideWindowStates.RemoveAt(k);
+                                continue;
+                            }
+                            ++k;
+                        }
+                    }
+                }
+
+                ++j;
+
+            }
             if (mWindowContextDic.TryGetValue(key, out WindowContextBase w))
             {
                 DestroyWindow(w);
             }
         }
-        mWindowStack.Clear();
+        mTempList.Clear();
 
-        Open(context, callback, widgets);
+        if(mWindowStack.Count > 0)
+        {
+            var current = mWindowStack[mWindowStack.Count - 1];
+            SetActive(current.windowState.context, true, current.windowState.widgetsActive);
+        }
     }
 
     public void Close(WindowContextBase context)
