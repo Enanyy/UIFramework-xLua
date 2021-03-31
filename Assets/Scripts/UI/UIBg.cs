@@ -29,4 +29,13 @@ public class UIBg : WindowComponent
             }
         }
     }
+
+    public override void OnShow()
+    {
+        base.OnShow();
+        if(context.name == "UIMain")
+        {
+            mButtonClose.gameObject.SetActive(false);
+        }
+    }
 }

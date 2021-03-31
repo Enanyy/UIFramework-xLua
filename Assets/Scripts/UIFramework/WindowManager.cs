@@ -1041,12 +1041,14 @@ public class WindowDefEditor : UnityEditor.EditorWindow
     {
         if (WindowManager.Instance.initialized == false || WindowManager.Instance.contexts.Count == 0)
         {
-            var asset = Resources.Load<TextAsset>("UIDefine");
 
             WindowManager.Instance.Initialize();
             WindowManager.Instance.SetLoader(LoadInEditor);
-            WindowManager.Instance.Clear();
-            WindowManager.Instance.Load(asset.text);
+            if(WindowManager.Instance.contexts.Count == 0)
+            {
+                var asset = Resources.Load<TextAsset>("UIDefine");
+                WindowManager.Instance.Load(asset.text);
+            }
         }
     }
 
