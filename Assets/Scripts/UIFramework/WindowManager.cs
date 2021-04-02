@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#define ENABLE_WINDOW_EDITOR
+using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
@@ -61,7 +62,7 @@ public class WindowManager : MonoBehaviour
     private bool mInitialized = false;
     public bool initialized { get { return mInitialized; } }
 
-    public Vector2 DesignResolution = new Vector2(1920, 1080); 
+    public Vector2 DesignResolution = new Vector2(1920, 1080);
 
     void Awake()
     {
@@ -302,13 +303,13 @@ public class WindowManager : MonoBehaviour
 
                 if (asset == null || context.status == WindowStatus.None)
                 {
-                    if(asset == null)
+                    if (asset == null)
                     {
                         Debug.LogError("Can't load ui with path= " + context.path);
                     }
-                    if(context.status == WindowStatus.None)
+                    if (context.status == WindowStatus.None)
                     {
-                        Debug.LogError("context.name="+context.name+ " status=" + context.path);
+                        Debug.LogError("context.name=" + context.name + " status=" + context.path);
                     }
                     mWindowContextDic.Remove(context.id);
                     context.Clear();
@@ -903,7 +904,7 @@ public class WindowManager : MonoBehaviour
         }
         mTempList.Clear();
 
-        if(mWindowStack.Count > 0)
+        if (mWindowStack.Count > 0)
         {
             var current = mWindowStack[mWindowStack.Count - 1];
             SetActive(current.windowState.context, true, current.windowState.widgetsActive);
@@ -1024,42 +1025,21 @@ public class WindowManager : MonoBehaviour
         }
         DestroyImmediate(go);
     }
-}
-#region WindowDefEditor
-#if UNITY_EDITOR 
-public class WindowDefEditor : UnityEditor.EditorWindow
-{
 
-    [UnityEditor.MenuItem("GameObject/UI/Open")]
-    private static void OpenDefineWindow()
+    #region Debug Draw
+#if ENABLE_WINDOW_EDITOR
+    private Vector2 mScroll;
+    private string mKey;
+    private bool mVisible;
+    private Rect mWindowRect;
+    public const string WindowTitle = "UI定义列表";
+    readonly Rect TitleBarRect = new Rect(0, 0, 10000, 20);
+
+    private const int margin = 0;
+    public void Draw(Rect rect)
     {
-        var editor = GetWindow<WindowDefEditor>("UI定义列表");
-        editor.Initialize();
-    }
-
-    private void Initialize()
-    {
-        if (WindowManager.Instance.initialized == false || WindowManager.Instance.contexts.Count == 0)
-        {
-
-            WindowManager.Instance.Initialize();
-            WindowManager.Instance.SetLoader(LoadInEditor);
-            if(WindowManager.Instance.contexts.Count == 0)
-            {
-                var asset = Resources.Load<TextAsset>("UIDefine");
-                WindowManager.Instance.Load(asset.text);
-            }
-        }
-    }
-
-    Vector2 mScroll;
-    string mKey;
-    private void OnGUI()
-    {
-        GUILayout.Space(10);
-
         GUILayout.BeginHorizontal();
-        GUILayout.Label(UnityEditor.EditorGUIUtility.TrTextContent("搜索"), GUILayout.Width(30), GUILayout.Height(30));
+        GUILayout.Label("搜索", GUILayout.Width(30), GUILayout.Height(30));
         mKey = GUILayout.TextField(mKey, GUILayout.Width(200), GUILayout.Height(30));
         if (string.IsNullOrEmpty(mKey) == false)
         {
@@ -1077,9 +1057,9 @@ public class WindowDefEditor : UnityEditor.EditorWindow
 
         mScroll = GUILayout.BeginScrollView(mScroll, false, true);
         float width = 200f;
-        int count = (int)(position.width / width);
+        int count = (int)(rect.width / width);
         int i = 0;
-        using (var it = WindowManager.Instance.contexts.GetEnumerator())
+        using (var it = contexts.GetEnumerator())
         {
             bool beginHorizontal = false;
             while (it.MoveNext())
@@ -1102,13 +1082,20 @@ public class WindowDefEditor : UnityEditor.EditorWindow
                     }
                     if (visible)
                     {
-                        bool open = WindowManager.Instance.GetObject(val);
+                        bool open = GetObject(val);
                         GUIStyle style = GUI.skin.button;
                         style.normal.textColor = open ? Color.yellow : Color.white;
 
-                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
+                        if (GUILayout.Button(val.name, style, GUILayout.Width(width), GUILayout.Height(30)))
                         {
-                            OpenWindow(val);
+                            if (!open)
+                            {
+                                Open(val);
+                            }
+                            else
+                            {
+                                Close(val);
+                            }
                         }
                     }
                 }
@@ -1134,19 +1121,79 @@ public class WindowDefEditor : UnityEditor.EditorWindow
         GUILayout.EndScrollView();
     }
 
-    private void OpenWindow(WindowContextBase obj)
+    void OnGUI()
     {
-        bool open = WindowManager.Instance.GetObject(obj) != null;
-
-        if (!open)
+        if (mVisible)
         {
-            WindowManager.Instance.Open(obj);
+            mWindowRect = GUILayout.Window(123456, new Rect(margin, margin, Screen.width - (margin * 2), Screen.height - (margin * 2)), DrawWindow, WindowTitle);
         }
-        else
+        if (!mVisible)
         {
-            WindowManager.Instance.Close(obj);
+            DrawButton();
         }
     }
+
+    void DrawButton()
+    {
+        int w = Screen.width / 6;
+        GUILayout.BeginArea(new Rect(Screen.width  - w / 2, 0, w, Screen.height / 10));
+        GUILayoutOption o1 = GUILayout.Height(40);
+        GUILayoutOption o2 = GUILayout.Width(100);
+        GUILayoutOption[] oo = { o1, o2 };
+        if (GUILayout.Button(mVisible ? "Close" : "Show", oo)) mVisible = !mVisible;
+        GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// Displays a window that lists the recorded logs.
+    /// </summary>
+    /// <param name="windowID">Window ID.</param>
+    void DrawWindow(int windowID)
+    {
+        Draw(mWindowRect);
+        if (mVisible)
+        {
+            DrawButton();
+        }
+        // Allow the window to be dragged by its title bar.
+        GUI.DragWindow(TitleBarRect);
+    }
+#endif
+    #endregion
+}
+#region WindowDefEditor
+#if UNITY_EDITOR && ENABLE_WINDOW_EDITOR
+public class WindowDefEditor : UnityEditor.EditorWindow
+{
+
+    [UnityEditor.MenuItem("GameObject/UI/Open")]
+    private static void OpenDefineWindow()
+    {
+        var editor = GetWindow<WindowDefEditor>(WindowManager.WindowTitle);
+        editor.Initialize();
+    }
+
+    private void Initialize()
+    {
+        if (WindowManager.Instance.initialized == false || WindowManager.Instance.contexts.Count == 0)
+        {
+
+            WindowManager.Instance.Initialize();
+            WindowManager.Instance.SetLoader(LoadInEditor);
+            if(WindowManager.Instance.contexts.Count == 0)
+            {
+                var asset = Resources.Load<TextAsset>("UIDefine");
+                WindowManager.Instance.Load(asset.text);
+            }
+        }
+    }
+
+    private void OnGUI()
+    {
+        WindowManager.Instance.Draw(position);
+    }
+
+  
 
     public static void LoadInEditor(string name, Action<GameObject> callback)
     {
