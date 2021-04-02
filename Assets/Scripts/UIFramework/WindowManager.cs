@@ -5,6 +5,20 @@ using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Xml;
+using System.Reflection;
+using System.Collections;
+
+#if ENABLE_WINDOW_EDITOR
+[AttributeUsage(AttributeTargets.Method)]
+public class WindowMenuAttribute : Attribute
+{
+    public string Title { get; private set; }
+    public WindowMenuAttribute(string title)
+    {
+        Title = title;
+    }
+}
+#endif
 
 public class WindowManager : MonoBehaviour
 {
@@ -248,6 +262,10 @@ public class WindowManager : MonoBehaviour
         CloseAll();
         contexts.Clear();
         mInitialized = false;
+#if ENABLE_WINDOW_EDITOR
+        mMenuList.Clear();
+        mMenuList = null;
+#endif
     }
 
 
@@ -1036,6 +1054,9 @@ public class WindowManager : MonoBehaviour
     readonly Rect TitleBarRect = new Rect(0, 0, 10000, 20);
 
     private const int margin = 0;
+
+    private Dictionary<WindowMenuAttribute,Action> mMenuList = null;
+
     public void Draw(Rect rect)
     {
         GUILayout.BeginHorizontal();
@@ -1058,67 +1079,121 @@ public class WindowManager : MonoBehaviour
         mScroll = GUILayout.BeginScrollView(mScroll, false, true);
         float width = 200f;
         int count = (int)(rect.width / width);
-        int i = 0;
-        using (var it = contexts.GetEnumerator())
+
+        DrawItems(count, contexts.GetEnumerator(), (current) =>
         {
-            bool beginHorizontal = false;
-            while (it.MoveNext())
+            WindowContextBase val = current.Value;
+            if (val != null)
             {
-                if (i == 0)
+                bool visible = true;
+                if (string.IsNullOrEmpty(mKey) == false)
                 {
-                    GUILayout.BeginHorizontal();
-                    beginHorizontal = true;
-                }
-                WindowContextBase val = it.Current.Value;
-                if (val != null)
-                {
-                    bool visible = true;
-                    if (string.IsNullOrEmpty(mKey) == false)
+                    if (val.name.ToLower().Contains(mKey) == false)
                     {
-                        if (val.name.ToLower().Contains(mKey) == false)
-                        {
-                            visible = false;
-                        }
+                        visible = false;
                     }
-                    if (visible)
-                    {
-                        bool open = GetObject(val);
-                        GUIStyle style = GUI.skin.button;
-                        style.normal.textColor = open ? Color.yellow : Color.white;
+                }
+                if (visible)
+                {
+                    bool open = GetObject(val);
+                    GUIStyle style = GUI.skin.button;
+                    style.normal.textColor = open ? Color.yellow : Color.white;
 
-                        if (GUILayout.Button(val.name, style, GUILayout.Width(width), GUILayout.Height(30)))
+                    if (GUILayout.Button(val.name, style, GUILayout.Width(width), GUILayout.Height(30)))
+                    {
+                        if (!open)
                         {
-                            if (!open)
-                            {
-                                Open(val);
-                            }
-                            else
-                            {
-                                Close(val);
-                            }
+                            Open(val);
+                        }
+                        else
+                        {
+                            Close(val);
                         }
                     }
                 }
-
-                i++;
-                if (i == count)
-                {
-                    if (beginHorizontal)
-                    {
-                        GUILayout.EndHorizontal();
-                        beginHorizontal = false;
-                    }
-                    i = 0;
-                }
-
             }
-            if (beginHorizontal)
+        });
+
+        if(mMenuList == null)
+        {
+            mMenuList = new Dictionary<WindowMenuAttribute, Action>();
+            var types = GetType().Assembly.GetTypes();
+            foreach (var type in types)
             {
-                GUILayout.EndHorizontal();
+                MethodInfo[] methods = type.GetMethods( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                for (int i = 0; methods != null && i < methods.Length; ++i)
+                {
+                    var method = methods[i];
+
+                    // only find static functions
+                    if (method.IsStatic)
+                    {
+                        WindowMenuAttribute attribute = method.GetCustomAttribute(typeof(WindowMenuAttribute), true) as WindowMenuAttribute;
+                        if(attribute!=null)
+                        {
+                            mMenuList.Add(attribute, (Action)Delegate.CreateDelegate(typeof(Action),  method));
+                        }
+                    }
+                }
             }
         }
 
+        if (mMenuList.Count > 0)
+        {
+            GUILayout.Space(10);
+            DrawItems(count, mMenuList.GetEnumerator(), (current) => {
+                GUIStyle style = GUI.skin.button;
+                Action callback = current.Value;
+                if (GUILayout.Button(current.Key.Title, style, GUILayout.Width(width), GUILayout.Height(30)))
+                {
+                    if(callback!=null)
+                    {
+                        callback();
+                    }
+                }
+            });
+        }
+
+
         GUILayout.EndScrollView();
+    }
+
+    private void DrawItems<T>(int count, IEnumerator<T> it, Action<T> func)
+    {
+        int i = 0;
+
+        bool beginHorizontal = false;
+        while (it.MoveNext())
+        {
+            if (i == 0)
+            {
+                GUILayout.BeginHorizontal();
+                beginHorizontal = true;
+            }
+
+            if(func!=null)
+            {
+                func(it.Current);
+            }
+
+            i++;
+            if (i == count)
+            {
+                if (beginHorizontal)
+                {
+                    GUILayout.EndHorizontal();
+                    beginHorizontal = false;
+                }
+                i = 0;
+            }
+
+        }
+        if (beginHorizontal)
+        {
+            GUILayout.EndHorizontal();
+        }
+
     }
 
     void OnGUI()
