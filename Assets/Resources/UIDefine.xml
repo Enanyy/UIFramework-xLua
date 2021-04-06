@@ -19,7 +19,7 @@
       <Component type="UIMain"></Component>
       <WidgetContext ref="UIBg" sortingOrderOffset="-1" group ="0" clone="true" active="true"></WidgetContext>
       <WidgetContext ref="UIFixed" sortingOrderOffset="1" group ="0" clone="false" active="true"></WidgetContext>
-      <WidgetContext ref="UIRight" sortingOrderOffset="1" group ="0" clone="false" active="false"></WidgetContext>
+      <WidgetContext ref="UIRight" sortingOrderOffset="1" group ="0" clone="false" active="false" bindNode="Right"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
       <Component type="UINormal"></Component>

@@ -621,9 +621,15 @@ public class WindowManager : MonoBehaviour
                 var parent = GetObject(widget.parent);
                 if (parent != null)
                 {
-                    if (parent.transform != go.transform.parent)
+                    Transform bindNode = parent.transform;
+                    if(!string.IsNullOrEmpty(widget.bindNode))
                     {
-                        go.transform.SetParent(parent.transform);
+                        bindNode = parent.transform.Find(widget.bindNode);
+                    }
+
+                    if (bindNode != go.transform.parent)
+                    {
+                        go.transform.SetParent(bindNode);
                         go.transform.localScale = Vector3.one;
                         go.transform.localPosition = Vector3.zero;
 
@@ -683,18 +689,29 @@ public class WindowManager : MonoBehaviour
             {
                 while (it.MoveNext())
                 {
-                    if (it.Current.Value || !Application.isPlaying)
+                    bool defaultActive = true;
+                    var param = context.GetWidgetParam(it.Current.Key);
+                    if(param!=null)
                     {
-                        if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(it.Current.Key.id, out bool val))
+                        defaultActive = param.defaultActive;
+                    }
+                    if(!Application.isPlaying)
+                    {
+                        defaultActive = true;
+                    }
+
+                    if (defaultActive)
+                    {
+                        if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(it.Current.Value.id, out bool val))
                         {
                             if (val == active)
                             {
-                                it.Current.Key.parent = context;
+                                it.Current.Value.parent = context;
                             }
                         }
                         else
                         {
-                            it.Current.Key.parent = context;
+                            it.Current.Value.parent = context;
                         }
                     }
                 }
