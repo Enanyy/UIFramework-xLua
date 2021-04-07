@@ -8,7 +8,7 @@ using System.Xml;
 using System.Reflection;
 using System.Collections;
 
-#if ENABLE_WINDOW_EDITOR
+
 [AttributeUsage(AttributeTargets.Method)]
 public class WindowMenuAttribute : Attribute
 {
@@ -18,7 +18,7 @@ public class WindowMenuAttribute : Attribute
         Title = title;
     }
 }
-#endif
+
 
 public class WindowManager : MonoBehaviour
 {

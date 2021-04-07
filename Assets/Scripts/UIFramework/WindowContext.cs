@@ -176,11 +176,11 @@ public sealed class WindowContext : WindowContextBase
     /// <summary>
     /// 固定层级
     /// </summary>
-    public int fixedOrder { get; private set; }
+    public int fixedOrder { get; private set; } = 0;
     /// <summary>
     ///打开时是否隐藏别的UI
     /// </summary>
-    public bool hideOther { get; private set; }
+    public bool hideOther { get; private set; } = true;
 
     public override WindowType type => WindowType.Normal;
     /// <summary>
@@ -362,8 +362,17 @@ public sealed class WindowContext : WindowContextBase
     public override void ParseXml(XmlElement node)
     {
         base.ParseXml(node);
-        fixedOrder = int.Parse(node.GetAttribute("fixedOrder"));
-        hideOther = bool.Parse(node.GetAttribute("hideOther"));
+        var s = node.GetAttribute("fixedOrder");
+        if(string.IsNullOrEmpty(s) == false)
+        {
+            fixedOrder = int.Parse(s);
+        }
+
+        s = node.GetAttribute("hideOther");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            hideOther = bool.Parse(s);
+        }
     }
 
     public void ParseXml(XmlElement node, Func<string, WidgetContext> func)
@@ -385,7 +394,12 @@ public sealed class WindowContext : WindowContextBase
                     if (widget != null)
                     {
                         param.CopyFrom(widget.defaultParam);
-                        bool clone = bool.Parse(child.GetAttribute("clone"));
+                        bool clone = false;
+                        string s = child.GetAttribute("clone");
+                        if (string.IsNullOrEmpty(s) == false)
+                        {
+                            clone = bool.Parse(s);
+                        }
                         if (!clone)
                         {
                             AddFixedWidget(widget);

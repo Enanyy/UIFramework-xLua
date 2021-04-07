@@ -18,8 +18,8 @@
     <WindowContext name ="UIMain" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIMain">
       <Component type="UIMain"></Component>
       <WidgetContext ref="UIBg"  clone="true" ></WidgetContext>
-      <WidgetContext ref="UIFixed" clone="false" ></WidgetContext>
-      <WidgetContext ref="UIRight" clone="false" defaultActive="false" bindNode="Right"></WidgetContext>
+      <WidgetContext ref="UIFixed"></WidgetContext>
+      <WidgetContext ref="UIRight" defaultActive="false" bindNode="Right"></WidgetContext>
     </WindowContext>
     <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
       <Component type="UINormal"></Component>
@@ -28,7 +28,7 @@
           <Param path="path2" name ="name2" />
         </Component>
       </WidgetContext>
-      <WidgetContext ref="UIFixed"  clone="false" ></WidgetContext>
+      <WidgetContext ref="UIFixed" ></WidgetContext>
     </WindowContext>
     <WindowContext name ="UIPop" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIPop">
       <Component type="UIPop"></Component>
@@ -38,7 +38,7 @@
     </WindowContext>
     <WindowContext name ="UISerialized" closeDestroy="true" hideOther="false" fixedOrder="0" path ="UISerialized">
       <Component type="UISerialized"></Component>
-      <WidgetContext ref="UIBg"  clone="true"></WidgetContext>
+      <WidgetContext ref="UIBg"></WidgetContext>
     </WindowContext>
   </WindowContexts>
 
