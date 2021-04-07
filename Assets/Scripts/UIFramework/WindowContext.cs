@@ -381,11 +381,10 @@ public sealed class WindowContext : WindowContextBase
                     string name = child.GetAttribute("ref");
                    
                     var param = new WidgetParam();
-                    param.ParseXml(child);
-                    AddWidgetParam(name, param);
                     WidgetContext widget = func(name);
                     if (widget != null)
                     {
+                        param.CopyFrom(widget.defaultParam);
                         bool clone = bool.Parse(child.GetAttribute("clone"));
                         if (!clone)
                         {
@@ -399,6 +398,9 @@ public sealed class WindowContext : WindowContextBase
                             AddFixedWidget(cloneWidget);
                         }
                     }
+                    param.ParseXml(child);
+                    AddWidgetParam(name, param);
+
                 }
             }
         }
@@ -460,7 +462,7 @@ public class WidgetContext : WindowContextBase,IWidgetContext
     public string bindNode => param.bindNode;
     public bool defaultActive => param.defaultActive;
 
-    private WidgetParam defaultParam = new WidgetParam();
+    public WidgetParam defaultParam = new WidgetParam();
 
     public override WindowType type => WindowType.Widget;
     public WidgetContext()
