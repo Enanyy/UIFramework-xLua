@@ -421,25 +421,34 @@ public interface IWidgetContext
 
 public class WidgetParam : IWidgetContext
 {
-    public int sortingOrderOffset { get; private set; }
+    public int sortingOrderOffset { get; private set; } = 0;
 
-    public int group { get; private set; }
+    public int group { get; private set; } = 0;
 
     public string bindNode { get; private set; }
 
-    public bool defaultActive { get; private set; }
+    public bool defaultActive { get; private set; } = true;
 
 
     public void ParseXml(XmlElement node)
     {
-        sortingOrderOffset = int.Parse(node.GetAttribute("sortingOrderOffset"));
-        group = int.Parse(node.GetAttribute("group"));
-        bindNode = node.GetAttribute("bindNode");
-        defaultActive = true;
-        var active = node.GetAttribute("active");
-        if(string.IsNullOrEmpty(active)==false)
+        var s = node.GetAttribute("sortingOrderOffset");
+        if (string.IsNullOrEmpty(s) == false)
         {
-            defaultActive = bool.Parse(active);
+            sortingOrderOffset = int.Parse(s);
+        }
+        s = node.GetAttribute("group");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            group = int.Parse(s);
+        }
+
+        bindNode = node.GetAttribute("bindNode");
+
+        s = node.GetAttribute("active");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            defaultActive = bool.Parse(s);
         }
     }
 
