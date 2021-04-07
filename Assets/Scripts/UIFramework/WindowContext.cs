@@ -445,7 +445,7 @@ public class WidgetParam : IWidgetContext
 
         bindNode = node.GetAttribute("bindNode");
 
-        s = node.GetAttribute("active");
+        s = node.GetAttribute("defaultActive");
         if (string.IsNullOrEmpty(s) == false)
         {
             defaultActive = bool.Parse(s);
