@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Root>
   <WidgetContexts>
-    <WidgetContext name ="UIBg" closeDestroy="true" sortingOrderOffset="-1" group ="0" path ="UIBg">
+    <WidgetContext name ="UIBg" sortingOrderOffset="-1" group ="0" path ="UIBg">
       <Component type="UIBg">
         <Param path="path1" name ="name1" />
       </Component>
     </WidgetContext>
-    <WidgetContext name ="UIFixed" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIFixed">
+    <WidgetContext name ="UIFixed" sortingOrderOffset="1" group ="0" path ="UIFixed">
       <Component type="UIFixed"></Component>
     </WidgetContext>
-    <WidgetContext name ="UIRight" closeDestroy="true" sortingOrderOffset="1" group ="0" path ="UIRight">
+    <WidgetContext name ="UIRight" sortingOrderOffset="1" group ="0" path ="UIRight">
       <Component type="UIRight"></Component>
     </WidgetContext>
   </WidgetContexts>
 
   <WindowContexts>
-    <WindowContext name ="UIMain" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIMain">
+    <WindowContext name ="UIMain" hideOther="true" path ="UIMain">
       <Component type="UIMain"></Component>
       <WidgetContext ref="UIBg"  clone="true" ></WidgetContext>
       <WidgetContext ref="UIFixed"></WidgetContext>
       <WidgetContext ref="UIRight" defaultActive="false" bindNode="Right"></WidgetContext>
     </WindowContext>
-    <WindowContext name ="UINormal" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UINormal">
+    <WindowContext name ="UINormal" closeDestroy="false" path ="UINormal">
       <Component type="UINormal"></Component>
       <WidgetContext ref="UIBg"  clone="true" >
         <Component type="UIBg">
@@ -30,13 +30,13 @@
       </WidgetContext>
       <WidgetContext ref="UIFixed" ></WidgetContext>
     </WindowContext>
-    <WindowContext name ="UIPop" closeDestroy="true" hideOther="true" fixedOrder="0" path ="UIPop">
+    <WindowContext name ="UIPop"  path ="UIPop">
       <Component type="UIPop"></Component>
     </WindowContext>
-    <WindowContext name ="UIWidget" closeDestroy="true" hideOther="false" fixedOrder="1000" path ="UIWidget">
+    <WindowContext name ="UIWidget" hideOther="false" fixedOrder="1000" path ="UIWidget">
       <Component type="UIWidget"></Component>
     </WindowContext>
-    <WindowContext name ="UISerialized" closeDestroy="true" hideOther="false" fixedOrder="0" path ="UISerialized">
+    <WindowContext name ="UISerialized" hideOther="false"  path ="UISerialized">
       <Component type="UISerialized"></Component>
       <WidgetContext ref="UIBg"></WidgetContext>
     </WindowContext>

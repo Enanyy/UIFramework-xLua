@@ -122,7 +122,11 @@ public abstract class WindowContextBase
     {
         name = node.GetAttribute("name");
         path = node.GetAttribute("path");
-        closeDestroy = bool.Parse(node.GetAttribute("closeDestroy"));
+        string s = node.GetAttribute("closeDestroy");
+        if(string.IsNullOrEmpty(s) == false)
+        {
+            closeDestroy = bool.Parse(s);
+        }
 
         AddComponent(node);
     }
