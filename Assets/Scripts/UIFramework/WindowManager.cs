@@ -918,7 +918,7 @@ public class WindowManager : MonoBehaviour
         }
         if (context.type == WindowType.Normal)
         {
-            int index = mWindowStack.FindIndex((nav) => { return nav.windowState.context == context; });
+            int index = mWindowStack.FindIndex((nav) => { return nav.windowState.context.id == context.id; });
             if (index >= 0 && index < mWindowStack.Count)
             {
                 WindowNav current = mWindowStack[index];
@@ -931,7 +931,7 @@ public class WindowManager : MonoBehaviour
                 }
 
                 mWindowStack.RemoveAt(index);
-                if (mWindowStack.FindIndex((nav) => { return nav.windowState.context == context; }) < 0)
+                if (mWindowStack.FindIndex((nav) => { return nav.windowState.context.id == context.id; }) < 0)
                 {
                     DestroyWindow(context);
                 }

@@ -32,7 +32,7 @@ namespace UnityEngine.UI
         /// <summary>
         /// 相当于联合体
         /// </summary>
-        public float[] values;
+        public int[] values;
         public string stringValue;
         public UnityEngine.Object objectValue;
 
@@ -40,7 +40,7 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 1)
             {
-                values = new float[1];
+                values = new int[1];
             }
             values[0] = value;
             objectValue = null;
@@ -63,9 +63,9 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 1)
             {
-                values = new float[1];
+                values = new int[1];
             }
-            values[0] = value;
+            values[0] = (int)(value * 1000);
 
             objectValue = null;
             stringValue = null;
@@ -79,7 +79,7 @@ namespace UnityEngine.UI
             {
                 if (values != null && values.Length == 1)
                 {
-                    return values[0];
+                    return values[0] / 1000f;
                 }
             }
             return defaultValue;
@@ -89,7 +89,7 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 1)
             {
-                values = new float[1];
+                values = new int[1];
             }
             values[0] = value ? 1 : -1;
 
@@ -131,10 +131,10 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 2)
             {
-                values = new float[2];
+                values = new int[2];
             }
-            values[0] = value.x;
-            values[1] = value.y;
+            values[0] = (int)(value.x * 1000);
+            values[1] = (int)(value.y * 1000);
 
             objectValue = null;
             stringValue = null;
@@ -148,7 +148,7 @@ namespace UnityEngine.UI
             {
                 if (values != null && values.Length == 2)
                 {
-                    return new Vector2(values[0], values[1]);
+                    return new Vector2(values[0] / 1000f, values[1] / 1000f);
                 }
             }
             return Vector2.zero;
@@ -158,11 +158,11 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 3)
             {
-                values = new float[3];
+                values = new int[3];
             }
-            values[0] = value.x;
-            values[1] = value.y;
-            values[2] = value.z;
+            values[0] = (int)(value.x *1000);
+            values[1] = (int)(value.y*1000);
+            values[2] = (int)(value.z*1000);
 
             objectValue = null;
             stringValue = null;
@@ -175,7 +175,7 @@ namespace UnityEngine.UI
             {
                 if (values != null && values.Length == 3)
                 {
-                    return new Vector3(values[0], values[1], values[2]);
+                    return new Vector3(values[0]/1000f, values[1]/1000f, values[2]/1000f);
                 }
             }
             return Vector3.zero;
@@ -186,12 +186,12 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 4)
             {
-                values = new float[4];
+                values = new int[4];
             }
-            values[0] = value.x;
-            values[1] = value.y;
-            values[2] = value.z;
-            values[3] = value.w;
+            values[0] = (int)(value.x*1000);
+            values[1] = (int)(value.y*1000);
+            values[2] = (int)(value.z*1000);
+            values[3] = (int)(value.w*1000);
 
             objectValue = null;
             stringValue = null;
@@ -204,7 +204,7 @@ namespace UnityEngine.UI
             {
                 if (values != null && values.Length == 4)
                 {
-                    return new Vector4(values[0], values[1], values[2], values[3]);
+                    return new Vector4(values[0]/1000f, values[1]/1000f, values[2]/1000f, values[3]/1000f);
                 }
             }
             return Vector4.zero;
@@ -216,7 +216,7 @@ namespace UnityEngine.UI
         {
             if (values == null || values.Length != 1)
             {
-                values = new float[1];
+                values = new int[1];
             }
             values[0] = value;
 

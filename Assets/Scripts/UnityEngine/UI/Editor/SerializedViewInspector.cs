@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode]
-[CustomEditor(typeof(SerializedView))]
+[CustomEditor(typeof(SerializedView),true)]
 public class SerializedViewInspector : Editor
 {
     private SerializedView mTarget;
