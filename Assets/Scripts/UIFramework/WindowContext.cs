@@ -122,7 +122,11 @@ public abstract class WindowContextBase
     {
         name = node.GetAttribute("name");
         path = node.GetAttribute("path");
-        closeDestroy = bool.Parse(node.GetAttribute("closeDestroy"));
+        string s = node.GetAttribute("closeDestroy");
+        if(string.IsNullOrEmpty(s) == false)
+        {
+            closeDestroy = bool.Parse(s);
+        }
 
         AddComponent(node);
     }
@@ -176,17 +180,18 @@ public sealed class WindowContext : WindowContextBase
     /// <summary>
     /// 固定层级
     /// </summary>
-    public int fixedOrder { get; private set; }
+    public int fixedOrder { get; private set; } = 0;
     /// <summary>
     ///打开时是否隐藏别的UI
     /// </summary>
-    public bool hideOther { get; private set; }
+    public bool hideOther { get; private set; } = true;
 
     public override WindowType type => WindowType.Normal;
     /// <summary>
     /// 固定的子UI
     /// </summary>
-    public Dictionary<WidgetContext, bool> fixedWidgets;
+    public Dictionary< string, WidgetContext> fixedWidgets;
+    public Dictionary<string, WidgetParam> widgetParams; 
    
 
     public readonly Dictionary<ulong, WidgetContext> widgets = new Dictionary<ulong, WidgetContext>();
@@ -207,24 +212,24 @@ public sealed class WindowContext : WindowContextBase
 
             if(windowContext.fixedWidgets!=null)
             {
-                fixedWidgets = new Dictionary<WidgetContext, bool>(windowContext.fixedWidgets);
+                fixedWidgets = new Dictionary<string, WidgetContext>(windowContext.fixedWidgets);
             }
         }
     }
 
-    public void AddFixedWidget(WidgetContext widget, bool defualtActive)
+    public void AddFixedWidget(WidgetContext widget)
     {
         if (fixedWidgets == null)
         {
-            fixedWidgets = new Dictionary<WidgetContext, bool>();
+            fixedWidgets = new Dictionary<string, WidgetContext>();
         }
-        if(fixedWidgets.ContainsKey(widget)==false)
+        if(fixedWidgets.ContainsKey(widget.name)==false)
         {
-            fixedWidgets.Add(widget, defualtActive);
+            fixedWidgets.Add(widget.name,widget);
         }
         else
         {
-            fixedWidgets[widget] = defualtActive;
+            fixedWidgets[widget.name] = widget;
         }
     }
 
@@ -234,17 +239,8 @@ public sealed class WindowContext : WindowContextBase
         {
             return null;
         }
-        using (var it = fixedWidgets.GetEnumerator())
-        {
-            while (it.MoveNext())
-            {
-                if (it.Current.Key.name == name)
-                {
-                    return it.Current.Key;
-                }
-            }
-        }
-        return null;
+        fixedWidgets.TryGetValue(name, out WidgetContext widget);
+        return widget;
     }
 
     public WidgetContext GetWidget(string name)
@@ -280,9 +276,9 @@ public sealed class WindowContext : WindowContextBase
             {
                 while (it.MoveNext())
                 {
-                    if (it.Current.Key.name == name && list.Contains(it.Current.Key)==false)
+                    if (it.Current.Key == name && list.Contains(it.Current.Value)==false)
                     {
-                        list.Add(it.Current.Key);
+                        list.Add(it.Current.Value);
                     }
                 }
             }
@@ -290,6 +286,33 @@ public sealed class WindowContext : WindowContextBase
        
 
         return list;
+    }
+
+    public void AddWidgetParam(string name, WidgetParam param)
+    {
+        if (widgetParams == null)
+        {
+            widgetParams = new Dictionary<string, WidgetParam>();
+        }
+
+        if (widgetParams.ContainsKey(name) == false)
+        {
+            widgetParams.Add(name, param);
+        }
+        else
+        {
+            widgetParams[name] = param;
+        }
+
+    }
+    public WidgetParam GetWidgetParam(string name)
+    {
+        if(widgetParams!=null)
+        {
+            widgetParams.TryGetValue(name, out WidgetParam param);
+            return param;
+        }
+        return null;
     }
 
     public void Foreach(Func<WidgetContext, bool> func)
@@ -318,7 +341,7 @@ public sealed class WindowContext : WindowContextBase
                 {
                     while (it.MoveNext())
                     {
-                        if (func(it.Current.Key))
+                        if (func(it.Current.Value))
                         {
                             result = true;
                             break;
@@ -343,8 +366,17 @@ public sealed class WindowContext : WindowContextBase
     public override void ParseXml(XmlElement node)
     {
         base.ParseXml(node);
-        fixedOrder = int.Parse(node.GetAttribute("fixedOrder"));
-        hideOther = bool.Parse(node.GetAttribute("hideOther"));
+        var s = node.GetAttribute("fixedOrder");
+        if(string.IsNullOrEmpty(s) == false)
+        {
+            fixedOrder = int.Parse(s);
+        }
+
+        s = node.GetAttribute("hideOther");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            hideOther = bool.Parse(s);
+        }
     }
 
     public void ParseXml(XmlElement node, Func<string, WidgetContext> func)
@@ -360,44 +392,104 @@ public sealed class WindowContext : WindowContextBase
                 if (child.Name == "WidgetContext")
                 {
                     string name = child.GetAttribute("ref");
+                   
+                    var param = new WidgetParam();
                     WidgetContext widget = func(name);
                     if (widget != null)
                     {
-                        bool active = bool.Parse(child.GetAttribute("active"));
-                        bool clone = bool.Parse(child.GetAttribute("clone"));
+                        param.CopyFrom(widget.defaultParam);
+                        bool clone = false;
+                        string s = child.GetAttribute("clone");
+                        if (string.IsNullOrEmpty(s) == false)
+                        {
+                            clone = bool.Parse(s);
+                        }
                         if (!clone)
                         {
-                            AddFixedWidget(widget, active);
+                            AddFixedWidget(widget);
                         }
                         else
                         {
-                            int sortingOrderOffset = int.Parse(child.GetAttribute("sortingOrderOffset"));
-                            int group = int.Parse(child.GetAttribute("group"));
-
                             WidgetContext cloneWidget = new WidgetContext();
                             cloneWidget.CopyFrom(widget);
-
-                            cloneWidget.sortingOrderOffset = sortingOrderOffset;
-                            cloneWidget.group = group;
                             cloneWidget.AddComponent(child);
-
-                            AddFixedWidget(cloneWidget, active);
+                            AddFixedWidget(cloneWidget);
                         }
                     }
+                    param.ParseXml(child);
+                    AddWidgetParam(name, param);
+
                 }
             }
         }
     }
 }
 
-public class WidgetContext : WindowContextBase
+public interface IWidgetContext
+{
+    public int sortingOrderOffset { get; }
+    public int group { get; }
+    public string bindNode { get;  }
+
+    public bool defaultActive { get; }
+
+    void ParseXml(XmlElement node);
+
+}
+
+public class WidgetParam : IWidgetContext
+{
+    public int sortingOrderOffset { get; private set; } = 0;
+
+    public int group { get; private set; } = 0;
+
+    public string bindNode { get; private set; }
+
+    public bool defaultActive { get; private set; } = true;
+
+
+    public void ParseXml(XmlElement node)
+    {
+        var s = node.GetAttribute("sortingOrderOffset");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            sortingOrderOffset = int.Parse(s);
+        }
+        s = node.GetAttribute("group");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            group = int.Parse(s);
+        }
+
+        bindNode = node.GetAttribute("bindNode");
+
+        s = node.GetAttribute("defaultActive");
+        if (string.IsNullOrEmpty(s) == false)
+        {
+            defaultActive = bool.Parse(s);
+        }
+    }
+
+    public void CopyFrom(WidgetParam other)
+    {
+        sortingOrderOffset = other.sortingOrderOffset;
+        group = other.group;
+        bindNode = other.bindNode;
+        defaultActive = other.defaultActive;
+    }
+}
+
+public class WidgetContext : WindowContextBase,IWidgetContext
 {
     /// <summary>
     ///相当于父界面的层级差
     /// </summary>
-    public int sortingOrderOffset { get; set; }
-    public int group { get; set; }
+    public int sortingOrderOffset =>  param.sortingOrderOffset; 
+    public int group =>  param.group;
+    public string bindNode => param.bindNode;
+    public bool defaultActive => param.defaultActive;
 
+    public WidgetParam defaultParam = new WidgetParam();
 
     public override WindowType type => WindowType.Widget;
     public WidgetContext()
@@ -411,8 +503,7 @@ public class WidgetContext : WindowContextBase
         WidgetContext widget = context as WidgetContext;
         if(widget!=null)
         {
-            sortingOrderOffset = widget.sortingOrderOffset;
-            group = widget.group;
+            defaultParam.CopyFrom(widget.defaultParam);
         }
     }
   
@@ -433,11 +524,28 @@ public class WidgetContext : WindowContextBase
             }
         }
     }
+    public WidgetParam param
+    {
+        get
+        {
+            if (parent != null)
+            {
+                var p = parent.GetWidgetParam(name);
+                if (p != null)
+                {
+                    return p;
+                }
+            }
+            return defaultParam;
+        }
+    }
+
+
 
     public override void ParseXml(XmlElement node)
     {
         base.ParseXml(node);
-        sortingOrderOffset = int.Parse(node.GetAttribute("sortingOrderOffset"));
+        defaultParam.ParseXml(node);
     }
 
     public override void Clear()

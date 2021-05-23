@@ -189,4 +189,10 @@ public class UIMain : WindowComponent
     {
         
     }
+
+    [WindowMenu("打开主界面")]
+    private static void OpenUIMain()
+    {
+        WindowManager.Instance.Open("UIMain");
+    }
 }

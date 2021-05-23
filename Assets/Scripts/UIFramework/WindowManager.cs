@@ -1,9 +1,24 @@
-﻿using UnityEngine;
+﻿#define ENABLE_WINDOW_EDITOR
+using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Xml;
+using System.Reflection;
+using System.Collections;
+
+
+[AttributeUsage(AttributeTargets.Method)]
+public class WindowMenuAttribute : Attribute
+{
+    public string Title { get; private set; }
+    public WindowMenuAttribute(string title)
+    {
+        Title = title;
+    }
+}
+
 
 public class WindowManager : MonoBehaviour
 {
@@ -61,7 +76,7 @@ public class WindowManager : MonoBehaviour
     private bool mInitialized = false;
     public bool initialized { get { return mInitialized; } }
 
-    public Vector2 DesignResolution = new Vector2(1920, 1080); 
+    public Vector2 DesignResolution = new Vector2(1920, 1080);
 
     void Awake()
     {
@@ -247,6 +262,10 @@ public class WindowManager : MonoBehaviour
         CloseAll();
         contexts.Clear();
         mInitialized = false;
+#if ENABLE_WINDOW_EDITOR
+        mMenuList.Clear();
+        mMenuList = null;
+#endif
     }
 
 
@@ -302,13 +321,13 @@ public class WindowManager : MonoBehaviour
 
                 if (asset == null || context.status == WindowStatus.None)
                 {
-                    if(asset == null)
+                    if (asset == null)
                     {
                         Debug.LogError("Can't load ui with path= " + context.path);
                     }
-                    if(context.status == WindowStatus.None)
+                    if (context.status == WindowStatus.None)
                     {
-                        Debug.LogError("context.name="+context.name+ " status=" + context.path);
+                        Debug.LogError("context.name=" + context.name + " status=" + context.path);
                     }
                     mWindowContextDic.Remove(context.id);
                     context.Clear();
@@ -602,9 +621,15 @@ public class WindowManager : MonoBehaviour
                 var parent = GetObject(widget.parent);
                 if (parent != null)
                 {
-                    if (parent.transform != go.transform.parent)
+                    Transform bindNode = parent.transform;
+                    if(!string.IsNullOrEmpty(widget.bindNode))
                     {
-                        go.transform.SetParent(parent.transform);
+                        bindNode = parent.transform.Find(widget.bindNode);
+                    }
+
+                    if (bindNode != go.transform.parent)
+                    {
+                        go.transform.SetParent(bindNode);
                         go.transform.localScale = Vector3.one;
                         go.transform.localPosition = Vector3.zero;
 
@@ -664,18 +689,29 @@ public class WindowManager : MonoBehaviour
             {
                 while (it.MoveNext())
                 {
-                    if (it.Current.Value || !Application.isPlaying)
+                    bool defaultActive = true;
+                    var param = context.GetWidgetParam(it.Current.Key);
+                    if(param!=null)
                     {
-                        if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(it.Current.Key.id, out bool val))
+                        defaultActive = param.defaultActive;
+                    }
+                    if(!Application.isPlaying)
+                    {
+                        defaultActive = true;
+                    }
+
+                    if (defaultActive)
+                    {
+                        if (Application.isPlaying && widgetsActive != null && widgetsActive.TryGetValue(it.Current.Value.id, out bool val))
                         {
                             if (val == active)
                             {
-                                it.Current.Key.parent = context;
+                                it.Current.Value.parent = context;
                             }
                         }
                         else
                         {
-                            it.Current.Key.parent = context;
+                            it.Current.Value.parent = context;
                         }
                     }
                 }
@@ -903,7 +939,7 @@ public class WindowManager : MonoBehaviour
         }
         mTempList.Clear();
 
-        if(mWindowStack.Count > 0)
+        if (mWindowStack.Count > 0)
         {
             var current = mWindowStack[mWindowStack.Count - 1];
             SetActive(current.windowState.context, true, current.windowState.widgetsActive);
@@ -1024,16 +1060,208 @@ public class WindowManager : MonoBehaviour
         }
         DestroyImmediate(go);
     }
+
+    #region Debug Draw
+#if ENABLE_WINDOW_EDITOR
+    private Vector2 mScroll;
+    private string mKey;
+    private bool mVisible;
+    private Rect mWindowRect;
+    public const string WindowTitle = "UI定义列表";
+    readonly Rect TitleBarRect = new Rect(0, 0, 10000, 20);
+
+    private const int margin = 0;
+
+    private Dictionary<WindowMenuAttribute,Action> mMenuList = null;
+
+    public void Draw(Rect rect)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("搜索", GUILayout.Width(30), GUILayout.Height(30));
+        mKey = GUILayout.TextField(mKey, GUILayout.Width(200), GUILayout.Height(30));
+        if (string.IsNullOrEmpty(mKey) == false)
+        {
+            mKey = mKey.Trim().ToLower();
+
+            if (GUILayout.Button("Reset", GUILayout.Width(60), GUILayout.Height(30)))
+            {
+                mKey = null;
+            }
+        }
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
+        mScroll = GUILayout.BeginScrollView(mScroll, false, true);
+        float width = 200f;
+        int count = (int)(rect.width / width);
+
+        DrawItems(count, contexts.GetEnumerator(), (current) =>
+        {
+            WindowContextBase val = current.Value;
+            if (val != null)
+            {
+                bool visible = true;
+                if (string.IsNullOrEmpty(mKey) == false)
+                {
+                    if (val.name.ToLower().Contains(mKey) == false)
+                    {
+                        visible = false;
+                    }
+                }
+                if (visible)
+                {
+                    bool open = GetObject(val);
+                    GUIStyle style = GUI.skin.button;
+                    style.normal.textColor = open ? Color.yellow : Color.white;
+
+                    if (GUILayout.Button(val.name, style, GUILayout.Width(width), GUILayout.Height(30)))
+                    {
+                        if (!open)
+                        {
+                            Open(val);
+                        }
+                        else
+                        {
+                            Close(val);
+                        }
+                    }
+                }
+            }
+        });
+
+        if(mMenuList == null)
+        {
+            mMenuList = new Dictionary<WindowMenuAttribute, Action>();
+            var types = GetType().Assembly.GetTypes();
+            foreach (var type in types)
+            {
+                MethodInfo[] methods = type.GetMethods( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                for (int i = 0; methods != null && i < methods.Length; ++i)
+                {
+                    var method = methods[i];
+
+                    // only find static functions
+                    if (method.IsStatic)
+                    {
+                        WindowMenuAttribute attribute = method.GetCustomAttribute(typeof(WindowMenuAttribute), true) as WindowMenuAttribute;
+                        if(attribute!=null)
+                        {
+                            mMenuList.Add(attribute, (Action)Delegate.CreateDelegate(typeof(Action),  method));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (mMenuList.Count > 0)
+        {
+            GUILayout.Space(10);
+            DrawItems(count, mMenuList.GetEnumerator(), (current) => {
+                GUIStyle style = GUI.skin.button;
+                Action callback = current.Value;
+                if (GUILayout.Button(current.Key.Title, style, GUILayout.Width(width), GUILayout.Height(30)))
+                {
+                    if(callback!=null)
+                    {
+                        callback();
+                    }
+                }
+            });
+        }
+
+
+        GUILayout.EndScrollView();
+    }
+
+    private void DrawItems<T>(int count, IEnumerator<T> it, Action<T> func)
+    {
+        int i = 0;
+
+        bool beginHorizontal = false;
+        while (it.MoveNext())
+        {
+            if (i == 0)
+            {
+                GUILayout.BeginHorizontal();
+                beginHorizontal = true;
+            }
+
+            if(func!=null)
+            {
+                func(it.Current);
+            }
+
+            i++;
+            if (i == count)
+            {
+                if (beginHorizontal)
+                {
+                    GUILayout.EndHorizontal();
+                    beginHorizontal = false;
+                }
+                i = 0;
+            }
+
+        }
+        if (beginHorizontal)
+        {
+            GUILayout.EndHorizontal();
+        }
+
+    }
+
+    void OnGUI()
+    {
+        if (mVisible)
+        {
+            mWindowRect = GUILayout.Window(123456, new Rect(margin, margin, Screen.width - (margin * 2), Screen.height - (margin * 2)), DrawWindow, WindowTitle);
+        }
+        if (!mVisible)
+        {
+            DrawButton();
+        }
+    }
+
+    void DrawButton()
+    {
+        int w = Screen.width / 6;
+        GUILayout.BeginArea(new Rect(Screen.width  - w / 2, 0, w, Screen.height / 10));
+        GUILayoutOption o1 = GUILayout.Height(40);
+        GUILayoutOption o2 = GUILayout.Width(100);
+        GUILayoutOption[] oo = { o1, o2 };
+        if (GUILayout.Button(mVisible ? "Close" : "Show", oo)) mVisible = !mVisible;
+        GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// Displays a window that lists the recorded logs.
+    /// </summary>
+    /// <param name="windowID">Window ID.</param>
+    void DrawWindow(int windowID)
+    {
+        Draw(mWindowRect);
+        if (mVisible)
+        {
+            DrawButton();
+        }
+        // Allow the window to be dragged by its title bar.
+        GUI.DragWindow(TitleBarRect);
+    }
+#endif
+    #endregion
 }
 #region WindowDefEditor
-#if UNITY_EDITOR 
+#if UNITY_EDITOR && ENABLE_WINDOW_EDITOR
 public class WindowDefEditor : UnityEditor.EditorWindow
 {
 
     [UnityEditor.MenuItem("GameObject/UI/Open")]
     private static void OpenDefineWindow()
     {
-        var editor = GetWindow<WindowDefEditor>("UI定义列表");
+        var editor = GetWindow<WindowDefEditor>(WindowManager.WindowTitle);
         editor.Initialize();
     }
 
@@ -1052,101 +1280,12 @@ public class WindowDefEditor : UnityEditor.EditorWindow
         }
     }
 
-    Vector2 mScroll;
-    string mKey;
     private void OnGUI()
     {
-        GUILayout.Space(10);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(UnityEditor.EditorGUIUtility.TrTextContent("搜索"), GUILayout.Width(30), GUILayout.Height(30));
-        mKey = GUILayout.TextField(mKey, GUILayout.Width(200), GUILayout.Height(30));
-        if (string.IsNullOrEmpty(mKey) == false)
-        {
-            mKey = mKey.Trim().ToLower();
-
-            if (GUILayout.Button("Reset", GUILayout.Width(60), GUILayout.Height(30)))
-            {
-                mKey = null;
-            }
-        }
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-
-        mScroll = GUILayout.BeginScrollView(mScroll, false, true);
-        float width = 200f;
-        int count = (int)(position.width / width);
-        int i = 0;
-        using (var it = WindowManager.Instance.contexts.GetEnumerator())
-        {
-            bool beginHorizontal = false;
-            while (it.MoveNext())
-            {
-                if (i == 0)
-                {
-                    GUILayout.BeginHorizontal();
-                    beginHorizontal = true;
-                }
-                WindowContextBase val = it.Current.Value;
-                if (val != null)
-                {
-                    bool visible = true;
-                    if (string.IsNullOrEmpty(mKey) == false)
-                    {
-                        if (val.name.ToLower().Contains(mKey) == false)
-                        {
-                            visible = false;
-                        }
-                    }
-                    if (visible)
-                    {
-                        bool open = WindowManager.Instance.GetObject(val);
-                        GUIStyle style = GUI.skin.button;
-                        style.normal.textColor = open ? Color.yellow : Color.white;
-
-                        if (GUILayout.Button(UnityEditor.EditorGUIUtility.TrTextContent(val.name), style, GUILayout.Width(width), GUILayout.Height(30)))
-                        {
-                            OpenWindow(val);
-                        }
-                    }
-                }
-
-                i++;
-                if (i == count)
-                {
-                    if (beginHorizontal)
-                    {
-                        GUILayout.EndHorizontal();
-                        beginHorizontal = false;
-                    }
-                    i = 0;
-                }
-
-            }
-            if (beginHorizontal)
-            {
-                GUILayout.EndHorizontal();
-            }
-        }
-
-        GUILayout.EndScrollView();
+        WindowManager.Instance.Draw(position);
     }
 
-    private void OpenWindow(WindowContextBase obj)
-    {
-        bool open = WindowManager.Instance.GetObject(obj) != null;
-
-        if (!open)
-        {
-            WindowManager.Instance.Open(obj);
-        }
-        else
-        {
-            WindowManager.Instance.Close(obj);
-        }
-    }
+  
 
     public static void LoadInEditor(string name, Action<GameObject> callback)
     {
