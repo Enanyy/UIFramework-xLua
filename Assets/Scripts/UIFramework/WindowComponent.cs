@@ -3,7 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+public interface IComponentUpdate
+{
+    void OnUpdate();
+}
+public interface IComponentLateUpdate
+{
+    void OnLateUpdate();
+}
 public class WindowComponent : MonoBehaviour
 {
 

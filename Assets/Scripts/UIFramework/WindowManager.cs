@@ -3,11 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using System.Xml;
 using System.Reflection;
-using System.Collections;
-
 
 [AttributeUsage(AttributeTargets.Method)]
 public class WindowMenuAttribute : Attribute
@@ -54,10 +50,10 @@ public class WindowManager : MonoBehaviour
         public WindowState windowState;
         public List<WindowState> hideWindowStates;
     }
-    public readonly Dictionary<string, WindowContextBase> contexts = new Dictionary<string, WindowContextBase>();
 
-    private Dictionary<ulong, WindowContextBase> mWindowContextDic = new Dictionary<ulong, WindowContextBase>();
-    private Dictionary<ulong, GameObject> mWindowObjectDic = new Dictionary<ulong, GameObject>();
+    public readonly WindowDefine mWindowDefine = new WindowDefine();
+
+    private Dictionary<ulong, WindowObject> mWindowObjectDic = new Dictionary<ulong, WindowObject>();
 
     private List<WindowNav> mWindowStack = new List<WindowNav>();
     private List<ulong> mTempList = new List<ulong>();
@@ -76,7 +72,6 @@ public class WindowManager : MonoBehaviour
     private bool mInitialized = false;
     public bool initialized { get { return mInitialized; } }
 
-    public Vector2 DesignResolution = new Vector2(1920, 1080);
 
     void Awake()
     {
@@ -131,67 +126,17 @@ public class WindowManager : MonoBehaviour
         mLoader = loader;
     }
 
-
     public void Load(string xml)
     {
-        if (string.IsNullOrEmpty(xml))
-        {
-            return;
-        }
-
-        XmlDocument doc = new XmlDocument();
-        doc.LoadXml(xml);
-        var widgetNode = doc.SelectSingleNode("/Root/WidgetContexts");
-
-        var widgetIter = widgetNode.ChildNodes.GetEnumerator();
-        while (widgetIter.MoveNext())
-        {
-            var child = widgetIter.Current as XmlElement;
-
-            if (child.Name == "WidgetContext")
-            {
-                WidgetContext widget = new WidgetContext();
-                widget.ParseXml(child);
-
-                contexts.Add(widget.name, widget);
-            }
-        }
-
-        var windowNode = doc.SelectSingleNode("/Root/WindowContexts");
-
-        var windowIter = windowNode.ChildNodes.GetEnumerator();
-        while (windowIter.MoveNext())
-        {
-            var child = windowIter.Current as XmlElement;
-
-            if (child.Name == "WindowContext")
-            {
-                WindowContext context = new WindowContext();
-                context.ParseXml(child, GetWidgetContext);
-                contexts.Add(context.name, context);
-            }
-        }
+        mWindowDefine.Load(xml);
     }
+    
 
-    public WindowContextBase GetWindowContextBase(string name)
-    {
-        WindowContextBase context;
-        contexts.TryGetValue(name, out context);
-        return context;
-    }
+   
 
-    public WidgetContext GetWidgetContext(string name)
+    public void Open(string name, Action<WindowObject> callback = null, params string[] widgets)
     {
-        return GetWindowContextBase(name) as WidgetContext;
-    }
-    public WindowContext GetWindowContext(string name)
-    {
-        return GetWindowContextBase(name) as WindowContext;
-    }
-
-    public void Open(string name, Action<GameObject> callback = null, params string[] widgets)
-    {
-        WindowContextBase context = GetWindowContextBase(name);
+        WindowContextBase context = mWindowDefine.GetWindowContextBase(name);
         if (context == null)
         {
             return;
@@ -203,14 +148,14 @@ public class WindowManager : MonoBehaviour
             widgetContexts = new WidgetContext[widgets.Length];
             for (int i = 0; i < widgets.Length; ++i)
             {
-                widgetContexts[i] = GetWidgetContext(widgets[i]);
+                widgetContexts[i] = mWindowDefine.GetWidgetContext(widgets[i]);
             }
         }
         Open(context, callback, widgetContexts);
     }
     public void Close(string name)
     {
-        WindowContextBase context = GetWindowContextBase(name);
+        WindowContextBase context = mWindowDefine.GetWindowContextBase(name);
         if (context == null)
         {
             return;
@@ -225,7 +170,7 @@ public class WindowManager : MonoBehaviour
             contexts = new WindowContext[excepts.Length];
             for (int i = 0; i < excepts.Length; ++i)
             {
-                contexts[i] = GetWindowContext(excepts[i]);
+                contexts[i] = mWindowDefine.GetWindowContext(excepts[i]);
             }
         }
         CloseAll(contexts);
@@ -233,8 +178,8 @@ public class WindowManager : MonoBehaviour
 
     public void SetWidgetsActive(string context, bool active)
     {
-        WindowContext windowContext = GetWindowContext(context);
-        if (windowContext == null || mWindowContextDic.ContainsKey(windowContext.id) == false)
+        WindowContext windowContext = mWindowDefine.GetWindowContext(context);
+        if (windowContext == null || mWindowObjectDic.ContainsKey(windowContext.id) == false)
         {
             return;
         }
@@ -243,8 +188,8 @@ public class WindowManager : MonoBehaviour
 
     public void SetWidgetActive(string context, string widget, bool active)
     {
-        WindowContext windowContext = GetWindowContext(context);
-        if (windowContext == null || mWindowContextDic.ContainsKey(windowContext.id) == false)
+        WindowContext windowContext = mWindowDefine.GetWindowContext(context);
+        if (windowContext == null || mWindowObjectDic.ContainsKey(windowContext.id) == false)
         {
             return;
         }
@@ -260,8 +205,8 @@ public class WindowManager : MonoBehaviour
     public void Clear()
     {
         CloseAll();
-        contexts.Clear();
         mInitialized = false;
+        mWindowDefine.Clear();
 #if ENABLE_WINDOW_EDITOR
         mMenuList.Clear();
         mMenuList = null;
@@ -269,7 +214,7 @@ public class WindowManager : MonoBehaviour
     }
 
 
-    public void Open(WindowContextBase context, Action<GameObject> callback = null, params WidgetContext[] widgets)
+    public void Open(WindowContextBase context, Action<WindowObject> callback = null, params WidgetContext[] widgets)
     {
         if (mLoader == null)
         {
@@ -287,12 +232,6 @@ public class WindowManager : MonoBehaviour
 
         SetTouch(false);
 
-        if (mWindowContextDic.ContainsKey(context.id) == false)
-        {
-            mWindowContextDic.Add(context.id, context);
-        }
-
-
         if (widgets != null && widgets.Length > 0)
         {
             Debug.Assert(context.type == WindowType.Normal, string.Format("{0} type = {1}", context.name, context.type));
@@ -307,8 +246,13 @@ public class WindowManager : MonoBehaviour
             }
         }
 
-        GameObject go = GetObject(context);
-        if (go == null)
+        var windowObject = GetObject(context);
+        if(windowObject == null)
+        {
+            windowObject = new WindowObject(context);
+            mWindowObjectDic.Add(context.id, windowObject);
+        }
+        if (windowObject.gameObject == null)
         {
             if (context.status == WindowStatus.Loading)
             {
@@ -329,82 +273,38 @@ public class WindowManager : MonoBehaviour
                     {
                         Debug.LogError("context.name=" + context.name + " status=" + context.path);
                     }
-                    mWindowContextDic.Remove(context.id);
+                    mWindowObjectDic.Remove(context.id);
                     context.Clear();
                     return;
                 }
 
 
                 context.status = WindowStatus.Done;
+
+                windowObject.Destroy();
+                
+                GameObject go = null;
+#if UNITY_EDITOR
                 if (Application.isPlaying)
                 {
-                    go = Instantiate(asset) as GameObject;
-                }
-                else
-                {
-#if UNITY_EDITOR
-                    go = UnityEditor.PrefabUtility.InstantiatePrefab(asset) as GameObject;
-#else
-                    return;
 #endif
-                }
-                go.name = System.IO.Path.GetFileNameWithoutExtension(context.path);
-                if (mWindowObjectDic.ContainsKey(context.id))
-                {
-                    DestroyGameObject(mWindowObjectDic[context.id]);
-                    mWindowObjectDic[context.id] = go;
+                    go = Instantiate(asset) as GameObject;
+#if UNITY_EDITOR
                 }
                 else
                 {
-                    mWindowObjectDic.Add(context.id, go);
+                     go = UnityEditor.PrefabUtility.InstantiatePrefab(asset) as GameObject;
                 }
-                AddComponent(go, context);
-
-                go.TryGetComponent(out Canvas canvas);
-                if (canvas == null) canvas = go.AddComponent<Canvas>();
-                go.TryGetComponent(out CanvasScaler scaler);
+#endif
 
                 go.transform.SetParent(transform);
-                bool isScale = context.type == WindowType.Normal;
-                if (isScale == false)
-                {
-                    var widget = context as WidgetContext;
-                    if (widget.parent == null)
-                    {
-                        isScale = true;
-                    }
-                }
-
-                if (isScale)
-                {
-                    if (scaler == null) scaler = go.AddComponent<CanvasScaler>();
-
-                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                    canvas.worldCamera = mCamera;
-                    canvas.sortingLayerName = "UI";
-                    canvas.overrideSorting = false;
-
-                    scaler.scaleFactor = 1;
-                    scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                    scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                    scaler.referenceResolution = DesignResolution;
-                    scaler.referencePixelsPerUnit = 100;
-                }
-                else
-                {
-
-                    if (scaler != null)
-                    {
-                        DestroyImmediate(scaler);
-                    }
-                }
-                go.SetActive(true);
+                windowObject.Init(go, mCamera);
 
                 Push(context as WindowContext);
 
                 SetActive(context, true);
 
-                callback?.Invoke(go);
+                callback?.Invoke(windowObject);
 
 
             });
@@ -418,7 +318,7 @@ public class WindowManager : MonoBehaviour
             SetActive(context, true);
             SetTouch(true);
 
-            callback?.Invoke(go);
+            callback?.Invoke(windowObject);
         }
     }
 
@@ -436,11 +336,11 @@ public class WindowManager : MonoBehaviour
 
             if (context.hideOther)
             {
-                using (var it = mWindowContextDic.GetEnumerator())
+                using (var it = mWindowObjectDic.GetEnumerator())
                 {
                     while (it.MoveNext())
                     {
-                        var w = it.Current.Value as WindowContext;
+                        var w = it.Current.Value.contextbase as WindowContext;
                         if (w != null && w != context && w.active)
                         {
                             if (nav.hideWindowStates == null)
@@ -481,96 +381,32 @@ public class WindowManager : MonoBehaviour
         return windowActive;
     }
 
-    private void AddComponent(GameObject go, WindowContextBase context)
-    {
-        if (Application.isPlaying == false)
-        {
-            return;
-        }
-        if (go == null)
-        {
-            return;
-        }
-        if (context.components != null)
-        {
-            using (var it = context.components.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    var type = it.Current.Key;
 
-                    WindowComponent component = go.GetComponent(type) as WindowComponent;
-                    if (component == null)
-                    {
-                        component = go.AddComponent(type) as WindowComponent;
-                    }
-                    if (component != null)
-                    {
-                        component.contextbase = context;
-                        component.parameters = it.Current.Value;
-                    }
-                }
-            }
-
-        }
-        var components = go.GetComponentsInChildren<WindowComponent>();
-        for (int i = 0; i < components.Length; ++i)
-        {
-            components[i].contextbase = context;
-        }
-        for (int i = 0; i < components.Length; ++i)
-        {
-            components[i].OnInit();
-        }
-    }
-    private void SetComponentActive(GameObject go, bool active)
-    {
-        if (Application.isPlaying == false)
-        {
-            return;
-        }
-
-        if (go == null)
-        {
-            return;
-        }
-        var components = go.GetComponentsInChildren<WindowComponent>();
-        for (int i = 0; i < components.Length; ++i)
-        {
-            if (active)
-            {
-                components[i].OnShow();
-            }
-            else
-            {
-                components[i].OnHide();
-            }
-        }
-    }
 
     private int SortWindow(WindowState a, WindowState b)
     {
-        var canvasA = GetCanvas(a.context);
-        var canvasB = GetCanvas(b.context);
-        if (canvasA == null && canvasB == null)
+        var windowObjectA = GetObject(a.context);
+        var windowObjectB = GetObject(b.context);
+   
+        if (windowObjectA == null && windowObjectB == null)
         {
             return 0;
         }
-        else if (canvasA != null && canvasB == null)
+        else if (windowObjectA != null && windowObjectB == null)
         {
             return 1;
         }
-        else if (canvasA == null && canvasB != null)
+        else if (windowObjectA == null && windowObjectB != null)
         {
             return -1;
         }
         else
         {
-            if (canvasA.sortingOrder > canvasB.sortingOrder)
+            if (windowObjectA.sortingOrder > windowObjectB.sortingOrder)
             {
                 return -1;
             }
-            else if (canvasA.sortingOrder < canvasB.sortingOrder)
+            else if (windowObjectA.sortingOrder < windowObjectB.sortingOrder)
             {
                 return 1;
             }
@@ -584,7 +420,11 @@ public class WindowManager : MonoBehaviour
         {
             return;
         }
-        var canvas = GetCanvas(context);
+        var windowObject = GetObject(context);
+        if(windowObject == null)
+        {
+            return;
+        }
 
         if (active)
         {
@@ -592,22 +432,15 @@ public class WindowManager : MonoBehaviour
         }
         else
         {
-            if (canvas != null)
-            {
-                canvas.sortingOrder = 0;
-            }
+            windowObject.sortingOrder = 0;
         }
-        GameObject go = GetObject(context);
 
         if (context.active != active)
         {
             context.active = active;
-            if (canvas != null)
-            {
-                canvas.enabled = context.active;
-            }
-
-            SetComponentActive(go, active);
+            windowObject.active = active;
+           
+            windowObject.SetComponentActive(active);
         }
         if (context.type == WindowType.Normal)
         {
@@ -621,49 +454,9 @@ public class WindowManager : MonoBehaviour
                 var parent = GetObject(widget.parent);
                 if (parent != null)
                 {
-                    Transform bindNode = parent.transform;
-                    if(!string.IsNullOrEmpty(widget.bindNode))
-                    {
-                        bindNode = parent.transform.Find(widget.bindNode);
-                    }
+                    windowObject.SetParent(parent);
 
-                    if (bindNode != go.transform.parent)
-                    {
-                        go.transform.SetParent(bindNode);
-                        go.transform.localScale = Vector3.one;
-                        go.transform.localPosition = Vector3.zero;
-
-                        RectTransform rect = go.transform as RectTransform;
-
-                        rect.anchorMin = Vector2.zero;
-                        rect.anchorMax = Vector2.one;
-                        rect.offsetMin = Vector2.zero;
-                        rect.offsetMax = Vector2.zero;
-
-                        if (canvas != null)
-                        {
-                            canvas.overrideSorting = true;
-                        }
-                    }
-
-                    var components = parent.GetComponentsInChildren<WindowComponent>();
-                    for (int i = 0; i < components.Length; ++i)
-                    {
-                        var com = components[i];
-
-                        if (com.contextbase != null && com.contextbase.id == widget.id)
-                        {
-                            continue;
-                        }
-                        if (active)
-                        {
-                            com.OnWidgetShow(widget);
-                        }
-                        else
-                        {
-                            com.OnWidgetHide(widget);
-                        }
-                    }
+                    parent.OnWidgetActive(widget);
                 }
             }
         }
@@ -674,7 +467,7 @@ public class WindowManager : MonoBehaviour
         {
             return false;
         }
-        return context.active && mWindowContextDic.ContainsKey(context.id);
+        return context.active && mWindowObjectDic.ContainsKey(context.id);
     }
 
     public void SetWidgetsActive(WindowContext context, bool active, Dictionary<ulong, bool> widgetsActive = null)
@@ -741,8 +534,8 @@ public class WindowManager : MonoBehaviour
     {
         widget.parent = context;
 
-        var go = GetObject(widget);
-        if (go != null)
+        var windowObject = GetObject(widget);
+        if (windowObject != null)
         {
             SetActive(widget, active);
         }
@@ -752,34 +545,47 @@ public class WindowManager : MonoBehaviour
         }
     }
 
-
-    private Canvas GetCanvas(WindowContextBase context)
+    public int GetMaxOrder()
     {
-        GameObject go = GetObject(context);
-
-        if (go != null)
+        int maxOrder = int.MinValue;
+        using (var it = mWindowObjectDic.GetEnumerator())
         {
-            return go.GetComponent<Canvas>();
+            while (it.MoveNext())
+            {
+                var v = it.Current.Value;
+
+                var context = v.contextbase as WindowContext;
+                if (context != null)
+                {
+                    if (context.fixedOrder == 0)
+                    {
+                        if (v.sortingOrder > maxOrder)
+                        {
+                            maxOrder = v.sortingOrder;
+                        }
+                    }
+                }
+            }
         }
-        return null;
+        return maxOrder;
     }
 
     private void SetOrder(WindowContextBase context)
     {
         if (context == null) return;
 
-        var canvas = GetCanvas(context);
-        if (canvas == null)
+        var windowObject = GetObject(context);
+        if (windowObject == null)
         {
             return;
         }
         var widget = context as WidgetContext;
         if (widget != null)
         {
-            var parent = GetCanvas(widget.parent);
+            var parent = GetObject(widget.parent);
             if (parent != null)
             {
-                canvas.sortingOrder = parent.sortingOrder + widget.sortingOrderOffset;
+                windowObject.sortingOrder = parent.sortingOrder + widget.sortingOrderOffset;
             }
         }
 
@@ -789,29 +595,11 @@ public class WindowManager : MonoBehaviour
             //固定层级
             if (window != null && window.fixedOrder != 0)
             {
-                canvas.sortingOrder = window.fixedOrder;
+                windowObject.sortingOrder = window.fixedOrder;
             }
             else
             {
-                int maxOrder = int.MinValue;
-                using (var it = mWindowContextDic.GetEnumerator())
-                {
-                    while (it.MoveNext())
-                    {
-                        var v = it.Current.Value as WindowContext;
-                        if (v != null)
-                        {
-                            var c = GetCanvas(v);
-                            if (c != null && v.fixedOrder == 0)
-                            {
-                                if (c.sortingOrder > maxOrder)
-                                {
-                                    maxOrder = c.sortingOrder;
-                                }
-                            }
-                        }
-                    }
-                }
+                int maxOrder = GetMaxOrder();
                 if (maxOrder == int.MinValue)
                 {
                     maxOrder = 0;
@@ -820,18 +608,22 @@ public class WindowManager : MonoBehaviour
                 {
                     maxOrder += mOrderAddition;
                 }
-                canvas.sortingOrder = maxOrder;
+                windowObject.sortingOrder = maxOrder;
             }
         }
     }
 
     private WindowContextBase Get(ulong id)
     {
-        mWindowContextDic.TryGetValue(id, out WindowContextBase context);
-        return context;
+        mWindowObjectDic.TryGetValue(id, out WindowObject obj);
+        if(obj!=null)
+        {
+            return obj.contextbase;
+        }
+        return null;
     }
 
-    public GameObject GetObject(WindowContextBase context)
+    public WindowObject GetObject(WindowContextBase context)
     {
         if (context == null)
         {
@@ -840,16 +632,16 @@ public class WindowManager : MonoBehaviour
         return GetObject(context.id);
     }
 
-    public GameObject GetObject(ulong id)
+    public WindowObject GetObject(ulong id)
     {
-        mWindowObjectDic.TryGetValue(id, out GameObject go);
-        return go;
+        mWindowObjectDic.TryGetValue(id, out WindowObject windowObject);
+        return windowObject;
     }
 
     public void CloseAll(bool destroy = true)
     {
         mTempList.Clear();
-        mTempList.AddRange(mWindowContextDic.Keys);
+        mTempList.AddRange(mWindowObjectDic.Keys);
         for (int i = 0; i < mTempList.Count; ++i)
         {
             var context = Get(mTempList[i]);
@@ -870,7 +662,7 @@ public class WindowManager : MonoBehaviour
     public void CloseAll(params WindowContext[] excepts)
     {
         mTempList.Clear();
-        using (var it = mWindowContextDic.GetEnumerator())
+        using (var it = mWindowObjectDic.GetEnumerator())
         {
             while (it.MoveNext())
             {
@@ -932,10 +724,13 @@ public class WindowManager : MonoBehaviour
                 ++j;
 
             }
-            if (mWindowContextDic.TryGetValue(key, out WindowContextBase w))
+
+            var w = Get(key);
+            if (w != null)
             {
                 DestroyWindow(w);
             }
+           
         }
         mTempList.Clear();
 
@@ -1024,43 +819,57 @@ public class WindowManager : MonoBehaviour
 
         if (context.closeDestroy)
         {
-            DestroyWindowObject(context);
-        }
-    }
+            WindowObject windowObject = GetObject(context);
 
-    private void DestroyWindowObject(WindowContextBase context)
-    {
-        mWindowContextDic.Remove(context.id);
-
-        GameObject go = GetObject(context);
-
-        DestroyGameObject(go);
-
-        mWindowObjectDic.Remove(context.id);
-
-        var w = context as WindowContext;
-        if (w != null)
-        {
-            using (var it = w.widgets.GetEnumerator())
+            if (windowObject != null)
             {
-                while (it.MoveNext())
+                windowObject.Destroy();
+            }
+
+            mWindowObjectDic.Remove(context.id);
+
+            var w = context as WindowContext;
+            if (w != null)
+            {
+                using (var it = w.widgets.GetEnumerator())
                 {
-                    DestroyWindow(it.Current.Value);
+                    while (it.MoveNext())
+                    {
+                        DestroyWindow(it.Current.Value);
+                    }
                 }
             }
-        }
 
-        context.Clear();
+            context.Clear();
+        }
     }
-    public static void DestroyGameObject(GameObject go)
+
+    private void Update()
     {
-        if (go == null)
+        mTempList.Clear();
+        mTempList.AddRange(mWindowObjectDic.Keys);
+        for (int i = 0; i < mTempList.Count; ++i)
         {
-            return;
+            var windowObject = GetObject(mTempList[i]);
+            if(windowObject!= null && windowObject.active)
+            {
+                windowObject.Update();
+            }
         }
-        DestroyImmediate(go);
     }
-
+    private void LateUpdate()
+    {
+        mTempList.Clear();
+        mTempList.AddRange(mWindowObjectDic.Keys);
+        for (int i = 0; i < mTempList.Count; ++i)
+        {
+            var windowObject = GetObject(mTempList[i]);
+            if (windowObject != null && windowObject.active)
+            {
+                windowObject.LateUpdate();
+            }
+        }
+    }
     #region Debug Draw
 #if ENABLE_WINDOW_EDITOR
     private Vector2 mScroll;
@@ -1097,7 +906,7 @@ public class WindowManager : MonoBehaviour
         float width = 200f;
         int count = (int)(rect.width / width);
 
-        DrawItems(count, contexts.GetEnumerator(), (current) =>
+        DrawItems(count,mWindowDefine.contexts.GetEnumerator(), (current) =>
         {
             WindowContextBase val = current.Value;
             if (val != null)
@@ -1112,7 +921,7 @@ public class WindowManager : MonoBehaviour
                 }
                 if (visible)
                 {
-                    bool open = GetObject(val);
+                    bool open = GetObject(val) != null;
                     GUIStyle style = GUI.skin.button;
                     style.normal.textColor = open ? Color.yellow : Color.white;
 
@@ -1257,6 +1066,7 @@ public class WindowManager : MonoBehaviour
 #if UNITY_EDITOR && ENABLE_WINDOW_EDITOR
 public class WindowDefEditor : UnityEditor.EditorWindow
 {
+    private Dictionary<string, WindowContextBase> contexts => WindowManager.Instance.mWindowDefine.contexts;
 
     [UnityEditor.MenuItem("GameObject/UI/Open")]
     private static void OpenDefineWindow()
@@ -1267,15 +1077,16 @@ public class WindowDefEditor : UnityEditor.EditorWindow
 
     private void Initialize()
     {
-        if (WindowManager.Instance.initialized == false || WindowManager.Instance.contexts.Count == 0)
+        var instance = WindowManager.Instance;
+        if (instance.initialized == false || contexts.Count == 0)
         {
 
-            WindowManager.Instance.Initialize();
-            WindowManager.Instance.SetLoader(LoadInEditor);
-            if(WindowManager.Instance.contexts.Count == 0)
+            instance.Initialize();
+            instance.SetLoader(LoadInEditor);
+            if(contexts.Count == 0)
             {
                 var asset = Resources.Load<TextAsset>("UIDefine");
-                WindowManager.Instance.Load(asset.text);
+                instance.Load(asset.text);
             }
         }
     }
