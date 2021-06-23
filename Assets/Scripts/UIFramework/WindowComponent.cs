@@ -11,10 +11,24 @@ public interface IComponentLateUpdate
 {
     void OnLateUpdate();
 }
+public interface IComponentFixedUpdate
+{
+    void OnFixedUpdate();
+}
 public class WindowComponent : MonoBehaviour
 {
-
-    public WindowContextBase contextbase;
+    public WindowObject windowObject;
+    public WindowContextBase contextbase
+    {
+        get
+        {
+            if(windowObject!=null)
+            {
+                return windowObject.contextbase;
+            }
+            return null;
+        }
+    }
     public WidgetContext widget
     {
         get { return contextbase as WidgetContext; }

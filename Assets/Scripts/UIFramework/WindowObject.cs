@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class WindowObject
 {
     public readonly WindowContextBase contextbase;
-  
+
     public GameObject gameObject { get; private set; }
     public Canvas canvas { get; private set; }
     public CanvasScaler canvasScaler { get; private set; }
@@ -42,10 +42,13 @@ public class WindowObject
     }
 
     private List<WindowComponent> components = new List<WindowComponent>();
-    private List<IComponentUpdate> updateComponents = new List<IComponentUpdate>();
-    private List<IComponentLateUpdate> lateUpdateComponents = new List<IComponentLateUpdate>();
+    private List<IComponentUpdate> updateComponents;
+    private List<IComponentLateUpdate> lateUpdateComponents;
+    private List<IComponentFixedUpdate> fixedUpdateComponents;
 
     public static readonly Vector2 DesignResolution = new Vector2(1920, 1080);
+
+    private bool initialize = false;
 
     public WindowObject(WindowContextBase windowContextBase)
     {
@@ -55,6 +58,8 @@ public class WindowObject
     public void Init(GameObject go, Camera camera)
     {
         Debug.Assert(go != null, "go is NULL!!!");
+        Debug.Assert(initialize == false, "initialize !=false!!!");
+
         gameObject = go;
 
         go.name = System.IO.Path.GetFileNameWithoutExtension(contextbase.path);
@@ -100,6 +105,8 @@ public class WindowObject
         go.SetActive(true);
 
         InitComponent();
+
+        initialize = true;
     }
 
     // Update is called once per frame
@@ -111,7 +118,10 @@ public class WindowObject
             return;
         }
 #endif
-
+        if (updateComponents == null)
+        {
+            return;
+        }
         for (int i = 0; i < updateComponents.Count;)
         {
             var component = updateComponents[i];
@@ -132,7 +142,10 @@ public class WindowObject
             return;
         }
 #endif
-
+        if (lateUpdateComponents == null)
+        {
+            return;
+        }
         for (int i = 0; i < lateUpdateComponents.Count;)
         {
             var component = lateUpdateComponents[i];
@@ -145,6 +158,30 @@ public class WindowObject
         }
     }
 
+    public void FixedUpdate()
+    {
+#if UNITY_EDITOR
+        if (Application.isPlaying == false)
+        {
+            return;
+        }
+#endif
+        if (fixedUpdateComponents == null)
+        {
+            return;
+        }
+        for (int i = 0; i < fixedUpdateComponents.Count;)
+        {
+            var component = fixedUpdateComponents[i];
+            if (component == null)
+            {
+                continue;
+            }
+            component.OnFixedUpdate();
+            ++i;
+        }
+    }
+
     private void InitComponent()
     {
 #if UNITY_EDITOR
@@ -153,7 +190,7 @@ public class WindowObject
             return;
         }
 #endif
-        if (contextbase == null ||  gameObject == null)
+        if (contextbase == null || gameObject == null)
         {
             return;
         }
@@ -170,26 +207,72 @@ public class WindowObject
                     {
                         component = gameObject.AddComponent(type) as WindowComponent;
                     }
-                    if (component != null)
-                    {
-                        component.contextbase = contextbase;
-                        component.parameters = it.Current.Value;
-                    }
                 }
             }
-
         }
-        components.AddRange(gameObject.GetComponentsInChildren<WindowComponent>());
-        for (int i = 0; i < components.Count; ++i)
-        {
-            components[i].contextbase = contextbase;
-        }
-
-        for (int i = 0; i < components.Count; ++i)
-        {
-            components[i].OnInit();
-        }
+        RegisterComponent(gameObject);
     }
+
+    public void RegisterComponent(GameObject go)
+    {
+        if (go == null || contextbase == null)
+        {
+            return;
+        }
+        var windowComponents = go.GetComponentsInChildren<WindowComponent>();
+        for (int i = 0; i < windowComponents.Length; ++i)
+        {
+            var component = windowComponents[i];
+
+            component.windowObject = this;
+            var updateComponent = component as IComponentUpdate;
+            if (updateComponent != null)
+            {
+                if (updateComponents == null)
+                {
+                    updateComponents = new List<IComponentUpdate>();
+                }
+                updateComponents.Add(updateComponent);
+            }
+            var lateUpdateComponent = component as IComponentLateUpdate;
+            if (lateUpdateComponent != null)
+            {
+                if (lateUpdateComponents == null)
+                {
+                    lateUpdateComponents = new List<IComponentLateUpdate>();
+                }
+                lateUpdateComponents.Add(lateUpdateComponent);
+            }
+            var fixedUpdateComponent = component as IComponentFixedUpdate;
+            if (fixedUpdateComponents != null)
+            {
+                if (fixedUpdateComponents == null)
+                {
+                    fixedUpdateComponents = new List<IComponentFixedUpdate>();
+                }
+                fixedUpdateComponents.Add(fixedUpdateComponent);
+            }
+        }
+        var active = contextbase.active;
+        for (int i = 0; i < windowComponents.Length; ++i)
+        {
+            var component = windowComponents[i];
+            component.OnInit();
+            if (initialize)
+            {
+                if (active)
+                {
+                    component.OnShow();
+                }
+                else
+                {
+                    component.OnHide();
+                }
+            }
+        }
+        components.AddRange(windowComponents);
+    }
+
     public void SetComponentActive(bool active)
     {
 #if UNITY_EDITOR
@@ -264,7 +347,7 @@ public class WindowObject
             return;
         }
         var widget = contextbase as WidgetContext;
-        if(widget == null)
+        if (widget == null)
         {
             return;
         }
@@ -308,8 +391,19 @@ public class WindowObject
         gameObject = null;
         canvas = null;
         components.Clear();
-        updateComponents.Clear();
-        lateUpdateComponents.Clear();
+        if (updateComponents != null)
+        {
+            updateComponents.Clear();
+        }
+        if (lateUpdateComponents != null)
+        {
+            lateUpdateComponents.Clear();
+        }
+        if (fixedUpdateComponents != null)
+        {
+            fixedUpdateComponents.Clear();
+        }
+        initialize = false;
     }
 }
 

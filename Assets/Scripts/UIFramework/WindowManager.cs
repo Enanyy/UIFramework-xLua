@@ -870,6 +870,19 @@ public class WindowManager : MonoBehaviour
             }
         }
     }
+    private void FixedUpdate()
+    {
+        mTempList.Clear();
+        mTempList.AddRange(mWindowObjectDic.Keys);
+        for (int i = 0; i < mTempList.Count; ++i)
+        {
+            var windowObject = GetObject(mTempList[i]);
+            if (windowObject != null && windowObject.active)
+            {
+                windowObject.FixedUpdate();
+            }
+        }
+    }
     #region Debug Draw
 #if ENABLE_WINDOW_EDITOR
     private Vector2 mScroll;
@@ -1066,8 +1079,6 @@ public class WindowManager : MonoBehaviour
 #if UNITY_EDITOR && ENABLE_WINDOW_EDITOR
 public class WindowDefEditor : UnityEditor.EditorWindow
 {
-    private Dictionary<string, WindowContextBase> contexts => WindowManager.Instance.mWindowDefine.contexts;
-
     [UnityEditor.MenuItem("GameObject/UI/Open")]
     private static void OpenDefineWindow()
     {
@@ -1078,6 +1089,7 @@ public class WindowDefEditor : UnityEditor.EditorWindow
     private void Initialize()
     {
         var instance = WindowManager.Instance;
+        var contexts = instance.mWindowDefine.contexts;
         if (instance.initialized == false || contexts.Count == 0)
         {
 
@@ -1095,8 +1107,6 @@ public class WindowDefEditor : UnityEditor.EditorWindow
     {
         WindowManager.Instance.Draw(position);
     }
-
-  
 
     public static void LoadInEditor(string name, Action<GameObject> callback)
     {

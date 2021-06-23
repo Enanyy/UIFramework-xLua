@@ -1,13 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-public class UINormal : WindowComponent
+public class UINormal : WindowComponent,IComponentUpdate
 {
 //BINDING_DEFINITION_BEGIN	private Button mButtonClose;
 	private Button mButtonMain;
 	private Button mButtonPop;
 	private Button mButtonWidget;
-//BINDING_DEFINITION_END
+
+    public void OnUpdate()
+    {
+        Debug.Log("OnUpdate");
+    }
+
+    //BINDING_DEFINITION_END
 
     private void Awake()
     {

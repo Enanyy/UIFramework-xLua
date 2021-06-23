@@ -1,14 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIPop : WindowComponent
+public class UIPop : WindowComponent,IComponentLateUpdate
 {
 //BINDING_DEFINITION_BEGIN	private Button mButtonClose;
 	private Button mbuttonMain;
 	private Button mButtonNormal;
 	private Button mButtonWidget;
 	private Text mText;
-//BINDING_DEFINITION_END
+
+    public void OnLateUpdate()
+    {
+        Debug.Log("OnLateUpdate");
+    }
+
+    //BINDING_DEFINITION_END
 
     private void Awake()
     {
