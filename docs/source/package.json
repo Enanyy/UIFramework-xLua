@@ -6,7 +6,7 @@
     "version": "3.3.7"
   },
   "dependencies": {
-    "hexo": "^3.3.7",
+    "hexo": "^7.2.0",
     "hexo-cli": "^1.0.3",
     "hexo-generator-archive": "^0.1.4",
     "hexo-generator-category": "^0.1.3",
